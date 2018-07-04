@@ -1,0 +1,10 @@
+name: numba-xnd
+channels:
+  - numba
+  - xnd/label/dev
+dependencies:
+  - python=3.6
+  - llvmlite
+  - numpy
+  - gumath
+  - xnd
