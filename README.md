@@ -62,11 +62,11 @@ can be registered as an gumath kernel.
 Can create gumath kernels. The last argument is always the return value:
 
 ```python
-@register_gumath_kernel
-@jit([
-    xnd_type('N * M * float64, M * P * float64 -> M * P * float64'), # this converts ndtype signature to numba type signuture
-    xnd_type('N * M * int64, M * P * int64 -> M * P * int64'),
-], nopython=True)
+@register_gumath_kernel([
+    'N * M * float64, M * P * float64 -> M * P * float64',
+    'N * M * int64, M * P * int64 -> M * P * int64'
+])
+@jit(nopython=True)
 def matrix_multiply(a, b, c):
     n, m = a.type.shape
     m, p = b.type.shape
