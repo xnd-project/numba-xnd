@@ -59,10 +59,10 @@ assert sum_attr(xnd([{'hi': 1}, {'hi': 2}])) == 3
 Any jitted function that takes in all xnd argument and returns xnd arguments
 can be registered as an gumath kernel.
 
-Can create gumath kernels:
+Can create gumath kernels. The last argument is always the return value:
 
 ```python
-@register_gumath_kernel(accepts_return=True)
+@register_gumath_kernel
 @jit([
     xnd_type('N * M * float64, M * P * float64 -> M * P * float64'), # this converts ndtype signature to numba type signuture
     xnd_type('N * M * int64, M * P * int64 -> M * P * int64'),
@@ -84,8 +84,8 @@ Can also create them with runtime type inspect:
 ```python
 @register_gumath_kernel
 @jit(nopython=True)
-def add(a, b):
-    return xnd(a[tuple()] + b[tuple()])
+def add(a, b, c):
+    c[tuple()] = xnd(a[tuple()] + b[tuple()]
 
 add(xnd(1), xnd(2))
 ```
