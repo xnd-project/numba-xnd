@@ -95,9 +95,8 @@ add(xnd(1), xnd(2))
 ```bash
 conda env create -f environment.yml
 conda activate numba-xnd
-
-# use development version of numba so that we can debug it more easily
-git clone https://github.com/numba/numba.git
 cd numba
-python setup.py install
+python setup.py develop
+cd ..
+# ready to run project scripts
 ```
