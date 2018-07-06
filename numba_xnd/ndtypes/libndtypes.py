@@ -4,7 +4,7 @@ from llvmlite.ir import PointerType as ptr, global_context as context
 from numba.extending import models, register_model, lower_builtin
 from numba import types
 
-i8, i16, i32, i64 = map(ir.IntType, [8, 16, 32, 64])
+from ..utils import int_
 
 
 ndt_t = context.get_identified_type("_ndt")
@@ -37,14 +37,14 @@ class NdtModel(models.PrimitiveModel):
         super().__init__(dmm, fe_type, be_type)
 
 
-def ndt_as_ndarray(a, t, ctx):
+def ndt_as_ndarray(a, n, ctx):
     raise NotImplementedError()
 
 
 @lower_builtin(ndt_as_ndarray, NdtNdarrayType, NdtType, NdtContextType)
 def ndt_as_ndarray_impl(context, builder, sig, args):
     xnd_ndim = builder.module.get_or_insert_function(
-        ir.FunctionType(i32, [ptr(ndt_ndarray_t), ptr(ndt_t), ptr(ndt_context_t)]),
+        ir.FunctionType(int_, [ptr(ndt_ndarray_t), ptr(ndt_t), ptr(ndt_context_t)]),
         name="ndt_as_ndarray",
     )
     return builder.call(xnd_ndim, [a.value for a in args])
