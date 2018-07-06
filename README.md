@@ -100,3 +100,10 @@ python setup.py develop
 cd ..
 # ready to run project scripts
 ```
+
+Calculate sizes
+
+```bash
+clang $(python-config --includes) sizes.c -o sizes
+./sizes
+```
