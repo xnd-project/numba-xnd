@@ -1,5 +1,8 @@
 # Numba integration for XND
 
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
+
+
 Goals:
 
 * Provide users with a way to operate on xnd structures in python that has fast performance
@@ -101,9 +104,9 @@ cd ..
 # ready to run project scripts
 ```
 
-Calculate sizes
+To re-calculate sizes:
 
 ```bash
 clang $(python-config --includes) sizes.c -o sizes
-./sizes
+./sizes > numba_xnd/sizes.py
 ```

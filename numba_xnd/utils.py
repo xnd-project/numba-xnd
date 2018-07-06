@@ -3,6 +3,8 @@ from llvmlite.ir import PointerType as ptr
 
 i8, i16, i32, i64 = map(ir.IntType, [8, 16, 32, 64])
 int_ = i32
+char = i8
+
 index = lambda i: ir.Constant(i32, i)
 
 

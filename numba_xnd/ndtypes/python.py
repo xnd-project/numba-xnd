@@ -7,6 +7,8 @@ from numba.extending import (
     unbox,
     NativeValue,
     overload_attribute,
+    type_callable,
+    lower_builtin,
 )
 from llvmlite import ir
 from llvmlite.ir import PointerType as ptr
@@ -16,8 +18,10 @@ from .libndtypes import (
     NdtModel,
     ndt_t,
     ndt_as_ndarray,
-    create_ndt_array,
+    create_ndt_ndarray,
     create_ndt_context,
+    ndt_type,
+    NdtType,
 )
 
 
@@ -34,7 +38,7 @@ def typeof_ndt(val, c):
     return py_ndt_type
 
 
-register_model(py_ndt_type)(NdtModel)
+register_model(PyNdtType)(NdtModel)
 
 
 @unbox(PyNdtType)
@@ -75,16 +79,57 @@ def py_ndt_to_ndt(x):
     raise NotImplementedError()
 
 
+@type_callable(py_ndt_to_ndt)
+def type_py_ndt_to_ndt(context):
+    def typer(x):
+        if isinstance(x, PyNdtType):
+            return ndt_type
+
+    return typer
+
+
+@lower_builtin(py_ndt_to_ndt, PyNdtType)
+def py_ndt_to_ndt_impl(context, builder, sig, args):
+    return args[0]
+
+
 def ndt_to_py_ndt(x):
     raise NotImplementedError()
 
 
+@type_callable(py_ndt_to_ndt)
+def type_ndt_to_py_ndt(context):
+    def typer(x):
+        if isinstance(x, NdtType):
+            return py_ndt_type
+
+    return typer
+
+
+@lower_builtin(ndt_to_py_ndt, NdtType)
+def ndt_to_py_ndt_impl(context, builder, sig, args):
+    return args[0]
+
+
 @overload_attribute(PyNdtType, "shape")
 def py_ndt_shape(_):
-    def get(n):
-        a = create_ndt_array()
+    def get(py_ndt):
+        a = create_ndt_ndarray()
         ctx = create_ndt_context()
+        n = py_ndt_to_ndt(py_ndt)
         ndt_as_ndarray(a, n, ctx)
         return a.shape
+
+    return get
+
+
+@overload_attribute(PyNdtType, "ndim")
+def py_ndt_ndim(_):
+    def get(py_ndt):
+        a = create_ndt_ndarray()
+        ctx = create_ndt_context()
+        n = py_ndt_to_ndt(py_ndt)
+        ndt_as_ndarray(a, n, ctx)
+        return a.ndim
 
     return get
