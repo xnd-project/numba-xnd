@@ -2,6 +2,42 @@
 
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 
+## Development
+
+```bash
+conda env create -f environment.yml
+conda activate numba-xnd
+cd numba
+python setup.py develop
+cd ..
+# ready to run project scripts
+```
+
+Run tests:
+
+```python
+python -m unittest
+```
+
+To re-calculate sizes:
+
+```bash
+clang $(python-config --includes) sizes.c -o sizes
+./sizes > numba_xnd/sizes.py
+```
+
+## Project Structure
+
+The directory structure is meant to mirror the `plurs/*` projects. For each plures project,
+We have the low level API wrapping the C library (`lib*.py`) and then a higher level API
+wrapping the python level (`python.py`). The Python level should use the functions
+in the C level.
+
+For the Python API, we implement lowering some of the same functions/methods that are present at the normal python level.
+For the `lib*` level, we lower functions and attributes that correspond to the exposed functions and struct definitions in the `lib*.h` files.
+
+## Design Notes
+
 
 Goals:
 
@@ -91,22 +127,4 @@ def add(a, b, c):
     c[tuple()] = xnd(a[tuple()] + b[tuple()]
 
 add(xnd(1), xnd(2))
-```
-
-## Development
-
-```bash
-conda env create -f environment.yml
-conda activate numba-xnd
-cd numba
-python setup.py develop
-cd ..
-# ready to run project scripts
-```
-
-To re-calculate sizes:
-
-```bash
-clang $(python-config --includes) sizes.c -o sizes
-./sizes > numba_xnd/sizes.py
 ```
