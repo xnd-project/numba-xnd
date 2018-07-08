@@ -4,10 +4,11 @@ jobs:
     docker:
       - image: continuumio/miniconda3
     steps:
+      - run: echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc
       - checkout
       - run: conda env create -f environment.yml
-      - run: conda activate numba-xnd && cd numba && python setup.py develop
-      - run: conda activate numba-xnd && python -m unittest
+      - run: conda deactivate && conda activate numba-xnd && cd numba && python setup.py develop
+      - run: conda deactivate && conda activate numba-xnd && python -m unittest
 workflows:
   version: 2
   test:
