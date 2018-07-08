@@ -4,8 +4,17 @@ jobs:
     docker:
       - image: frolvlad/alpine-miniconda3
     steps:
+      # gcc for numba install
+      - apk add --no-cache build-base
       - checkout
+      - restore_cache:
+          keys:
+            - conda-pkgs
       - run: conda env create
+      - save_cache:
+          key: conda-pkgs
+          paths:
+            - /opt/conda/pkgs
       - run: source activate numba-xnd && cd numba && python setup.py develop
       - run: source activate numba-xnd && python -m unittest
 workflows:
