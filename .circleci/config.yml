@@ -1,0 +1,18 @@
+version: 2
+jobs:
+  conda:
+    docker:
+      - image: continuumio/miniconda
+    working_directory: ~/repo/notebooks
+    steps:
+      - checkout:
+          path: ~/repo
+      - run: conda env create -f environment.yml
+      - run: echo 'export PATH=/opt/conda/envs/numba-xnd/bin:$PATH' >> $BASH_ENV
+      - run: cd numba && python setup.py develop
+      - run: python -m unittest
+workflows:
+  version: 2
+  test:
+    jobs:
+      - conda
