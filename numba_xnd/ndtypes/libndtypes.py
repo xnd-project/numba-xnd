@@ -1,5 +1,6 @@
 from llvmlite import ir
 from llvmlite.ir import PointerType as ptr
+import llvmlite
 
 from numba.extending import (
     models,
@@ -17,6 +18,7 @@ from numba import types, cgutils
 from ..utils import int_, char, index, i64
 from .. import sizes
 
+llvmlite.binding.load_library_permanently('libndtypes.so')
 
 ndt_t = ir.ArrayType(char, sizes.SIZEOF_NDT_T)
 ndt_context_t = ir.ArrayType(char, sizes.SIZEOF_NDT_CONTEXT_T)

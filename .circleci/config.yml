@@ -5,7 +5,7 @@ jobs:
       - image: frolvlad/alpine-miniconda3
     steps:
       # gcc for numba install
-      - run: apk add --no-cache build-base
+      - run: apk add --no-cache build-base ca-certificates
       - checkout
       - restore_cache:
           keys:
