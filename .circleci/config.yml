@@ -2,13 +2,13 @@ version: 2
 jobs:
   conda:
     docker:
-      - image: continuumio/miniconda3
+      - image: frolvlad/alpine-miniconda3
     steps:
       - run: echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc
       - checkout
-      - run: conda env update
-      - run: cd numba && python setup.py develop
-      - run: python -m unittest
+      - run: conda env create
+      - run: source activate numba-xnd && cd numba && python setup.py develop
+      - run: source activate numba-xnd && python -m unittest
 workflows:
   version: 2
   test:

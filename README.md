@@ -5,7 +5,7 @@
 ## Development
 
 ```bash
-conda env create -f environment.yml
+conda env create
 conda activate numba-xnd
 cd numba
 python setup.py develop
