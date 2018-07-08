@@ -4,7 +4,6 @@ jobs:
     docker:
       - image: frolvlad/alpine-miniconda3
     steps:
-      - run: echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc
       - checkout
       - run: conda env create
       - run: source activate numba-xnd && cd numba && python setup.py develop
