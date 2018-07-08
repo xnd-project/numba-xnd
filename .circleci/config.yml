@@ -6,9 +6,8 @@ jobs:
     steps:
       - checkout
       - run: conda env create -f environment.yml
-      - run: echo 'export PATH=/opt/conda/envs/numba-xnd/bin:$PATH' >> $BASH_ENV
-      - run: cd numba && python setup.py develop
-      - run: python -m unittest
+      - run: conda activate numba-xnd && cd numba && python setup.py develop
+      - run: conda activate numba-xnd && python -m unittest
 workflows:
   version: 2
   test:
