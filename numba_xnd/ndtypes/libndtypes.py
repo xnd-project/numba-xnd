@@ -20,11 +20,11 @@ from numba import types, cgutils
 from ..utils import int_, char, index, i64
 from .. import sizes
 
-if sys.platform.startswith('linux'):
-    llvmlite.binding.load_library_permanently('libndtypes.so')
-elif sys.platform.startswith('darwin'):
-    llvmlite.binding.load_library_permanently('libndtypes.dylib')
-elif sys.platform.startswith('win'):
+if sys.platform.startswith("linux"):
+    llvmlite.binding.load_library_permanently("libndtypes.so")
+elif sys.platform.startswith("darwin"):
+    llvmlite.binding.load_library_permanently("libndtypes.dylib")
+elif sys.platform.startswith("win"):
     raise ImportWarning("Don't know how to load libndtypes library on windows")
 
 
@@ -175,7 +175,9 @@ def ndt_ndarray_shape_impl(context, builder, typ, value):
     with cgutils.for_range(builder, ndim) as loop:
         i = loop.index
         inst.setitem(
-            idx=i, val=builder.load(builder.gep(array, [index(0), i])), incref=True
+            idx=i,
+            val=builder.load(builder.gep(array, [index(0), i])),
+            incref=True,  # no idea what incref does
         )
 
     return impl_ret_new_ref(context, builder, list_type, inst.value)
