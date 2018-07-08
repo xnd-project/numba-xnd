@@ -2,7 +2,7 @@ version: 2
 jobs:
   conda:
     docker:
-      - image: continuumio/miniconda
+      - image: continuumio/miniconda3
     steps:
       - checkout
       - run: conda env create -f environment.yml
