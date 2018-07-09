@@ -48,6 +48,10 @@ def box_ndt(typ, val, c):
     return res
 
 
+# These functions are no-ops, but they exist so that at the Python API, the user has a way to
+# convert from a higher level api to a lower level one, without mixing them together.
+
+
 @lower_builtin(api.py_ndt_to_ndt, types.PyNdtType)
 def py_ndt_to_ndt_impl(context, builder, sig, args):
     return args[0]

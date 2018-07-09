@@ -44,10 +44,6 @@ def py_ndt_shape(_):
 @overload_attribute(types.PyNdtType, "ndim")
 def py_ndt_ndim(_):
     def get(py_ndt):
-        n = api.py_ndt_to_ndt(py_ndt)
-        a = libndtypes.create_ndt_ndarray()
-        ctx = libndtypes.create_ndt_context()
-        libndtypes.ndt_as_ndarray(a, n, ctx)
-        return a.ndim
+        return api.py_ndt_to_ndt(py_ndt).ndim
 
     return get

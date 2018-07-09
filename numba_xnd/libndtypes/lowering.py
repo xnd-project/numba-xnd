@@ -34,6 +34,15 @@ def ndt_as_ndarray_impl(context, builder, sig, args):
     return builder.call(ndt_as_ndarray_, args)
 
 
+@lower_getattr(types.NdtType, "ndim")
+def ndt_ndarray_ndim_impl(context, builder, typ, value):
+    return builder.load(
+        builder.bitcast(
+            builder.gep(value, [index(0), index(sizes.OFFSETOF_NDT_T_NDIM)]), ptr(int_)
+        )
+    )
+
+
 @lower_getattr(types.NdtNdarrayType, "ndim")
 def ndt_ndarray_ndim_impl(context, builder, typ, value):
     return builder.load(

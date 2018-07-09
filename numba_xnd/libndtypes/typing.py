@@ -37,6 +37,14 @@ def type_ndt_as_ndarray(context):
 
 
 @infer_getattr
+class NdtAttribute(AttributeTemplate):
+    key = types.NdtType
+
+    def resolve_ndim(self, ary):
+        return numba_types.int32
+
+
+@infer_getattr
 class NdtNdarrayAttribute(AttributeTemplate):
     key = types.NdtNdarrayType
 
