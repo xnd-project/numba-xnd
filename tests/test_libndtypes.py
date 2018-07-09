@@ -3,8 +3,8 @@ import unittest
 from numba import njit
 from ndtypes import ndt
 
-from numba_xnd.ndtypes.python import py_ndt_to_ndt
-from numba_xnd.ndtypes.libndtypes import ndt_as_ndarray, create_ndt_context, create_ndt_ndarray
+from numba_xnd.ndtypes import py_ndt_to_ndt
+from numba_xnd.libndtypes import ndt_as_ndarray, create_ndt_context, create_ndt_ndarray
 
 
 n = ndt("10 * 4 * 4 * int64")

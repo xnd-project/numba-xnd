@@ -1,6 +1,5 @@
 # Numba integration for XND
 
-
 [![CircleCI branch](https://img.shields.io/circleci/project/github/Quansight/numba-xnd/master.svg)](https://circleci.com/gh/Quansight/workflows/numba-xnd/tree/master) [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 
 ## Development
@@ -24,48 +23,46 @@ To re-calculate sizes:
 
 ```bash
 clang $(python-config --includes) sizes.c -o sizes
-./sizes > numba_xnd/sizes.py
+./sizes > numba_xnd/shared/sizes.py
 ```
 
 ## Project Structure
 
-The directory structure is meant to mirror the `plurs/*` projects. For each plures project,
-We have the low level API wrapping the C library (`lib*.py`) and then a higher level API
-wrapping the python level (`python.py`). The Python level should use the functions
+The directory structure is meant to mirror the `plures/*` projects. For each plures project,
+We have the low level API wrapping the C library (`./libndtypes`) and then a higher level API
+wrapping the python level (`./ndtypes`). The Python level should use the functions
 in the C level.
 
-For the Python API, we implement lowering some of the same functions/methods that are present at the normal python level.
-For the `lib*` level, we lower functions and attributes that correspond to the exposed functions and struct definitions in the `lib*.h` files.
+For the Python API, we implement lowering some of the same functions/methods that are present at the normal python level, so that a user who wraps a functions in `jit` will have the same API.
 
 ## Design Notes
 
-
 Goals:
 
-* Provide users with a way to operate on xnd structures in python that has fast performance
+- Provide users with a way to operate on xnd structures in python that has fast performance
 
 Approach:
 
-* Register xnd properly in numba so that we use the numba machinery to extract intent from python code user writes and compile to LLVM
-* allow taking numba jitted function and creating gumath kernel from it
+- Register xnd properly in numba so that we use the numba machinery to extract intent from python code user writes and compile to LLVM
+- allow taking numba jitted function and creating gumath kernel from it
 
 Assumptions:
 
-* The numba API should be the same as the python API. So that the user can write code and use
+- The numba API should be the same as the python API. So that the user can write code and use
   it either jit compiled or not
-* All operations we should support should be able to done in nopython mode
+- All operations we should support should be able to done in nopython mode
 
 Open questions:
 
-* Should numba types for xnd include shape information? What if some shapes are not known until runtime?
-  * If we have compile time shape information, then we maybe we shouldn't use libxnd's indexing functions, because these are not shape aware.
+- Should numba types for xnd include shape information? What if some shapes are not known until runtime?
+  - If we have compile time shape information, then we maybe we shouldn't use libxnd's indexing functions, because these are not shape aware.
     They have to introspect shapes at runtime, so the code won't be as optimized as if we produced llvm for the specific dimensions we have.
-  * Is it possible in numba to go back and forth between lowered and unlowered code? Erm, I mean like if we know some partial shape information for the program
+  - Is it possible in numba to go back and forth between lowered and unlowered code? Erm, I mean like if we know some partial shape information for the program
     can we execute part of it, then use that resulting shape information to re-compile the rest? I guess this would be too slow.
-* How do we get garbage collection/memory allocation working?
-  * Do we use the `xnd_master_t` struct?
-* Should we be using numba's array type? That we can get all the optimizations they have built in for it.
-  * I am leaning towards no, since it might be hard to extend to fit xnd's model
+- How do we get garbage collection/memory allocation working?
+  - Do we use the `xnd_master_t` struct?
+- Should we be using numba's array type? That we can get all the optimizations they have built in for it.
+  - I am leaning towards no, since it might be hard to extend to fit xnd's model
 
 Current status:
 
