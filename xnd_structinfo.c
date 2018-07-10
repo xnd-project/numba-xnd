@@ -1,5 +1,8 @@
 /* This file is generated using structinfo_generator from the xndtools project */
-#include "xnd_structinfo_input.h"
+#include "Python.h"
+#include "pyndtypes.h"
+#include "pyxnd.h"
+#include "gumath.h"
 extern size_t sizeof_char_opt_t(void){ return sizeof(char_opt_t); }
 extern /* enum ndt_option */ void * get_char_opt_t_tag(void* ptr){ return &(((char_opt_t*)ptr)->tag); }
 extern size_t offsetof_char_opt_t_tag(void){ return offsetof(char_opt_t, tag); }
@@ -229,6 +232,11 @@ extern /* int64_t */ void * get_ndt_bytes_t_size(void* ptr){ return &(((ndt_byte
 extern size_t offsetof_ndt_bytes_t_size(void){ return offsetof(ndt_bytes_t, size); }
 extern /* uint8_t * */ void * get_ndt_bytes_t_data(void* ptr){ return &(((ndt_bytes_t*)ptr)->data); }
 extern size_t offsetof_ndt_bytes_t_data(void){ return offsetof(ndt_bytes_t, data); }
+extern size_t sizeof_NdtObject(void){ return sizeof(NdtObject); }
+extern /* PyObject * */ void * get_NdtObject_rbuf(void* ptr){ return &(((NdtObject*)ptr)->rbuf); }
+extern size_t offsetof_NdtObject_rbuf(void){ return offsetof(NdtObject, rbuf); }
+extern /* ndt_t * */ void * get_NdtObject_ndt(void* ptr){ return &(((NdtObject*)ptr)->ndt); }
+extern size_t offsetof_NdtObject_ndt(void){ return offsetof(NdtObject, ndt); }
 extern size_t sizeof_xnd_bitmap_t(void){ return sizeof(xnd_bitmap_t); }
 extern /* uint8_t * */ void * get_xnd_bitmap_t_data(void* ptr){ return &(((xnd_bitmap_t*)ptr)->data); }
 extern size_t offsetof_xnd_bitmap_t_data(void){ return offsetof(xnd_bitmap_t, data); }
@@ -245,6 +253,20 @@ extern /* const char * */ void * get_xnd_index_t_FieldName(void* ptr){ return &(
 extern size_t offsetof_xnd_index_t_FieldName(void){ return offsetof(xnd_index_t, FieldName); }
 extern /* ndt_slice_t */ void * get_xnd_index_t_Slice(void* ptr){ return &(((xnd_index_t*)ptr)->Slice); }
 extern size_t offsetof_xnd_index_t_Slice(void){ return offsetof(xnd_index_t, Slice); }
+extern size_t sizeof_MemoryBlockObject(void){ return sizeof(MemoryBlockObject); }
+extern /* PyObject * */ void * get_MemoryBlockObject_type(void* ptr){ return &(((MemoryBlockObject*)ptr)->type); }
+extern size_t offsetof_MemoryBlockObject_type(void){ return offsetof(MemoryBlockObject, type); }
+extern /* xnd_master_t * */ void * get_MemoryBlockObject_xnd(void* ptr){ return &(((MemoryBlockObject*)ptr)->xnd); }
+extern size_t offsetof_MemoryBlockObject_xnd(void){ return offsetof(MemoryBlockObject, xnd); }
+extern /* Py_buffer * */ void * get_MemoryBlockObject_view(void* ptr){ return &(((MemoryBlockObject*)ptr)->view); }
+extern size_t offsetof_MemoryBlockObject_view(void){ return offsetof(MemoryBlockObject, view); }
+extern size_t sizeof_XndObject(void){ return sizeof(XndObject); }
+extern /* MemoryBlockObject * */ void * get_XndObject_mblock(void* ptr){ return &(((XndObject*)ptr)->mblock); }
+extern size_t offsetof_XndObject_mblock(void){ return offsetof(XndObject, mblock); }
+extern /* PyObject * */ void * get_XndObject_type(void* ptr){ return &(((XndObject*)ptr)->type); }
+extern size_t offsetof_XndObject_type(void){ return offsetof(XndObject, type); }
+extern /* xnd_t */ void * get_XndObject_xnd(void* ptr){ return &(((XndObject*)ptr)->xnd); }
+extern size_t offsetof_XndObject_xnd(void){ return offsetof(XndObject, xnd); }
 extern size_t sizeof_gm_kernel_set_t(void){ return sizeof(gm_kernel_set_t); }
 extern /* ndt_t * */ void * get_gm_kernel_set_t_sig(void* ptr){ return &(((gm_kernel_set_t*)ptr)->sig); }
 extern size_t offsetof_gm_kernel_set_t_sig(void){ return offsetof(gm_kernel_set_t, sig); }
@@ -1275,6 +1297,25 @@ static PyObject *pyc_get_ndt_bytes_t_data(PyObject *self, PyObject *args) {
   return NULL;
 }
 static PyObject *pyc_offsetof_ndt_bytes_t_data(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(offsetof_ndt_bytes_t_data())); }
+static PyObject *pyc_sizeof_NdtObject(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(sizeof_NdtObject())); }
+static PyObject *pyc_get_NdtObject_rbuf(PyObject *self, PyObject *args) {
+  PyObject* ptr=NULL;
+  if (!PyArg_UnpackTuple(args, "NdtObject", 0, 1, &ptr))
+    return NULL;
+  if (PyCapsule_CheckExact(ptr))
+    return PyCapsule_New(get_NdtObject_rbuf(PyCapsule_GetPointer(ptr, "NdtObject")), "get_NdtObject_rbuf", NULL);
+  return NULL;
+}
+static PyObject *pyc_offsetof_NdtObject_rbuf(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(offsetof_NdtObject_rbuf())); }
+static PyObject *pyc_get_NdtObject_ndt(PyObject *self, PyObject *args) {
+  PyObject* ptr=NULL;
+  if (!PyArg_UnpackTuple(args, "NdtObject", 0, 1, &ptr))
+    return NULL;
+  if (PyCapsule_CheckExact(ptr))
+    return PyCapsule_New(get_NdtObject_ndt(PyCapsule_GetPointer(ptr, "NdtObject")), "get_NdtObject_ndt", NULL);
+  return NULL;
+}
+static PyObject *pyc_offsetof_NdtObject_ndt(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(offsetof_NdtObject_ndt())); }
 static PyObject *pyc_sizeof_xnd_bitmap_t(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(sizeof_xnd_bitmap_t())); }
 static PyObject *pyc_get_xnd_bitmap_t_data(PyObject *self, PyObject *args) {
   PyObject* ptr=NULL;
@@ -1340,6 +1381,62 @@ static PyObject *pyc_get_xnd_index_t_Slice(PyObject *self, PyObject *args) {
   return NULL;
 }
 static PyObject *pyc_offsetof_xnd_index_t_Slice(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(offsetof_xnd_index_t_Slice())); }
+static PyObject *pyc_sizeof_MemoryBlockObject(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(sizeof_MemoryBlockObject())); }
+static PyObject *pyc_get_MemoryBlockObject_type(PyObject *self, PyObject *args) {
+  PyObject* ptr=NULL;
+  if (!PyArg_UnpackTuple(args, "MemoryBlockObject", 0, 1, &ptr))
+    return NULL;
+  if (PyCapsule_CheckExact(ptr))
+    return PyCapsule_New(get_MemoryBlockObject_type(PyCapsule_GetPointer(ptr, "MemoryBlockObject")), "get_MemoryBlockObject_type", NULL);
+  return NULL;
+}
+static PyObject *pyc_offsetof_MemoryBlockObject_type(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(offsetof_MemoryBlockObject_type())); }
+static PyObject *pyc_get_MemoryBlockObject_xnd(PyObject *self, PyObject *args) {
+  PyObject* ptr=NULL;
+  if (!PyArg_UnpackTuple(args, "MemoryBlockObject", 0, 1, &ptr))
+    return NULL;
+  if (PyCapsule_CheckExact(ptr))
+    return PyCapsule_New(get_MemoryBlockObject_xnd(PyCapsule_GetPointer(ptr, "MemoryBlockObject")), "get_MemoryBlockObject_xnd", NULL);
+  return NULL;
+}
+static PyObject *pyc_offsetof_MemoryBlockObject_xnd(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(offsetof_MemoryBlockObject_xnd())); }
+static PyObject *pyc_get_MemoryBlockObject_view(PyObject *self, PyObject *args) {
+  PyObject* ptr=NULL;
+  if (!PyArg_UnpackTuple(args, "MemoryBlockObject", 0, 1, &ptr))
+    return NULL;
+  if (PyCapsule_CheckExact(ptr))
+    return PyCapsule_New(get_MemoryBlockObject_view(PyCapsule_GetPointer(ptr, "MemoryBlockObject")), "get_MemoryBlockObject_view", NULL);
+  return NULL;
+}
+static PyObject *pyc_offsetof_MemoryBlockObject_view(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(offsetof_MemoryBlockObject_view())); }
+static PyObject *pyc_sizeof_XndObject(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(sizeof_XndObject())); }
+static PyObject *pyc_get_XndObject_mblock(PyObject *self, PyObject *args) {
+  PyObject* ptr=NULL;
+  if (!PyArg_UnpackTuple(args, "XndObject", 0, 1, &ptr))
+    return NULL;
+  if (PyCapsule_CheckExact(ptr))
+    return PyCapsule_New(get_XndObject_mblock(PyCapsule_GetPointer(ptr, "XndObject")), "get_XndObject_mblock", NULL);
+  return NULL;
+}
+static PyObject *pyc_offsetof_XndObject_mblock(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(offsetof_XndObject_mblock())); }
+static PyObject *pyc_get_XndObject_type(PyObject *self, PyObject *args) {
+  PyObject* ptr=NULL;
+  if (!PyArg_UnpackTuple(args, "XndObject", 0, 1, &ptr))
+    return NULL;
+  if (PyCapsule_CheckExact(ptr))
+    return PyCapsule_New(get_XndObject_type(PyCapsule_GetPointer(ptr, "XndObject")), "get_XndObject_type", NULL);
+  return NULL;
+}
+static PyObject *pyc_offsetof_XndObject_type(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(offsetof_XndObject_type())); }
+static PyObject *pyc_get_XndObject_xnd(PyObject *self, PyObject *args) {
+  PyObject* ptr=NULL;
+  if (!PyArg_UnpackTuple(args, "XndObject", 0, 1, &ptr))
+    return NULL;
+  if (PyCapsule_CheckExact(ptr))
+    return PyCapsule_New(get_XndObject_xnd(PyCapsule_GetPointer(ptr, "XndObject")), "get_XndObject_xnd", NULL);
+  return NULL;
+}
+static PyObject *pyc_offsetof_XndObject_xnd(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(offsetof_XndObject_xnd())); }
 static PyObject *pyc_sizeof_gm_kernel_set_t(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(sizeof_gm_kernel_set_t())); }
 static PyObject *pyc_get_gm_kernel_set_t_sig(PyObject *self, PyObject *args) {
   PyObject* ptr=NULL;
@@ -1774,6 +1871,11 @@ static PyMethodDef xnd_structinfo_methods[] = {
   {"offsetof_ndt_bytes_t_size", (PyCFunction)pyc_offsetof_ndt_bytes_t_size, METH_VARARGS, "offsetof_ndt_bytes_t_size() -> int"},
   {"get_ndt_bytes_t_data", (PyCFunction)pyc_get_ndt_bytes_t_data, METH_VARARGS, "get_ndt_bytes_t_data(< pointer to ndt_bytes_t >) -> < pointer to ndt_bytes_t->data >"},
   {"offsetof_ndt_bytes_t_data", (PyCFunction)pyc_offsetof_ndt_bytes_t_data, METH_VARARGS, "offsetof_ndt_bytes_t_data() -> int"},
+  {"sizeof_NdtObject", (PyCFunction)pyc_sizeof_NdtObject, METH_VARARGS, "sizeof_NdtObject() -> int"},
+  {"get_NdtObject_rbuf", (PyCFunction)pyc_get_NdtObject_rbuf, METH_VARARGS, "get_NdtObject_rbuf(< pointer to NdtObject >) -> < pointer to NdtObject->rbuf >"},
+  {"offsetof_NdtObject_rbuf", (PyCFunction)pyc_offsetof_NdtObject_rbuf, METH_VARARGS, "offsetof_NdtObject_rbuf() -> int"},
+  {"get_NdtObject_ndt", (PyCFunction)pyc_get_NdtObject_ndt, METH_VARARGS, "get_NdtObject_ndt(< pointer to NdtObject >) -> < pointer to NdtObject->ndt >"},
+  {"offsetof_NdtObject_ndt", (PyCFunction)pyc_offsetof_NdtObject_ndt, METH_VARARGS, "offsetof_NdtObject_ndt() -> int"},
   {"sizeof_xnd_bitmap_t", (PyCFunction)pyc_sizeof_xnd_bitmap_t, METH_VARARGS, "sizeof_xnd_bitmap_t() -> int"},
   {"get_xnd_bitmap_t_data", (PyCFunction)pyc_get_xnd_bitmap_t_data, METH_VARARGS, "get_xnd_bitmap_t_data(< pointer to xnd_bitmap_t >) -> < pointer to xnd_bitmap_t->data >"},
   {"offsetof_xnd_bitmap_t_data", (PyCFunction)pyc_offsetof_xnd_bitmap_t_data, METH_VARARGS, "offsetof_xnd_bitmap_t_data() -> int"},
@@ -1790,6 +1892,20 @@ static PyMethodDef xnd_structinfo_methods[] = {
   {"offsetof_xnd_index_t_FieldName", (PyCFunction)pyc_offsetof_xnd_index_t_FieldName, METH_VARARGS, "offsetof_xnd_index_t_FieldName() -> int"},
   {"get_xnd_index_t_Slice", (PyCFunction)pyc_get_xnd_index_t_Slice, METH_VARARGS, "get_xnd_index_t_Slice(< pointer to xnd_index_t >) -> < pointer to xnd_index_t->Slice >"},
   {"offsetof_xnd_index_t_Slice", (PyCFunction)pyc_offsetof_xnd_index_t_Slice, METH_VARARGS, "offsetof_xnd_index_t_Slice() -> int"},
+  {"sizeof_MemoryBlockObject", (PyCFunction)pyc_sizeof_MemoryBlockObject, METH_VARARGS, "sizeof_MemoryBlockObject() -> int"},
+  {"get_MemoryBlockObject_type", (PyCFunction)pyc_get_MemoryBlockObject_type, METH_VARARGS, "get_MemoryBlockObject_type(< pointer to MemoryBlockObject >) -> < pointer to MemoryBlockObject->type >"},
+  {"offsetof_MemoryBlockObject_type", (PyCFunction)pyc_offsetof_MemoryBlockObject_type, METH_VARARGS, "offsetof_MemoryBlockObject_type() -> int"},
+  {"get_MemoryBlockObject_xnd", (PyCFunction)pyc_get_MemoryBlockObject_xnd, METH_VARARGS, "get_MemoryBlockObject_xnd(< pointer to MemoryBlockObject >) -> < pointer to MemoryBlockObject->xnd >"},
+  {"offsetof_MemoryBlockObject_xnd", (PyCFunction)pyc_offsetof_MemoryBlockObject_xnd, METH_VARARGS, "offsetof_MemoryBlockObject_xnd() -> int"},
+  {"get_MemoryBlockObject_view", (PyCFunction)pyc_get_MemoryBlockObject_view, METH_VARARGS, "get_MemoryBlockObject_view(< pointer to MemoryBlockObject >) -> < pointer to MemoryBlockObject->view >"},
+  {"offsetof_MemoryBlockObject_view", (PyCFunction)pyc_offsetof_MemoryBlockObject_view, METH_VARARGS, "offsetof_MemoryBlockObject_view() -> int"},
+  {"sizeof_XndObject", (PyCFunction)pyc_sizeof_XndObject, METH_VARARGS, "sizeof_XndObject() -> int"},
+  {"get_XndObject_mblock", (PyCFunction)pyc_get_XndObject_mblock, METH_VARARGS, "get_XndObject_mblock(< pointer to XndObject >) -> < pointer to XndObject->mblock >"},
+  {"offsetof_XndObject_mblock", (PyCFunction)pyc_offsetof_XndObject_mblock, METH_VARARGS, "offsetof_XndObject_mblock() -> int"},
+  {"get_XndObject_type", (PyCFunction)pyc_get_XndObject_type, METH_VARARGS, "get_XndObject_type(< pointer to XndObject >) -> < pointer to XndObject->type >"},
+  {"offsetof_XndObject_type", (PyCFunction)pyc_offsetof_XndObject_type, METH_VARARGS, "offsetof_XndObject_type() -> int"},
+  {"get_XndObject_xnd", (PyCFunction)pyc_get_XndObject_xnd, METH_VARARGS, "get_XndObject_xnd(< pointer to XndObject >) -> < pointer to XndObject->xnd >"},
+  {"offsetof_XndObject_xnd", (PyCFunction)pyc_offsetof_XndObject_xnd, METH_VARARGS, "offsetof_XndObject_xnd() -> int"},
   {"sizeof_gm_kernel_set_t", (PyCFunction)pyc_sizeof_gm_kernel_set_t, METH_VARARGS, "sizeof_gm_kernel_set_t() -> int"},
   {"get_gm_kernel_set_t_sig", (PyCFunction)pyc_get_gm_kernel_set_t_sig, METH_VARARGS, "get_gm_kernel_set_t_sig(< pointer to gm_kernel_set_t >) -> < pointer to gm_kernel_set_t->sig >"},
   {"offsetof_gm_kernel_set_t_sig", (PyCFunction)pyc_offsetof_gm_kernel_set_t_sig, METH_VARARGS, "offsetof_gm_kernel_set_t_sig() -> int"},
