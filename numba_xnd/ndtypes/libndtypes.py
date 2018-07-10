@@ -20,13 +20,8 @@ from numba import types, cgutils
 from ..utils import int_, char, index, i64
 from .. import sizes
 
-if sys.platform.startswith("linux"):
-    llvmlite.binding.load_library_permanently("libndtypes.so")
-elif sys.platform.startswith("darwin"):
-    llvmlite.binding.load_library_permanently("libndtypes.dylib")
-elif sys.platform.startswith("win"):
-    raise ImportWarning("Don't know how to load libndtypes library on windows")
-
+import ndtypes
+llvmlite.binding.load_library_permanently(ndtypes._ndtypes.__file__)
 
 ndt_t = ir.ArrayType(char, sizes.SIZEOF_NDT_T)
 ndt_context_t = ir.ArrayType(char, sizes.SIZEOF_NDT_CONTEXT_T)
