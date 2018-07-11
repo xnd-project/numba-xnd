@@ -10,6 +10,7 @@ conda activate numba-xnd
 cd numba
 python setup.py develop
 cd ..
+python setup.py develop
 # ready to run project scripts
 ```
 
