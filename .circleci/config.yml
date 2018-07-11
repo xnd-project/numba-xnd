@@ -16,6 +16,7 @@ jobs:
           paths:
             - /opt/conda/pkgs
       - run: source activate numba-xnd && cd numba && python setup.py develop
+      - run: source activate numba-xnd && python setup.py develop
       - run: source activate numba-xnd && python -m unittest
 workflows:
   version: 2
