@@ -17,7 +17,7 @@ def shape_and_ndim(t):
     return t.shape, t.ndim
 
 
-assert shape_and_ndim(ndt("3 * 4 * int64")) == ([3, 4], 2)
+assert shape_and_ndim(xnd([[1, 2], [4, 5]])) == ([3, 4], 2)
 ```
 
 ## Development
@@ -36,6 +36,13 @@ Run tests:
 
 ```python
 python -m unittest
+```
+
+Updating `xnd_structinfo.c`:
+
+```bash
+pip install git+https://github.com/plures/xndtools.git
+structinfo_generator structinfo_config.py
 ```
 
 ## Project Structure
