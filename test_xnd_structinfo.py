@@ -1,4 +1,3 @@
-
 import ndtypes
 import xnd_structinfo as xinfo
 
@@ -22,11 +21,8 @@ def show_ndt_members(ndt, tab=""):
         f"{tab}tag={tag}, access={access}, flags={flags}, ndim={ndim}, datasize={datasize}"
     )
 
-    typ = xinfo.get_ndt_t_FixedDim_type(ndt)
-
     if ndim > 0:
-        show_ndt_members(typ, tab=tab + "  ")
+        show_ndt_members(xinfo.get_ndt_t_FixedDim_type(ndt), tab=tab + "  ")
 
 
 show_ndt_members(ndt)
-
