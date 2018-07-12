@@ -246,6 +246,20 @@ extern /* pointer to `int64_t` */ void * get_xnd_bitmap_t_size(void* ptr){ retur
 extern size_t offsetof_xnd_bitmap_t_size(void){ return offsetof(xnd_bitmap_t, size); }
 extern /* pointer to `xnd_bitmap_t*` */ void * get_xnd_bitmap_t_next(void* ptr){ return (void*)(((xnd_bitmap_t*)ptr)->next); }
 extern size_t offsetof_xnd_bitmap_t_next(void){ return offsetof(xnd_bitmap_t, next); }
+extern size_t sizeof_xnd_t(void){ return sizeof(xnd_t); }
+extern /* pointer to `xnd_bitmap_t` */ void * get_xnd_t_bitmap(void* ptr){ return &(((xnd_t*)ptr)->bitmap); }
+extern size_t offsetof_xnd_t_bitmap(void){ return offsetof(xnd_t, bitmap); }
+extern /* pointer to `int64_t` */ void * get_xnd_t_index(void* ptr){ return &(((xnd_t*)ptr)->index); }
+extern size_t offsetof_xnd_t_index(void){ return offsetof(xnd_t, index); }
+extern /* pointer to `const ndt_t*` */ void * get_xnd_t_type(void* ptr){ return (void*)(((xnd_t*)ptr)->type); }
+extern size_t offsetof_xnd_t_type(void){ return offsetof(xnd_t, type); }
+extern /* pointer to `char*` */ void * get_xnd_t_ptr(void* ptr){ return (void*)(((xnd_t*)ptr)->ptr); }
+extern size_t offsetof_xnd_t_ptr(void){ return offsetof(xnd_t, ptr); }
+extern size_t sizeof_xnd_master_t(void){ return sizeof(xnd_master_t); }
+extern /* pointer to `uint32_t` */ void * get_xnd_master_t_flags(void* ptr){ return &(((xnd_master_t*)ptr)->flags); }
+extern size_t offsetof_xnd_master_t_flags(void){ return offsetof(xnd_master_t, flags); }
+extern /* pointer to `xnd_t` */ void * get_xnd_master_t_master(void* ptr){ return &(((xnd_master_t*)ptr)->master); }
+extern size_t offsetof_xnd_master_t_master(void){ return offsetof(xnd_master_t, master); }
 extern size_t sizeof_xnd_index_t(void){ return sizeof(xnd_index_t); }
 extern /* pointer to `enum xnd_key` */ void * get_xnd_index_t_tag(void* ptr){ return &(((xnd_index_t*)ptr)->tag); }
 extern size_t offsetof_xnd_index_t_tag(void){ return offsetof(xnd_index_t, tag); }
@@ -1582,6 +1596,74 @@ static PyObject *pyc_get_xnd_bitmap_t_next(PyObject *self, PyObject *args) {
   return NULL;
 }
 static PyObject *pyc_offsetof_xnd_bitmap_t_next(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(offsetof_xnd_bitmap_t_next())); }
+static PyObject *pyc_sizeof_xnd_t(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(sizeof_xnd_t())); }
+static PyObject *pyc_get_xnd_t_bitmap(PyObject *self, PyObject *args) {
+  PyObject* ptr=NULL;
+  if (!PyArg_UnpackTuple(args, "xnd_t", 0, 1, &ptr))
+    return NULL;
+  if (PyCapsule_CheckExact(ptr)) {
+    return PyCapsule_New( get_xnd_t_bitmap(PyCapsule_GetPointer(ptr, "xnd_t*")), "xnd_bitmap_t", NULL);
+  }
+  PyErr_SetString(PyExc_TypeError, "expected capsuleted xnd_t");
+  return NULL;
+}
+static PyObject *pyc_offsetof_xnd_t_bitmap(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(offsetof_xnd_t_bitmap())); }
+static PyObject *pyc_get_xnd_t_index(PyObject *self, PyObject *args) {
+  PyObject* ptr=NULL;
+  if (!PyArg_UnpackTuple(args, "xnd_t", 0, 1, &ptr))
+    return NULL;
+  if (PyCapsule_CheckExact(ptr)) {
+    return PyCapsule_New( get_xnd_t_index(PyCapsule_GetPointer(ptr, "xnd_t*")), "int64_t", NULL);
+  }
+  PyErr_SetString(PyExc_TypeError, "expected capsuleted xnd_t");
+  return NULL;
+}
+static PyObject *pyc_offsetof_xnd_t_index(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(offsetof_xnd_t_index())); }
+static PyObject *pyc_get_xnd_t_type(PyObject *self, PyObject *args) {
+  PyObject* ptr=NULL;
+  if (!PyArg_UnpackTuple(args, "xnd_t", 0, 1, &ptr))
+    return NULL;
+  if (PyCapsule_CheckExact(ptr)) {
+    return PyCapsule_New( get_xnd_t_type(PyCapsule_GetPointer(ptr, "xnd_t*")), "const ndt_t*", NULL);
+  }
+  PyErr_SetString(PyExc_TypeError, "expected capsuleted xnd_t");
+  return NULL;
+}
+static PyObject *pyc_offsetof_xnd_t_type(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(offsetof_xnd_t_type())); }
+static PyObject *pyc_get_xnd_t_ptr(PyObject *self, PyObject *args) {
+  PyObject* ptr=NULL;
+  if (!PyArg_UnpackTuple(args, "xnd_t", 0, 1, &ptr))
+    return NULL;
+  if (PyCapsule_CheckExact(ptr)) {
+    return PyCapsule_New( get_xnd_t_ptr(PyCapsule_GetPointer(ptr, "xnd_t*")), "char*", NULL);
+  }
+  PyErr_SetString(PyExc_TypeError, "expected capsuleted xnd_t");
+  return NULL;
+}
+static PyObject *pyc_offsetof_xnd_t_ptr(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(offsetof_xnd_t_ptr())); }
+static PyObject *pyc_sizeof_xnd_master_t(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(sizeof_xnd_master_t())); }
+static PyObject *pyc_get_xnd_master_t_flags(PyObject *self, PyObject *args) {
+  PyObject* ptr=NULL;
+  if (!PyArg_UnpackTuple(args, "xnd_master_t", 0, 1, &ptr))
+    return NULL;
+  if (PyCapsule_CheckExact(ptr)) {
+    return PyCapsule_New( get_xnd_master_t_flags(PyCapsule_GetPointer(ptr, "xnd_master_t*")), "uint32_t", NULL);
+  }
+  PyErr_SetString(PyExc_TypeError, "expected capsuleted xnd_master_t");
+  return NULL;
+}
+static PyObject *pyc_offsetof_xnd_master_t_flags(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(offsetof_xnd_master_t_flags())); }
+static PyObject *pyc_get_xnd_master_t_master(PyObject *self, PyObject *args) {
+  PyObject* ptr=NULL;
+  if (!PyArg_UnpackTuple(args, "xnd_master_t", 0, 1, &ptr))
+    return NULL;
+  if (PyCapsule_CheckExact(ptr)) {
+    return PyCapsule_New( get_xnd_master_t_master(PyCapsule_GetPointer(ptr, "xnd_master_t*")), "xnd_t", NULL);
+  }
+  PyErr_SetString(PyExc_TypeError, "expected capsuleted xnd_master_t");
+  return NULL;
+}
+static PyObject *pyc_offsetof_xnd_master_t_master(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(offsetof_xnd_master_t_master())); }
 static PyObject *pyc_sizeof_xnd_index_t(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(sizeof_xnd_index_t())); }
 static PyObject *pyc_get_xnd_index_t_tag(PyObject *self, PyObject *args) {
   PyObject* ptr=NULL;
@@ -2244,6 +2326,20 @@ static PyMethodDef xnd_structinfo_methods[] = {
   {"offsetof_xnd_bitmap_t_size", (PyCFunction)pyc_offsetof_xnd_bitmap_t_size, METH_VARARGS, "offsetof_xnd_bitmap_t_size() -> int"},
   {"get_xnd_bitmap_t_next", (PyCFunction)pyc_get_xnd_bitmap_t_next, METH_VARARGS, "get_xnd_bitmap_t_next(< capsule(xnd_bitmap_t) >) -> < capsule( xnd_bitmap_t->next ) >"},
   {"offsetof_xnd_bitmap_t_next", (PyCFunction)pyc_offsetof_xnd_bitmap_t_next, METH_VARARGS, "offsetof_xnd_bitmap_t_next() -> int"},
+  {"sizeof_xnd_t", (PyCFunction)pyc_sizeof_xnd_t, METH_VARARGS, "sizeof_xnd_t() -> int"},
+  {"get_xnd_t_bitmap", (PyCFunction)pyc_get_xnd_t_bitmap, METH_VARARGS, "get_xnd_t_bitmap(< capsule(xnd_t) >) -> < capsule( &xnd_t->bitmap ) >"},
+  {"offsetof_xnd_t_bitmap", (PyCFunction)pyc_offsetof_xnd_t_bitmap, METH_VARARGS, "offsetof_xnd_t_bitmap() -> int"},
+  {"get_xnd_t_index", (PyCFunction)pyc_get_xnd_t_index, METH_VARARGS, "get_xnd_t_index(< capsule(xnd_t) >) -> < capsule( &xnd_t->index ) >"},
+  {"offsetof_xnd_t_index", (PyCFunction)pyc_offsetof_xnd_t_index, METH_VARARGS, "offsetof_xnd_t_index() -> int"},
+  {"get_xnd_t_type", (PyCFunction)pyc_get_xnd_t_type, METH_VARARGS, "get_xnd_t_type(< capsule(xnd_t) >) -> < capsule( xnd_t->type ) >"},
+  {"offsetof_xnd_t_type", (PyCFunction)pyc_offsetof_xnd_t_type, METH_VARARGS, "offsetof_xnd_t_type() -> int"},
+  {"get_xnd_t_ptr", (PyCFunction)pyc_get_xnd_t_ptr, METH_VARARGS, "get_xnd_t_ptr(< capsule(xnd_t) >) -> < capsule( xnd_t->ptr ) >"},
+  {"offsetof_xnd_t_ptr", (PyCFunction)pyc_offsetof_xnd_t_ptr, METH_VARARGS, "offsetof_xnd_t_ptr() -> int"},
+  {"sizeof_xnd_master_t", (PyCFunction)pyc_sizeof_xnd_master_t, METH_VARARGS, "sizeof_xnd_master_t() -> int"},
+  {"get_xnd_master_t_flags", (PyCFunction)pyc_get_xnd_master_t_flags, METH_VARARGS, "get_xnd_master_t_flags(< capsule(xnd_master_t) >) -> < capsule( &xnd_master_t->flags ) >"},
+  {"offsetof_xnd_master_t_flags", (PyCFunction)pyc_offsetof_xnd_master_t_flags, METH_VARARGS, "offsetof_xnd_master_t_flags() -> int"},
+  {"get_xnd_master_t_master", (PyCFunction)pyc_get_xnd_master_t_master, METH_VARARGS, "get_xnd_master_t_master(< capsule(xnd_master_t) >) -> < capsule( &xnd_master_t->master ) >"},
+  {"offsetof_xnd_master_t_master", (PyCFunction)pyc_offsetof_xnd_master_t_master, METH_VARARGS, "offsetof_xnd_master_t_master() -> int"},
   {"sizeof_xnd_index_t", (PyCFunction)pyc_sizeof_xnd_index_t, METH_VARARGS, "sizeof_xnd_index_t() -> int"},
   {"get_xnd_index_t_tag", (PyCFunction)pyc_get_xnd_index_t_tag, METH_VARARGS, "get_xnd_index_t_tag(< capsule(xnd_index_t) >) -> < capsule( &xnd_index_t->tag ) >"},
   {"offsetof_xnd_index_t_tag", (PyCFunction)pyc_offsetof_xnd_index_t_tag, METH_VARARGS, "offsetof_xnd_index_t_tag() -> int"},

@@ -18,10 +18,10 @@ def unbox_ndt(typ, obj, c):
     """
     Convert a ndt object to a native ndt_t ptr.
     """
-    ndt_as_ndarray_ = c.builder.module.get_or_insert_function(
+    get_NdtObject_ndt = c.builder.module.get_or_insert_function(
         ir.FunctionType(ptr(ndt_t), [c.pyapi.pyobj]), name="get_NdtObject_ndt"
     )
-    return NativeValue(c.builder.call(ndt_as_ndarray_, [obj]))
+    return NativeValue(c.builder.call(get_NdtObject_ndt, [obj]))
 
 
 @box(types.PyNdtType)

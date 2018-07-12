@@ -20,7 +20,7 @@ def type_py_ndt_to_ndt(context):
     return typer
 
 
-@type_callable(api.py_ndt_to_ndt)
+@type_callable(api.ndt_to_py_ndt)
 def type_ndt_to_py_ndt(context):
     def typer(x):
         if isinstance(x, libndtypes.NdtType):

@@ -6,18 +6,19 @@
 
 ```python
 from numba import jit
-from ndtypes import ndt
+from xnd import xnd
 
 # register types
 import numba_xnd
 
 
 @jit(nopython=True)
-def shape_and_ndim(t):
-    return t.shape, t.ndim
+def shape_and_ndim(x):
+    return x.type.shape, x.type.ndim
 
 
-assert shape_and_ndim(xnd([[1, 2], [4, 5]])) == ([3, 4], 2)
+x = xnd([[1, 2], [4, 5]])
+assert shape_and_ndim(x) == ([3, 4], 2)
 ```
 
 ## Development

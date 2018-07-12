@@ -4,5 +4,7 @@ import llvmlite
 # register libraries
 from . import libndtypes as _  # NOQA
 from . import ndtypes as _  # NOQA
+from . import libxnd as _  # NOQA
+from . import xnd as _  # NOQA
 
 llvmlite.binding.load_library_permanently(xnd_structinfo.__file__)
