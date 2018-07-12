@@ -1,8 +1,10 @@
 /* This file is generated using structinfo_generator from the xndtools project */
-#include "Python.h"
 #include "pyndtypes.h"
 #include "pyxnd.h"
 #include "gumath.h"
+
+extern PyObject* ndt_from_type(ndt_t* val) { return Ndt_FromType(val); }
+
 extern size_t sizeof_char_opt_t(void){ return sizeof(char_opt_t); }
 extern /* pointer to `enum ndt_option` */ void * get_char_opt_t_tag(void* ptr){ return &(((char_opt_t*)ptr)->tag); }
 extern size_t offsetof_char_opt_t_tag(void){ return offsetof(char_opt_t, tag); }
@@ -318,6 +320,7 @@ extern /* pointer to `gm_kernel_set_t*` */ void * get_gm_func_t_kernels(void* pt
 extern size_t offsetof_gm_func_t_kernels(void){ return offsetof(gm_func_t, kernels); }
 #ifdef PYTHON_MODULE
 #include "Python.h"
+
 
 static PyObject *pyc_sizeof_char_opt_t(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(sizeof_char_opt_t())); }
 static PyObject *pyc_get_char_opt_t_tag(PyObject *self, PyObject *args) {
@@ -1997,6 +2000,8 @@ static PyObject *pyc_capsule_to_bytes(PyObject *self, PyObject *args) {
 }
 
 static PyMethodDef xnd_structinfo_methods[] = {
+  
+
   {"sizeof_char_opt_t", (PyCFunction)pyc_sizeof_char_opt_t, METH_VARARGS, "sizeof_char_opt_t() -> int"},
   {"get_char_opt_t_tag", (PyCFunction)pyc_get_char_opt_t_tag, METH_VARARGS, "get_char_opt_t_tag(< capsule(char_opt_t) >) -> < capsule( &char_opt_t->tag ) >"},
   {"offsetof_char_opt_t_tag", (PyCFunction)pyc_offsetof_char_opt_t_tag, METH_VARARGS, "offsetof_char_opt_t_tag() -> int"},
@@ -2327,9 +2332,11 @@ static struct PyModuleDef xnd_structinfomodule = {
 };
 
 PyMODINIT_FUNC
-PyInit_xnd_structinfo(void) { 
+PyInit_xnd_structinfo(void) {
+  
   import_ndtypes();
   import_xnd();
+
   return PyModule_Create(&xnd_structinfomodule); 
 }
 #endif
