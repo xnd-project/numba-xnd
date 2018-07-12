@@ -49,4 +49,3 @@ def py_ndt_to_ndt_impl(context, builder, sig, args):
 @lower_builtin(api.ndt_to_py_ndt, NdtType)
 def ndt_to_py_ndt_impl(context, builder, sig, args):
     return args[0]
-
