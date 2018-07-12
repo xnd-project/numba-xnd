@@ -2,6 +2,24 @@
 
 [![CircleCI branch](https://img.shields.io/circleci/project/github/Quansight/numba-xnd/master.svg)](https://circleci.com/gh/Quansight/workflows/numba-xnd/tree/master) [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 
+## Usage
+
+```python
+from numba import jit
+from ndtypes import ndt
+
+# register types
+import numba_xnd
+
+
+@jit(nopython=True)
+def shape_and_ndim(t):
+    return t.shape, t.ndim
+
+
+assert shape_and_ndim(ndt("3 * 4 * int64")) == ([3, 4], 2)
+```
+
 ## Development
 
 ```bash
