@@ -4,7 +4,6 @@ from llvmlite import ir
 from llvmlite.ir import PointerType as ptr
 
 from ..libndtypes import ndt_t, NdtType
-from ..shared import pycapsule_import
 from . import api
 from . import types
 
@@ -33,18 +32,6 @@ def box_ndt(typ, val, c):
     ndt_from_type = c.builder.module.get_or_insert_function(
         ir.FunctionType(c.pyapi.pyobj, [ptr(ndt_t)]), name="ndt_from_type"
     )
-    res = c.builder.call(ndt_from_type, [val])
-    c.pyapi.incref(res)
-    return res;
-    
-    ndt_from_type = pycapsule_import(
-        c,
-        "ndtypes._ndtypes._API",
-        6,
-        ir.FunctionType(c.pyapi.pyobj, [ptr(ndt_t)]),
-        name="ndt_from_type",
-    )
-
     res = c.builder.call(ndt_from_type, [val])
     c.pyapi.incref(res)
     return res
