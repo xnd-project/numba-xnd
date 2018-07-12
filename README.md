@@ -20,13 +20,6 @@ Run tests:
 python -m unittest
 ```
 
-To re-calculate sizes:
-
-```bash
-clang $(python-config --includes) sizes.c -o sizes
-./sizes > numba_xnd/shared/sizes.py
-```
-
 ## Project Structure
 
 The directory structure is meant to mirror the `plures/*` projects. For each plures project,

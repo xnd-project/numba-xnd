@@ -5,7 +5,7 @@ from numba.targets.listobj import ListInstance
 from numba.targets.imputils import impl_ret_new_ref
 from numba import cgutils
 
-from ..shared import ptr, int_, index, i64, sizes
+from ..shared import ptr, int_, index, i64
 from . import api
 from . import types
 from . import llvm
@@ -35,32 +35,30 @@ def ndt_as_ndarray_impl(context, builder, sig, args):
 
 
 @lower_getattr(types.NdtType, "ndim")
-def ndt_ndarray_ndim_impl(context, builder, typ, value):
-    return builder.load(
-        builder.bitcast(
-            builder.gep(value, [index(0), index(sizes.OFFSETOF_NDT_T_NDIM)]), ptr(int_)
-        )
+def ndt_ndim_impl(context, builder, typ, value):
+    get_ndt_t_ndim = builder.module.get_or_insert_function(
+        ir.FunctionType(ptr(int_), [ptr(llvm.ndt_t)]), name="get_ndt_t_ndim"
     )
+    return builder.load(builder.call(get_ndt_t_ndim, [value]))
 
 
 @lower_getattr(types.NdtNdarrayType, "ndim")
 def ndt_ndarray_ndim_impl(context, builder, typ, value):
-    return builder.load(
-        builder.bitcast(
-            builder.gep(value, [index(0), index(sizes.OFFSETOF_NDT_ARRAY_T_NDIM)]),
-            ptr(int_),
-        )
+    get_ndt_ndarray_t_ndim = builder.module.get_or_insert_function(
+        ir.FunctionType(ptr(int_), [ptr(llvm.ndt_ndarray_t)]),
+        name="get_ndt_ndarray_t_ndim",
     )
+    return builder.load(builder.call(get_ndt_ndarray_t_ndim, [value]))
 
 
 @lower_getattr(types.NdtNdarrayType, "shape")
 def ndt_ndarray_shape_impl(context, builder, typ, value):
-    array = builder.bitcast(
-        builder.gep(value, [index(0), index(sizes.OFFSETOF_NDT_ARRAY_T_SHAPE)]),
-        ptr(ir.ArrayType(i64, sizes.CONST_NDT_MAX_DIM)),
+    get_ndt_ndarray_t_shape = builder.module.get_or_insert_function(
+        ir.FunctionType(ptr(llvm.ndt_ndarray_t_shape), [ptr(llvm.ndt_ndarray_t)]),
+        name="get_ndt_ndarray_t_shape",
     )
 
-    # now we have to convert the LLVM array to a Numba list instance
+    array = builder.call(get_ndt_ndarray_t_shape, [value])
     ndim = builder.sext(ndt_ndarray_ndim_impl(context, builder, None, value), i64)
     inst = ListInstance.allocate(context, builder, types.shape_type, ndim)
     inst.size = ndim
