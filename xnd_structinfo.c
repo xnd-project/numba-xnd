@@ -23,16 +23,16 @@ extern size_t offsetof_uint16_opt_t_Some(void){ return offsetof(uint16_opt_t, So
 extern size_t sizeof_ndt_meta_t(void){ return sizeof(ndt_meta_t); }
 extern /* pointer to `int` */ void * get_ndt_meta_t_ndims(void* ptr){ return &(((ndt_meta_t*)ptr)->ndims); }
 extern size_t offsetof_ndt_meta_t_ndims(void){ return offsetof(ndt_meta_t, ndims); }
-extern /* pointer to `int32_t*` */ void * get_ndt_meta_t_noffsets(void* ptr){ return (void*)(((ndt_meta_t*)ptr)->noffsets); }
+extern /* `int32_t*` */ void * get_ndt_meta_t_noffsets(void* ptr){ return (void*)(((ndt_meta_t*)ptr)->noffsets); }
 extern size_t offsetof_ndt_meta_t_noffsets(void){ return offsetof(ndt_meta_t, noffsets); }
-extern /* pointer to `int32_t**` */ void * get_ndt_meta_t_offsets(void* ptr){ return (void*)(((ndt_meta_t*)ptr)->offsets); }
+extern /* `int32_t**` */ void * get_ndt_meta_t_offsets(void* ptr){ return (void*)(((ndt_meta_t*)ptr)->offsets); }
 extern size_t offsetof_ndt_meta_t_offsets(void){ return offsetof(ndt_meta_t, offsets); }
 extern size_t sizeof_ndt_field_t(void){ return sizeof(ndt_field_t); }
 extern /* pointer to `enum ndt_access` */ void * get_ndt_field_t_access(void* ptr){ return &(((ndt_field_t*)ptr)->access); }
 extern size_t offsetof_ndt_field_t_access(void){ return offsetof(ndt_field_t, access); }
-extern /* pointer to `char*` */ void * get_ndt_field_t_name(void* ptr){ return (void*)(((ndt_field_t*)ptr)->name); }
+extern /* `char*` */ void * get_ndt_field_t_name(void* ptr){ return (void*)(((ndt_field_t*)ptr)->name); }
 extern size_t offsetof_ndt_field_t_name(void){ return offsetof(ndt_field_t, name); }
-extern /* pointer to `ndt_t*` */ void * get_ndt_field_t_type(void* ptr){ return (void*)(((ndt_field_t*)ptr)->type); }
+extern /* `ndt_t*` */ void * get_ndt_field_t_type(void* ptr){ return (void*)(((ndt_field_t*)ptr)->type); }
 extern size_t offsetof_ndt_field_t_type(void){ return offsetof(ndt_field_t, type); }
 extern /* pointer to `uint16_t` */ void * get_ndt_field_t_Concrete_align(void* ptr){ return &(((ndt_field_t*)ptr)->Concrete.align); }
 extern size_t offsetof_ndt_field_t_Concrete_align(void){ return offsetof(ndt_field_t, Concrete.align); }
@@ -51,7 +51,7 @@ extern /* pointer to `int64_t` */ void * get_ndt_value_t_ValInt64(void* ptr){ re
 extern size_t offsetof_ndt_value_t_ValInt64(void){ return offsetof(ndt_value_t, ValInt64); }
 extern /* pointer to `double` */ void * get_ndt_value_t_ValFloat64(void* ptr){ return &(((ndt_value_t*)ptr)->ValFloat64); }
 extern size_t offsetof_ndt_value_t_ValFloat64(void){ return offsetof(ndt_value_t, ValFloat64); }
-extern /* pointer to `char*` */ void * get_ndt_value_t_ValString(void* ptr){ return (void*)(((ndt_value_t*)ptr)->ValString); }
+extern /* `char*` */ void * get_ndt_value_t_ValString(void* ptr){ return (void*)(((ndt_value_t*)ptr)->ValString); }
 extern size_t offsetof_ndt_value_t_ValString(void){ return offsetof(ndt_value_t, ValString); }
 extern size_t sizeof_ndt_slice_t(void){ return sizeof(ndt_slice_t); }
 extern /* pointer to `int64_t` */ void * get_ndt_slice_t_start(void* ptr){ return &(((ndt_slice_t*)ptr)->start); }
@@ -67,7 +67,7 @@ extern /* pointer to `int` */ void * get_ndt_constraint_t_nin(void* ptr){ return
 extern size_t offsetof_ndt_constraint_t_nin(void){ return offsetof(ndt_constraint_t, nin); }
 extern /* pointer to `int` */ void * get_ndt_constraint_t_nout(void* ptr){ return &(((ndt_constraint_t*)ptr)->nout); }
 extern size_t offsetof_ndt_constraint_t_nout(void){ return offsetof(ndt_constraint_t, nout); }
-extern /* pointer to `const char**` */ void * get_ndt_constraint_t_symbols(void* ptr){ return (void*)(((ndt_constraint_t*)ptr)->symbols); }
+extern /* `const char**` */ void * get_ndt_constraint_t_symbols(void* ptr){ return (void*)(((ndt_constraint_t*)ptr)->symbols); }
 extern size_t offsetof_ndt_constraint_t_symbols(void){ return offsetof(ndt_constraint_t, symbols); }
 extern size_t sizeof_ndt_methods_t(void){ return sizeof(ndt_methods_t); }
 extern /* pointer to `ndt_init_t` */ void * get_ndt_methods_t_init(void* ptr){ return &(((ndt_methods_t*)ptr)->init); }
@@ -89,9 +89,9 @@ extern /* pointer to `int64_t` */ void * get_ndt_t_datasize(void* ptr){ return &
 extern size_t offsetof_ndt_t_datasize(void){ return offsetof(ndt_t, datasize); }
 extern /* pointer to `uint16_t` */ void * get_ndt_t_align(void* ptr){ return &(((ndt_t*)ptr)->align); }
 extern size_t offsetof_ndt_t_align(void){ return offsetof(ndt_t, align); }
-extern /* pointer to `char*` */ void * get_ndt_t_Module_name(void* ptr){ return (void*)(((ndt_t*)ptr)->Module.name); }
+extern /* `char*` */ void * get_ndt_t_Module_name(void* ptr){ return (void*)(((ndt_t*)ptr)->Module.name); }
 extern size_t offsetof_ndt_t_Module_name(void){ return offsetof(ndt_t, Module.name); }
-extern /* pointer to `ndt_t*` */ void * get_ndt_t_Module_type(void* ptr){ return (void*)(((ndt_t*)ptr)->Module.type); }
+extern /* `ndt_t*` */ void * get_ndt_t_Module_type(void* ptr){ return (void*)(((ndt_t*)ptr)->Module.type); }
 extern size_t offsetof_ndt_t_Module_type(void){ return offsetof(ndt_t, Module.type); }
 extern /* pointer to `int64_t` */ void * get_ndt_t_Function_nin(void* ptr){ return &(((ndt_t*)ptr)->Function.nin); }
 extern size_t offsetof_ndt_t_Function_nin(void){ return offsetof(ndt_t, Function.nin); }
@@ -99,51 +99,51 @@ extern /* pointer to `int64_t` */ void * get_ndt_t_Function_nout(void* ptr){ ret
 extern size_t offsetof_ndt_t_Function_nout(void){ return offsetof(ndt_t, Function.nout); }
 extern /* pointer to `int64_t` */ void * get_ndt_t_Function_nargs(void* ptr){ return &(((ndt_t*)ptr)->Function.nargs); }
 extern size_t offsetof_ndt_t_Function_nargs(void){ return offsetof(ndt_t, Function.nargs); }
-extern /* pointer to `ndt_t**` */ void * get_ndt_t_Function_types(void* ptr){ return (void*)(((ndt_t*)ptr)->Function.types); }
+extern /* `ndt_t**` */ void * get_ndt_t_Function_types(void* ptr){ return (void*)(((ndt_t*)ptr)->Function.types); }
 extern size_t offsetof_ndt_t_Function_types(void){ return offsetof(ndt_t, Function.types); }
 extern /* pointer to `int64_t` */ void * get_ndt_t_FixedDim_shape(void* ptr){ return &(((ndt_t*)ptr)->FixedDim.shape); }
 extern size_t offsetof_ndt_t_FixedDim_shape(void){ return offsetof(ndt_t, FixedDim.shape); }
-extern /* pointer to `ndt_t*` */ void * get_ndt_t_FixedDim_type(void* ptr){ return (void*)(((ndt_t*)ptr)->FixedDim.type); }
+extern /* `ndt_t*` */ void * get_ndt_t_FixedDim_type(void* ptr){ return (void*)(((ndt_t*)ptr)->FixedDim.type); }
 extern size_t offsetof_ndt_t_FixedDim_type(void){ return offsetof(ndt_t, FixedDim.type); }
-extern /* pointer to `ndt_t*` */ void * get_ndt_t_VarDim_type(void* ptr){ return (void*)(((ndt_t*)ptr)->VarDim.type); }
+extern /* `ndt_t*` */ void * get_ndt_t_VarDim_type(void* ptr){ return (void*)(((ndt_t*)ptr)->VarDim.type); }
 extern size_t offsetof_ndt_t_VarDim_type(void){ return offsetof(ndt_t, VarDim.type); }
-extern /* pointer to `char*` */ void * get_ndt_t_SymbolicDim_name(void* ptr){ return (void*)(((ndt_t*)ptr)->SymbolicDim.name); }
+extern /* `char*` */ void * get_ndt_t_SymbolicDim_name(void* ptr){ return (void*)(((ndt_t*)ptr)->SymbolicDim.name); }
 extern size_t offsetof_ndt_t_SymbolicDim_name(void){ return offsetof(ndt_t, SymbolicDim.name); }
-extern /* pointer to `ndt_t*` */ void * get_ndt_t_SymbolicDim_type(void* ptr){ return (void*)(((ndt_t*)ptr)->SymbolicDim.type); }
+extern /* `ndt_t*` */ void * get_ndt_t_SymbolicDim_type(void* ptr){ return (void*)(((ndt_t*)ptr)->SymbolicDim.type); }
 extern size_t offsetof_ndt_t_SymbolicDim_type(void){ return offsetof(ndt_t, SymbolicDim.type); }
-extern /* pointer to `char*` */ void * get_ndt_t_EllipsisDim_name(void* ptr){ return (void*)(((ndt_t*)ptr)->EllipsisDim.name); }
+extern /* `char*` */ void * get_ndt_t_EllipsisDim_name(void* ptr){ return (void*)(((ndt_t*)ptr)->EllipsisDim.name); }
 extern size_t offsetof_ndt_t_EllipsisDim_name(void){ return offsetof(ndt_t, EllipsisDim.name); }
-extern /* pointer to `ndt_t*` */ void * get_ndt_t_EllipsisDim_type(void* ptr){ return (void*)(((ndt_t*)ptr)->EllipsisDim.type); }
+extern /* `ndt_t*` */ void * get_ndt_t_EllipsisDim_type(void* ptr){ return (void*)(((ndt_t*)ptr)->EllipsisDim.type); }
 extern size_t offsetof_ndt_t_EllipsisDim_type(void){ return offsetof(ndt_t, EllipsisDim.type); }
 extern /* pointer to `enum ndt_variadic` */ void * get_ndt_t_Tuple_flag(void* ptr){ return &(((ndt_t*)ptr)->Tuple.flag); }
 extern size_t offsetof_ndt_t_Tuple_flag(void){ return offsetof(ndt_t, Tuple.flag); }
 extern /* pointer to `int64_t` */ void * get_ndt_t_Tuple_shape(void* ptr){ return &(((ndt_t*)ptr)->Tuple.shape); }
 extern size_t offsetof_ndt_t_Tuple_shape(void){ return offsetof(ndt_t, Tuple.shape); }
-extern /* pointer to `ndt_t**` */ void * get_ndt_t_Tuple_types(void* ptr){ return (void*)(((ndt_t*)ptr)->Tuple.types); }
+extern /* `ndt_t**` */ void * get_ndt_t_Tuple_types(void* ptr){ return (void*)(((ndt_t*)ptr)->Tuple.types); }
 extern size_t offsetof_ndt_t_Tuple_types(void){ return offsetof(ndt_t, Tuple.types); }
 extern /* pointer to `enum ndt_variadic` */ void * get_ndt_t_Record_flag(void* ptr){ return &(((ndt_t*)ptr)->Record.flag); }
 extern size_t offsetof_ndt_t_Record_flag(void){ return offsetof(ndt_t, Record.flag); }
 extern /* pointer to `int64_t` */ void * get_ndt_t_Record_shape(void* ptr){ return &(((ndt_t*)ptr)->Record.shape); }
 extern size_t offsetof_ndt_t_Record_shape(void){ return offsetof(ndt_t, Record.shape); }
-extern /* pointer to `char**` */ void * get_ndt_t_Record_names(void* ptr){ return (void*)(((ndt_t*)ptr)->Record.names); }
+extern /* `char**` */ void * get_ndt_t_Record_names(void* ptr){ return (void*)(((ndt_t*)ptr)->Record.names); }
 extern size_t offsetof_ndt_t_Record_names(void){ return offsetof(ndt_t, Record.names); }
-extern /* pointer to `ndt_t**` */ void * get_ndt_t_Record_types(void* ptr){ return (void*)(((ndt_t*)ptr)->Record.types); }
+extern /* `ndt_t**` */ void * get_ndt_t_Record_types(void* ptr){ return (void*)(((ndt_t*)ptr)->Record.types); }
 extern size_t offsetof_ndt_t_Record_types(void){ return offsetof(ndt_t, Record.types); }
-extern /* pointer to `ndt_t*` */ void * get_ndt_t_Ref_type(void* ptr){ return (void*)(((ndt_t*)ptr)->Ref.type); }
+extern /* `ndt_t*` */ void * get_ndt_t_Ref_type(void* ptr){ return (void*)(((ndt_t*)ptr)->Ref.type); }
 extern size_t offsetof_ndt_t_Ref_type(void){ return offsetof(ndt_t, Ref.type); }
-extern /* pointer to `char*` */ void * get_ndt_t_Constr_name(void* ptr){ return (void*)(((ndt_t*)ptr)->Constr.name); }
+extern /* `char*` */ void * get_ndt_t_Constr_name(void* ptr){ return (void*)(((ndt_t*)ptr)->Constr.name); }
 extern size_t offsetof_ndt_t_Constr_name(void){ return offsetof(ndt_t, Constr.name); }
-extern /* pointer to `ndt_t*` */ void * get_ndt_t_Constr_type(void* ptr){ return (void*)(((ndt_t*)ptr)->Constr.type); }
+extern /* `ndt_t*` */ void * get_ndt_t_Constr_type(void* ptr){ return (void*)(((ndt_t*)ptr)->Constr.type); }
 extern size_t offsetof_ndt_t_Constr_type(void){ return offsetof(ndt_t, Constr.type); }
-extern /* pointer to `char*` */ void * get_ndt_t_Nominal_name(void* ptr){ return (void*)(((ndt_t*)ptr)->Nominal.name); }
+extern /* `char*` */ void * get_ndt_t_Nominal_name(void* ptr){ return (void*)(((ndt_t*)ptr)->Nominal.name); }
 extern size_t offsetof_ndt_t_Nominal_name(void){ return offsetof(ndt_t, Nominal.name); }
-extern /* pointer to `ndt_t*` */ void * get_ndt_t_Nominal_type(void* ptr){ return (void*)(((ndt_t*)ptr)->Nominal.type); }
+extern /* `ndt_t*` */ void * get_ndt_t_Nominal_type(void* ptr){ return (void*)(((ndt_t*)ptr)->Nominal.type); }
 extern size_t offsetof_ndt_t_Nominal_type(void){ return offsetof(ndt_t, Nominal.type); }
-extern /* pointer to `const ndt_methods_t*` */ void * get_ndt_t_Nominal_meth(void* ptr){ return (void*)(((ndt_t*)ptr)->Nominal.meth); }
+extern /* `const ndt_methods_t*` */ void * get_ndt_t_Nominal_meth(void* ptr){ return (void*)(((ndt_t*)ptr)->Nominal.meth); }
 extern size_t offsetof_ndt_t_Nominal_meth(void){ return offsetof(ndt_t, Nominal.meth); }
 extern /* pointer to `int64_t` */ void * get_ndt_t_Categorical_ntypes(void* ptr){ return &(((ndt_t*)ptr)->Categorical.ntypes); }
 extern size_t offsetof_ndt_t_Categorical_ntypes(void){ return offsetof(ndt_t, Categorical.ntypes); }
-extern /* pointer to `ndt_value_t*` */ void * get_ndt_t_Categorical_types(void* ptr){ return (void*)(((ndt_t*)ptr)->Categorical.types); }
+extern /* `ndt_value_t*` */ void * get_ndt_t_Categorical_types(void* ptr){ return (void*)(((ndt_t*)ptr)->Categorical.types); }
 extern size_t offsetof_ndt_t_Categorical_types(void){ return offsetof(ndt_t, Categorical.types); }
 extern /* pointer to `int64_t` */ void * get_ndt_t_FixedString_size(void* ptr){ return &(((ndt_t*)ptr)->FixedString.size); }
 extern size_t offsetof_ndt_t_FixedString_size(void){ return offsetof(ndt_t, FixedString.size); }
@@ -157,7 +157,7 @@ extern /* pointer to `uint16_t` */ void * get_ndt_t_Bytes_target_align(void* ptr
 extern size_t offsetof_ndt_t_Bytes_target_align(void){ return offsetof(ndt_t, Bytes.target_align); }
 extern /* pointer to `enum ndt_encoding` */ void * get_ndt_t_Char_encoding(void* ptr){ return &(((ndt_t*)ptr)->Char.encoding); }
 extern size_t offsetof_ndt_t_Char_encoding(void){ return offsetof(ndt_t, Char.encoding); }
-extern /* pointer to `char*` */ void * get_ndt_t_Typevar_name(void* ptr){ return (void*)(((ndt_t*)ptr)->Typevar.name); }
+extern /* `char*` */ void * get_ndt_t_Typevar_name(void* ptr){ return (void*)(((ndt_t*)ptr)->Typevar.name); }
 extern size_t offsetof_ndt_t_Typevar_name(void){ return offsetof(ndt_t, Typevar.name); }
 extern /* pointer to `int64_t` */ void * get_ndt_t_Concrete_FixedDim_itemsize(void* ptr){ return &(((ndt_t*)ptr)->Concrete.FixedDim.itemsize); }
 extern size_t offsetof_ndt_t_Concrete_FixedDim_itemsize(void){ return offsetof(ndt_t, Concrete.FixedDim.itemsize); }
@@ -169,25 +169,25 @@ extern /* pointer to `int64_t` */ void * get_ndt_t_Concrete_VarDim_itemsize(void
 extern size_t offsetof_ndt_t_Concrete_VarDim_itemsize(void){ return offsetof(ndt_t, Concrete.VarDim.itemsize); }
 extern /* pointer to `int32_t` */ void * get_ndt_t_Concrete_VarDim_noffsets(void* ptr){ return &(((ndt_t*)ptr)->Concrete.VarDim.noffsets); }
 extern size_t offsetof_ndt_t_Concrete_VarDim_noffsets(void){ return offsetof(ndt_t, Concrete.VarDim.noffsets); }
-extern /* pointer to `const int32_t*` */ void * get_ndt_t_Concrete_VarDim_offsets(void* ptr){ return (void*)(((ndt_t*)ptr)->Concrete.VarDim.offsets); }
+extern /* `const int32_t*` */ void * get_ndt_t_Concrete_VarDim_offsets(void* ptr){ return (void*)(((ndt_t*)ptr)->Concrete.VarDim.offsets); }
 extern size_t offsetof_ndt_t_Concrete_VarDim_offsets(void){ return offsetof(ndt_t, Concrete.VarDim.offsets); }
 extern /* pointer to `int` */ void * get_ndt_t_Concrete_VarDim_nslices(void* ptr){ return &(((ndt_t*)ptr)->Concrete.VarDim.nslices); }
 extern size_t offsetof_ndt_t_Concrete_VarDim_nslices(void){ return offsetof(ndt_t, Concrete.VarDim.nslices); }
-extern /* pointer to `ndt_slice_t*` */ void * get_ndt_t_Concrete_VarDim_slices(void* ptr){ return (void*)(((ndt_t*)ptr)->Concrete.VarDim.slices); }
+extern /* `ndt_slice_t*` */ void * get_ndt_t_Concrete_VarDim_slices(void* ptr){ return (void*)(((ndt_t*)ptr)->Concrete.VarDim.slices); }
 extern size_t offsetof_ndt_t_Concrete_VarDim_slices(void){ return offsetof(ndt_t, Concrete.VarDim.slices); }
-extern /* pointer to `int64_t*` */ void * get_ndt_t_Concrete_Tuple_offset(void* ptr){ return (void*)(((ndt_t*)ptr)->Concrete.Tuple.offset); }
+extern /* `int64_t*` */ void * get_ndt_t_Concrete_Tuple_offset(void* ptr){ return (void*)(((ndt_t*)ptr)->Concrete.Tuple.offset); }
 extern size_t offsetof_ndt_t_Concrete_Tuple_offset(void){ return offsetof(ndt_t, Concrete.Tuple.offset); }
-extern /* pointer to `uint16_t*` */ void * get_ndt_t_Concrete_Tuple_align(void* ptr){ return (void*)(((ndt_t*)ptr)->Concrete.Tuple.align); }
+extern /* `uint16_t*` */ void * get_ndt_t_Concrete_Tuple_align(void* ptr){ return (void*)(((ndt_t*)ptr)->Concrete.Tuple.align); }
 extern size_t offsetof_ndt_t_Concrete_Tuple_align(void){ return offsetof(ndt_t, Concrete.Tuple.align); }
-extern /* pointer to `uint16_t*` */ void * get_ndt_t_Concrete_Tuple_pad(void* ptr){ return (void*)(((ndt_t*)ptr)->Concrete.Tuple.pad); }
+extern /* `uint16_t*` */ void * get_ndt_t_Concrete_Tuple_pad(void* ptr){ return (void*)(((ndt_t*)ptr)->Concrete.Tuple.pad); }
 extern size_t offsetof_ndt_t_Concrete_Tuple_pad(void){ return offsetof(ndt_t, Concrete.Tuple.pad); }
-extern /* pointer to `int64_t*` */ void * get_ndt_t_Concrete_Record_offset(void* ptr){ return (void*)(((ndt_t*)ptr)->Concrete.Record.offset); }
+extern /* `int64_t*` */ void * get_ndt_t_Concrete_Record_offset(void* ptr){ return (void*)(((ndt_t*)ptr)->Concrete.Record.offset); }
 extern size_t offsetof_ndt_t_Concrete_Record_offset(void){ return offsetof(ndt_t, Concrete.Record.offset); }
-extern /* pointer to `uint16_t*` */ void * get_ndt_t_Concrete_Record_align(void* ptr){ return (void*)(((ndt_t*)ptr)->Concrete.Record.align); }
+extern /* `uint16_t*` */ void * get_ndt_t_Concrete_Record_align(void* ptr){ return (void*)(((ndt_t*)ptr)->Concrete.Record.align); }
 extern size_t offsetof_ndt_t_Concrete_Record_align(void){ return offsetof(ndt_t, Concrete.Record.align); }
-extern /* pointer to `uint16_t*` */ void * get_ndt_t_Concrete_Record_pad(void* ptr){ return (void*)(((ndt_t*)ptr)->Concrete.Record.pad); }
+extern /* `uint16_t*` */ void * get_ndt_t_Concrete_Record_pad(void* ptr){ return (void*)(((ndt_t*)ptr)->Concrete.Record.pad); }
 extern size_t offsetof_ndt_t_Concrete_Record_pad(void){ return offsetof(ndt_t, Concrete.Record.pad); }
-extern /* pointer to `char*` */ void * get_ndt_t_extra(void* ptr){ return (void*)(((ndt_t*)ptr)->extra); }
+extern /* `char*` */ void * get_ndt_t_extra(void* ptr){ return (void*)(((ndt_t*)ptr)->extra); }
 extern size_t offsetof_ndt_t_extra(void){ return offsetof(ndt_t, extra); }
 extern size_t sizeof_ndt_context_t(void){ return sizeof(ndt_context_t); }
 extern /* pointer to `uint32_t` */ void * get_ndt_context_t_flags(void* ptr){ return &(((ndt_context_t*)ptr)->flags); }
@@ -196,20 +196,20 @@ extern /* pointer to `enum ndt_error` */ void * get_ndt_context_t_err(void* ptr)
 extern size_t offsetof_ndt_context_t_err(void){ return offsetof(ndt_context_t, err); }
 extern /* pointer to `enum ndt_msg` */ void * get_ndt_context_t_msg(void* ptr){ return &(((ndt_context_t*)ptr)->msg); }
 extern size_t offsetof_ndt_context_t_msg(void){ return offsetof(ndt_context_t, msg); }
-extern /* pointer to `const char*` */ void * get_ndt_context_t_ConstMsg(void* ptr){ return (void*)(((ndt_context_t*)ptr)->ConstMsg); }
+extern /* `const char*` */ void * get_ndt_context_t_ConstMsg(void* ptr){ return (void*)(((ndt_context_t*)ptr)->ConstMsg); }
 extern size_t offsetof_ndt_context_t_ConstMsg(void){ return offsetof(ndt_context_t, ConstMsg); }
-extern /* pointer to `char*` */ void * get_ndt_context_t_DynamicMsg(void* ptr){ return (void*)(((ndt_context_t*)ptr)->DynamicMsg); }
+extern /* `char*` */ void * get_ndt_context_t_DynamicMsg(void* ptr){ return (void*)(((ndt_context_t*)ptr)->DynamicMsg); }
 extern size_t offsetof_ndt_context_t_DynamicMsg(void){ return offsetof(ndt_context_t, DynamicMsg); }
 extern size_t sizeof_ndt_ndarray_t(void){ return sizeof(ndt_ndarray_t); }
 extern /* pointer to `int` */ void * get_ndt_ndarray_t_ndim(void* ptr){ return &(((ndt_ndarray_t*)ptr)->ndim); }
 extern size_t offsetof_ndt_ndarray_t_ndim(void){ return offsetof(ndt_ndarray_t, ndim); }
 extern /* pointer to `int64_t` */ void * get_ndt_ndarray_t_itemsize(void* ptr){ return &(((ndt_ndarray_t*)ptr)->itemsize); }
 extern size_t offsetof_ndt_ndarray_t_itemsize(void){ return offsetof(ndt_ndarray_t, itemsize); }
-extern /* pointer to `int64_t*` */ void * get_ndt_ndarray_t_shape(void* ptr){ return (void*)(((ndt_ndarray_t*)ptr)->shape); }
+extern /* `int64_t*` */ void * get_ndt_ndarray_t_shape(void* ptr){ return (void*)(((ndt_ndarray_t*)ptr)->shape); }
 extern size_t offsetof_ndt_ndarray_t_shape(void){ return offsetof(ndt_ndarray_t, shape); }
-extern /* pointer to `int64_t*` */ void * get_ndt_ndarray_t_strides(void* ptr){ return (void*)(((ndt_ndarray_t*)ptr)->strides); }
+extern /* `int64_t*` */ void * get_ndt_ndarray_t_strides(void* ptr){ return (void*)(((ndt_ndarray_t*)ptr)->strides); }
 extern size_t offsetof_ndt_ndarray_t_strides(void){ return offsetof(ndt_ndarray_t, strides); }
-extern /* pointer to `int64_t*` */ void * get_ndt_ndarray_t_steps(void* ptr){ return (void*)(((ndt_ndarray_t*)ptr)->steps); }
+extern /* `int64_t*` */ void * get_ndt_ndarray_t_steps(void* ptr){ return (void*)(((ndt_ndarray_t*)ptr)->steps); }
 extern size_t offsetof_ndt_ndarray_t_steps(void){ return offsetof(ndt_ndarray_t, steps); }
 extern size_t sizeof_ndt_apply_spec_t(void){ return sizeof(ndt_apply_spec_t); }
 extern /* pointer to `uint32_t` */ void * get_ndt_apply_spec_t_flags(void* ptr){ return &(((ndt_apply_spec_t*)ptr)->flags); }
@@ -220,40 +220,40 @@ extern /* pointer to `int` */ void * get_ndt_apply_spec_t_nbroadcast(void* ptr){
 extern size_t offsetof_ndt_apply_spec_t_nbroadcast(void){ return offsetof(ndt_apply_spec_t, nbroadcast); }
 extern /* pointer to `int` */ void * get_ndt_apply_spec_t_outer_dims(void* ptr){ return &(((ndt_apply_spec_t*)ptr)->outer_dims); }
 extern size_t offsetof_ndt_apply_spec_t_outer_dims(void){ return offsetof(ndt_apply_spec_t, outer_dims); }
-extern /* pointer to `ndt_t**` */ void * get_ndt_apply_spec_t_out(void* ptr){ return (void*)(((ndt_apply_spec_t*)ptr)->out); }
+extern /* `ndt_t**` */ void * get_ndt_apply_spec_t_out(void* ptr){ return (void*)(((ndt_apply_spec_t*)ptr)->out); }
 extern size_t offsetof_ndt_apply_spec_t_out(void){ return offsetof(ndt_apply_spec_t, out); }
-extern /* pointer to `ndt_t**` */ void * get_ndt_apply_spec_t_broadcast(void* ptr){ return (void*)(((ndt_apply_spec_t*)ptr)->broadcast); }
+extern /* `ndt_t**` */ void * get_ndt_apply_spec_t_broadcast(void* ptr){ return (void*)(((ndt_apply_spec_t*)ptr)->broadcast); }
 extern size_t offsetof_ndt_apply_spec_t_broadcast(void){ return offsetof(ndt_apply_spec_t, broadcast); }
 extern size_t sizeof_ndt_typedef_t(void){ return sizeof(ndt_typedef_t); }
-extern /* pointer to `const ndt_t*` */ void * get_ndt_typedef_t_type(void* ptr){ return (void*)(((ndt_typedef_t*)ptr)->type); }
+extern /* `const ndt_t*` */ void * get_ndt_typedef_t_type(void* ptr){ return (void*)(((ndt_typedef_t*)ptr)->type); }
 extern size_t offsetof_ndt_typedef_t_type(void){ return offsetof(ndt_typedef_t, type); }
 extern /* pointer to `ndt_methods_t` */ void * get_ndt_typedef_t_meth(void* ptr){ return &(((ndt_typedef_t*)ptr)->meth); }
 extern size_t offsetof_ndt_typedef_t_meth(void){ return offsetof(ndt_typedef_t, meth); }
 extern size_t sizeof_ndt_bytes_t(void){ return sizeof(ndt_bytes_t); }
 extern /* pointer to `int64_t` */ void * get_ndt_bytes_t_size(void* ptr){ return &(((ndt_bytes_t*)ptr)->size); }
 extern size_t offsetof_ndt_bytes_t_size(void){ return offsetof(ndt_bytes_t, size); }
-extern /* pointer to `uint8_t*` */ void * get_ndt_bytes_t_data(void* ptr){ return (void*)(((ndt_bytes_t*)ptr)->data); }
+extern /* `uint8_t*` */ void * get_ndt_bytes_t_data(void* ptr){ return (void*)(((ndt_bytes_t*)ptr)->data); }
 extern size_t offsetof_ndt_bytes_t_data(void){ return offsetof(ndt_bytes_t, data); }
 extern size_t sizeof_NdtObject(void){ return sizeof(NdtObject); }
-extern /* pointer to `PyObject*` */ void * get_NdtObject_rbuf(void* ptr){ return (void*)(((NdtObject*)ptr)->rbuf); }
+extern /* `PyObject*` */ void * get_NdtObject_rbuf(void* ptr){ return (void*)(((NdtObject*)ptr)->rbuf); }
 extern size_t offsetof_NdtObject_rbuf(void){ return offsetof(NdtObject, rbuf); }
-extern /* pointer to `ndt_t*` */ void * get_NdtObject_ndt(void* ptr){ return (void*)(((NdtObject*)ptr)->ndt); }
+extern /* `ndt_t*` */ void * get_NdtObject_ndt(void* ptr){ return (void*)(((NdtObject*)ptr)->ndt); }
 extern size_t offsetof_NdtObject_ndt(void){ return offsetof(NdtObject, ndt); }
 extern size_t sizeof_xnd_bitmap_t(void){ return sizeof(xnd_bitmap_t); }
-extern /* pointer to `uint8_t*` */ void * get_xnd_bitmap_t_data(void* ptr){ return (void*)(((xnd_bitmap_t*)ptr)->data); }
+extern /* `uint8_t*` */ void * get_xnd_bitmap_t_data(void* ptr){ return (void*)(((xnd_bitmap_t*)ptr)->data); }
 extern size_t offsetof_xnd_bitmap_t_data(void){ return offsetof(xnd_bitmap_t, data); }
 extern /* pointer to `int64_t` */ void * get_xnd_bitmap_t_size(void* ptr){ return &(((xnd_bitmap_t*)ptr)->size); }
 extern size_t offsetof_xnd_bitmap_t_size(void){ return offsetof(xnd_bitmap_t, size); }
-extern /* pointer to `xnd_bitmap_t*` */ void * get_xnd_bitmap_t_next(void* ptr){ return (void*)(((xnd_bitmap_t*)ptr)->next); }
+extern /* `xnd_bitmap_t*` */ void * get_xnd_bitmap_t_next(void* ptr){ return (void*)(((xnd_bitmap_t*)ptr)->next); }
 extern size_t offsetof_xnd_bitmap_t_next(void){ return offsetof(xnd_bitmap_t, next); }
 extern size_t sizeof_xnd_t(void){ return sizeof(xnd_t); }
 extern /* pointer to `xnd_bitmap_t` */ void * get_xnd_t_bitmap(void* ptr){ return &(((xnd_t*)ptr)->bitmap); }
 extern size_t offsetof_xnd_t_bitmap(void){ return offsetof(xnd_t, bitmap); }
 extern /* pointer to `int64_t` */ void * get_xnd_t_index(void* ptr){ return &(((xnd_t*)ptr)->index); }
 extern size_t offsetof_xnd_t_index(void){ return offsetof(xnd_t, index); }
-extern /* pointer to `const ndt_t*` */ void * get_xnd_t_type(void* ptr){ return (void*)(((xnd_t*)ptr)->type); }
+extern /* `const ndt_t*` */ void * get_xnd_t_type(void* ptr){ return (void*)(((xnd_t*)ptr)->type); }
 extern size_t offsetof_xnd_t_type(void){ return offsetof(xnd_t, type); }
-extern /* pointer to `char*` */ void * get_xnd_t_ptr(void* ptr){ return (void*)(((xnd_t*)ptr)->ptr); }
+extern /* `char*` */ void * get_xnd_t_ptr(void* ptr){ return (void*)(((xnd_t*)ptr)->ptr); }
 extern size_t offsetof_xnd_t_ptr(void){ return offsetof(xnd_t, ptr); }
 extern size_t sizeof_xnd_master_t(void){ return sizeof(xnd_master_t); }
 extern /* pointer to `uint32_t` */ void * get_xnd_master_t_flags(void* ptr){ return &(((xnd_master_t*)ptr)->flags); }
@@ -265,28 +265,28 @@ extern /* pointer to `enum xnd_key` */ void * get_xnd_index_t_tag(void* ptr){ re
 extern size_t offsetof_xnd_index_t_tag(void){ return offsetof(xnd_index_t, tag); }
 extern /* pointer to `int64_t` */ void * get_xnd_index_t_Index(void* ptr){ return &(((xnd_index_t*)ptr)->Index); }
 extern size_t offsetof_xnd_index_t_Index(void){ return offsetof(xnd_index_t, Index); }
-extern /* pointer to `const char*` */ void * get_xnd_index_t_FieldName(void* ptr){ return (void*)(((xnd_index_t*)ptr)->FieldName); }
+extern /* `const char*` */ void * get_xnd_index_t_FieldName(void* ptr){ return (void*)(((xnd_index_t*)ptr)->FieldName); }
 extern size_t offsetof_xnd_index_t_FieldName(void){ return offsetof(xnd_index_t, FieldName); }
 extern /* pointer to `ndt_slice_t` */ void * get_xnd_index_t_Slice(void* ptr){ return &(((xnd_index_t*)ptr)->Slice); }
 extern size_t offsetof_xnd_index_t_Slice(void){ return offsetof(xnd_index_t, Slice); }
 extern size_t sizeof_MemoryBlockObject(void){ return sizeof(MemoryBlockObject); }
-extern /* pointer to `PyObject*` */ void * get_MemoryBlockObject_type(void* ptr){ return (void*)(((MemoryBlockObject*)ptr)->type); }
+extern /* `PyObject*` */ void * get_MemoryBlockObject_type(void* ptr){ return (void*)(((MemoryBlockObject*)ptr)->type); }
 extern size_t offsetof_MemoryBlockObject_type(void){ return offsetof(MemoryBlockObject, type); }
-extern /* pointer to `xnd_master_t*` */ void * get_MemoryBlockObject_xnd(void* ptr){ return (void*)(((MemoryBlockObject*)ptr)->xnd); }
+extern /* `xnd_master_t*` */ void * get_MemoryBlockObject_xnd(void* ptr){ return (void*)(((MemoryBlockObject*)ptr)->xnd); }
 extern size_t offsetof_MemoryBlockObject_xnd(void){ return offsetof(MemoryBlockObject, xnd); }
-extern /* pointer to `Py_buffer*` */ void * get_MemoryBlockObject_view(void* ptr){ return (void*)(((MemoryBlockObject*)ptr)->view); }
+extern /* `Py_buffer*` */ void * get_MemoryBlockObject_view(void* ptr){ return (void*)(((MemoryBlockObject*)ptr)->view); }
 extern size_t offsetof_MemoryBlockObject_view(void){ return offsetof(MemoryBlockObject, view); }
 extern size_t sizeof_XndObject(void){ return sizeof(XndObject); }
-extern /* pointer to `MemoryBlockObject*` */ void * get_XndObject_mblock(void* ptr){ return (void*)(((XndObject*)ptr)->mblock); }
+extern /* `MemoryBlockObject*` */ void * get_XndObject_mblock(void* ptr){ return (void*)(((XndObject*)ptr)->mblock); }
 extern size_t offsetof_XndObject_mblock(void){ return offsetof(XndObject, mblock); }
-extern /* pointer to `PyObject*` */ void * get_XndObject_type(void* ptr){ return (void*)(((XndObject*)ptr)->type); }
+extern /* `PyObject*` */ void * get_XndObject_type(void* ptr){ return (void*)(((XndObject*)ptr)->type); }
 extern size_t offsetof_XndObject_type(void){ return offsetof(XndObject, type); }
 extern /* pointer to `xnd_t` */ void * get_XndObject_xnd(void* ptr){ return &(((XndObject*)ptr)->xnd); }
 extern size_t offsetof_XndObject_xnd(void){ return offsetof(XndObject, xnd); }
 extern size_t sizeof_gm_kernel_set_t(void){ return sizeof(gm_kernel_set_t); }
-extern /* pointer to `ndt_t*` */ void * get_gm_kernel_set_t_sig(void* ptr){ return (void*)(((gm_kernel_set_t*)ptr)->sig); }
+extern /* `ndt_t*` */ void * get_gm_kernel_set_t_sig(void* ptr){ return (void*)(((gm_kernel_set_t*)ptr)->sig); }
 extern size_t offsetof_gm_kernel_set_t_sig(void){ return offsetof(gm_kernel_set_t, sig); }
-extern /* pointer to `const ndt_constraint_t*` */ void * get_gm_kernel_set_t_constraint(void* ptr){ return (void*)(((gm_kernel_set_t*)ptr)->constraint); }
+extern /* `const ndt_constraint_t*` */ void * get_gm_kernel_set_t_constraint(void* ptr){ return (void*)(((gm_kernel_set_t*)ptr)->constraint); }
 extern size_t offsetof_gm_kernel_set_t_constraint(void){ return offsetof(gm_kernel_set_t, constraint); }
 extern /* pointer to `gm_xnd_kernel_t` */ void * get_gm_kernel_set_t_C(void* ptr){ return &(((gm_kernel_set_t*)ptr)->C); }
 extern size_t offsetof_gm_kernel_set_t_C(void){ return offsetof(gm_kernel_set_t, C); }
@@ -297,18 +297,18 @@ extern size_t offsetof_gm_kernel_set_t_Xnd(void){ return offsetof(gm_kernel_set_
 extern /* pointer to `gm_strided_kernel_t` */ void * get_gm_kernel_set_t_Strided(void* ptr){ return &(((gm_kernel_set_t*)ptr)->Strided); }
 extern size_t offsetof_gm_kernel_set_t_Strided(void){ return offsetof(gm_kernel_set_t, Strided); }
 extern size_t sizeof_gm_typedef_init_t(void){ return sizeof(gm_typedef_init_t); }
-extern /* pointer to `const char*` */ void * get_gm_typedef_init_t_name(void* ptr){ return (void*)(((gm_typedef_init_t*)ptr)->name); }
+extern /* `const char*` */ void * get_gm_typedef_init_t_name(void* ptr){ return (void*)(((gm_typedef_init_t*)ptr)->name); }
 extern size_t offsetof_gm_typedef_init_t_name(void){ return offsetof(gm_typedef_init_t, name); }
-extern /* pointer to `const char*` */ void * get_gm_typedef_init_t_type(void* ptr){ return (void*)(((gm_typedef_init_t*)ptr)->type); }
+extern /* `const char*` */ void * get_gm_typedef_init_t_type(void* ptr){ return (void*)(((gm_typedef_init_t*)ptr)->type); }
 extern size_t offsetof_gm_typedef_init_t_type(void){ return offsetof(gm_typedef_init_t, type); }
-extern /* pointer to `const ndt_methods_t*` */ void * get_gm_typedef_init_t_meth(void* ptr){ return (void*)(((gm_typedef_init_t*)ptr)->meth); }
+extern /* `const ndt_methods_t*` */ void * get_gm_typedef_init_t_meth(void* ptr){ return (void*)(((gm_typedef_init_t*)ptr)->meth); }
 extern size_t offsetof_gm_typedef_init_t_meth(void){ return offsetof(gm_typedef_init_t, meth); }
 extern size_t sizeof_gm_kernel_init_t(void){ return sizeof(gm_kernel_init_t); }
-extern /* pointer to `const char*` */ void * get_gm_kernel_init_t_name(void* ptr){ return (void*)(((gm_kernel_init_t*)ptr)->name); }
+extern /* `const char*` */ void * get_gm_kernel_init_t_name(void* ptr){ return (void*)(((gm_kernel_init_t*)ptr)->name); }
 extern size_t offsetof_gm_kernel_init_t_name(void){ return offsetof(gm_kernel_init_t, name); }
-extern /* pointer to `const char*` */ void * get_gm_kernel_init_t_sig(void* ptr){ return (void*)(((gm_kernel_init_t*)ptr)->sig); }
+extern /* `const char*` */ void * get_gm_kernel_init_t_sig(void* ptr){ return (void*)(((gm_kernel_init_t*)ptr)->sig); }
 extern size_t offsetof_gm_kernel_init_t_sig(void){ return offsetof(gm_kernel_init_t, sig); }
-extern /* pointer to `const ndt_constraint_t*` */ void * get_gm_kernel_init_t_constraint(void* ptr){ return (void*)(((gm_kernel_init_t*)ptr)->constraint); }
+extern /* `const ndt_constraint_t*` */ void * get_gm_kernel_init_t_constraint(void* ptr){ return (void*)(((gm_kernel_init_t*)ptr)->constraint); }
 extern size_t offsetof_gm_kernel_init_t_constraint(void){ return offsetof(gm_kernel_init_t, constraint); }
 extern /* pointer to `gm_xnd_kernel_t` */ void * get_gm_kernel_init_t_C(void* ptr){ return &(((gm_kernel_init_t*)ptr)->C); }
 extern size_t offsetof_gm_kernel_init_t_C(void){ return offsetof(gm_kernel_init_t, C); }
@@ -321,16 +321,16 @@ extern size_t offsetof_gm_kernel_init_t_Strided(void){ return offsetof(gm_kernel
 extern size_t sizeof_gm_kernel_t(void){ return sizeof(gm_kernel_t); }
 extern /* pointer to `uint32_t` */ void * get_gm_kernel_t_flag(void* ptr){ return &(((gm_kernel_t*)ptr)->flag); }
 extern size_t offsetof_gm_kernel_t_flag(void){ return offsetof(gm_kernel_t, flag); }
-extern /* pointer to `const gm_kernel_set_t*` */ void * get_gm_kernel_t_set(void* ptr){ return (void*)(((gm_kernel_t*)ptr)->set); }
+extern /* `const gm_kernel_set_t*` */ void * get_gm_kernel_t_set(void* ptr){ return (void*)(((gm_kernel_t*)ptr)->set); }
 extern size_t offsetof_gm_kernel_t_set(void){ return offsetof(gm_kernel_t, set); }
 extern size_t sizeof_gm_func_t(void){ return sizeof(gm_func_t); }
-extern /* pointer to `char*` */ void * get_gm_func_t_name(void* ptr){ return (void*)(((gm_func_t*)ptr)->name); }
+extern /* `char*` */ void * get_gm_func_t_name(void* ptr){ return (void*)(((gm_func_t*)ptr)->name); }
 extern size_t offsetof_gm_func_t_name(void){ return offsetof(gm_func_t, name); }
 extern /* pointer to `gm_typecheck_t` */ void * get_gm_func_t_typecheck(void* ptr){ return &(((gm_func_t*)ptr)->typecheck); }
 extern size_t offsetof_gm_func_t_typecheck(void){ return offsetof(gm_func_t, typecheck); }
 extern /* pointer to `int` */ void * get_gm_func_t_nkernels(void* ptr){ return &(((gm_func_t*)ptr)->nkernels); }
 extern size_t offsetof_gm_func_t_nkernels(void){ return offsetof(gm_func_t, nkernels); }
-extern /* pointer to `gm_kernel_set_t*` */ void * get_gm_func_t_kernels(void* ptr){ return (void*)(((gm_func_t*)ptr)->kernels); }
+extern /* `gm_kernel_set_t*` */ void * get_gm_func_t_kernels(void* ptr){ return (void*)(((gm_func_t*)ptr)->kernels); }
 extern size_t offsetof_gm_func_t_kernels(void){ return offsetof(gm_func_t, kernels); }
 #ifdef PYTHON_MODULE
 #include "Python.h"
