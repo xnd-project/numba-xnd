@@ -26,6 +26,8 @@ libraries = []
 # Additional C code to be added to output
 c_source = '''
 extern PyObject* ndt_from_type(ndt_t* val) { return Ndt_FromType(val); }
+extern PyObject* xnd_from_type_xnd(PyTypeObject* t, xnd_t* val) { return Xnd_FromXnd(t, val); };
+//extern PyObject* xnd_from_xndonly(xnd_t *val) { return Xnd_FromXndOnly(val); };
 '''
 
 # Additional Python C/API code to be added to output

@@ -4,6 +4,8 @@
 #include "gumath.h"
 
 extern PyObject* ndt_from_type(ndt_t* val) { return Ndt_FromType(val); }
+extern PyObject* xnd_from_type_xnd(PyTypeObject* t, xnd_t* val) { return Xnd_FromXnd(t, val); };
+//extern PyObject* xnd_from_xndonly(xnd_t *val) { return Xnd_FromXndOnly(val); };
 
 extern size_t sizeof_char_opt_t(void){ return sizeof(char_opt_t); }
 extern /* pointer to `enum ndt_option` */ void * get_char_opt_t_tag(void* ptr){ return &(((char_opt_t*)ptr)->tag); }

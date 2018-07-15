@@ -30,20 +30,14 @@ def box_xnd(typ, val, c):
     """
     Convert a native ptr(xnd_t) structure to a xnd object.
     """
-    xnd_from_xnd = pycapsule_import(
-        c,
-        "xnd._xnd._API",
-        5,
-        ir.FunctionType(c.pyapi.pyobj, [c.pyapi.pyobj, ptr(xnd_t)]),
-        name="xnd_from_xnd",
+    xnd_from_type_xnd = c.builder.module.get_or_insert_function(
+        ir.FunctionType(c.pyapi.pyobj, [c.pyapi.pyobj, ptr(xnd_t)]), name="xnd_from_type_xnd"
     )
-
     xnd_type = c.pyapi.unserialize(c.pyapi.serialize_object(xnd))
-    res = c.builder.call(xnd_from_xnd, [xnd_type, val])
+    res = c.builder.call(xnd_from_type_xnd, [xnd_type, val])
     c.pyapi.decref(xnd_type)
     c.pyapi.incref(res)
     return res
-
 
 # These functions are no-ops, but they exist so that at the Python API, the user has a way to
 # convert from a higher level api to a lower level one, without mixing them together.
