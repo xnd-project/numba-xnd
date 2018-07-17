@@ -1,3 +1,4 @@
+import inspect
 import llvmlite.ir
 import xnd_structinfo
 import numba.extending
@@ -83,3 +84,43 @@ def create_opaque_struct(c_struct_name, attrs):
         return inner_type(), codegen
 
     return inner_type, struct_llvm_type, create_inner
+
+
+def llvm_type_from_numba_type(numba_type):
+    datamodel = numba.datamodel.registry.default_manager.lookup(numba_type)
+    return datamodel.get_value_type()
+
+
+def wrap_c_func(func_name, numba_ret_type, numba_arg_types):
+    def intrinsic_inner(typingctx, *numba_arg_types_):
+        if numba_arg_types_ != numba_arg_types:
+            return
+
+        sig = numba_ret_type(*numba_arg_types)
+        print("SIG", sig)
+
+        def codegen(context, builder, sig, args):
+            return builder.call(
+                builder.module.get_or_insert_function(
+                    llvmlite.ir.FunctionType(
+                        llvm_type_from_numba_type(numba_ret_type),
+                        [llvm_type_from_numba_type(t) for t in numba_arg_types],
+                    ),
+                    name=func_name,
+                ),
+                args,
+            )
+
+        return sig, codegen
+
+    intrinsic_inner.__name__ = func_name
+    # change the function signature to take positional instead of variadic arguments
+    # so that numba type inference will work on it properly
+    # This should be like if you defined the intrinsic function explicitly with all the arguments
+    intrinsic_inner.__signature__ = inspect.signature(intrinsic_inner).replace(
+        parameters=[
+            inspect.Parameter(f"_p{i}", inspect.Parameter.POSITIONAL_OR_KEYWORD)
+            for i in range(len(numba_arg_types) + 1)
+        ]
+    )
+    return numba.extending.intrinsic(intrinsic_inner)
