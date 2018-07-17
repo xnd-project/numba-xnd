@@ -37,22 +37,11 @@ def create_opaque_struct(c_struct_name, attrs):
         char, getattr(xnd_structinfo, f"sizeof_{c_struct_name}")()
     )
 
-    class InnerType(numba.types.Type):
-        def __init__(self):
-            super().__init__(
-                name="".join(
-                    word.capitalize()
-                    for word in c_struct_name.split("_")
-                    if word != "t"
-                )
-            )
-
-    inner_type = InnerType()
-
-    @numba.extending.register_model(InnerType)
-    class _InnerModel(numba.extending.models.PrimitiveModel):
-        def __init__(self, dmm, fe_type):
-            super().__init__(dmm, fe_type, ptr(struct_llvm_type))
+    inner_type = create_numba_type(
+        "".join(word.capitalize() for word in c_struct_name.split("_") if word != "t"),
+        ptr(struct_llvm_type),
+    )
+    InnerType = type(inner_type)
 
     @numba.extending.infer_getattr
     class _InnerTemplate(numba.typing.templates.AttributeTemplate):
