@@ -6,7 +6,7 @@ from ndtypes import ndt
 import numba_xnd
 
 
-n = ndt("10 * 4 * 4 * int64")
+n = ndt("10 * 4 * 4 * 5 * 10 * int64")
 
 
 class TestPyNdt(unittest.TestCase):
@@ -14,7 +14,7 @@ class TestPyNdt(unittest.TestCase):
         self.assertEqual(njit(lambda x: x)(n), n)
 
     def test_ndim(self):
-        self.assertEqual(njit(lambda x: x.ndim)(n), 3)
+        self.assertEqual(njit(lambda x: x.ndim)(n), 5)
 
     def test_shape(self):
-        self.assertSequenceEqual(njit(lambda x: x.shape)(n), [10, 4, 4])
+        self.assertSequenceEqual(njit(lambda x: x.shape)(n), [10, 4, 4, 5, 10])

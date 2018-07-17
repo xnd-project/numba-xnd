@@ -1,14 +1,7 @@
-import llvmlite
 import sys
-
-# register types
-from . import typing as _  # NOQA
-
-# expose
-from .lowering import *  # NOQA
-from .models import *  # NOQA
-from .types import *  # NOQA
-from .llvm import *  # NOQA
+import llvmlite
+from .functions import *  # NOQA
+from .structs import *  # NOQA
 
 
 if sys.platform.startswith("linux"):

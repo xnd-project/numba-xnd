@@ -1,7 +1,7 @@
 import unittest
 
-from numba import njit
 from ndtypes import ndt
+from numba import njit
 
 # load shared libraries
 import numba_xnd  # NOQA
