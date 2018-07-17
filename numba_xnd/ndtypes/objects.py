@@ -2,7 +2,7 @@ import ndtypes
 import llvmlite.ir
 import numba.datamodel
 import numba.extending
-from ..shared import create_numba_type, ptr
+from ..shared import create_numba_type, ptr, integer_list_to_python_list
 from .. import libndtypes
 
 
@@ -74,7 +74,7 @@ def py_ndt_shape(_):
         a = libndtypes.create_ndt_ndarray()
         ctx = libndtypes.create_ndt_context()
         libndtypes.ndt_as_ndarray(a, n, ctx)
-        return libndtypes.shape_to_list(a.shape, a.ndim)
+        return integer_list_to_python_list(a.shape, a.ndim)
 
     return get
 

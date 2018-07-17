@@ -31,8 +31,7 @@ def create_opaque_struct(c_struct_name, attrs):
     Returns numba type, llvm type, and a create function.
 
     It also registers typing and lowering for it's attributes.
-    `attrs` should be a dictionary mapping attribute names to a tuple of the numba type of that attribute
-    and the llvm type of that attribute.
+    `attrs` should be a dictionary mapping attribute names to the numba type of that attribute.
     """
     struct_llvm_type = llvmlite.ir.ArrayType(
         char, getattr(xnd_structinfo, f"sizeof_{c_struct_name}")()
@@ -50,14 +49,14 @@ def create_opaque_struct(c_struct_name, attrs):
 
         def generic_resolve(self, val, attr):
             try:
-                return attrs[attr][0]
+                return attrs[attr]
             except IndexError:
                 raise NotImplementedError(
                     f"Did not register `${attr}` attribute on ${c_struct_name}"
                 )
 
     for attr, val in attrs.items():
-        _, attr_llvm_type = val
+        attr_llvm_type = llvm_type_from_numba_type(val)
 
         @numba.extending.lower_getattr(InnerType, attr)
         def _inner_getattr_impl(
