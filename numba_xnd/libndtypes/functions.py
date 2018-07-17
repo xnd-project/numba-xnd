@@ -7,7 +7,7 @@ from numba import cgutils
 import numba.types
 
 from . import structs
-from ..shared import ptr, int_, i64, index
+from ..shared import ptr, int_, i64
 
 
 @numba.extending.intrinsic

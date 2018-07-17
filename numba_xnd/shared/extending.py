@@ -20,7 +20,7 @@ def create_numba_type(name, llvm_type):
         def __init__(self, dmm, fe_type):
             super().__init__(dmm, fe_type, llvm_type)
 
-    return InnerType()
+    return InnerType
 
 
 def create_opaque_struct(c_struct_name, attrs):
@@ -37,11 +37,11 @@ def create_opaque_struct(c_struct_name, attrs):
         char, getattr(xnd_structinfo, f"sizeof_{c_struct_name}")()
     )
 
-    inner_type = create_numba_type(
+    InnerType = create_numba_type(
         "".join(word.capitalize() for word in c_struct_name.split("_") if word != "t"),
         ptr(struct_llvm_type),
     )
-    InnerType = type(inner_type)
+    inner_type = InnerType()
 
     @numba.extending.infer_getattr
     class _InnerTemplate(numba.typing.templates.AttributeTemplate):

@@ -6,8 +6,8 @@ from ..shared import create_numba_type, ptr
 from .. import libndtypes
 
 
-py_ndt_type = create_numba_type("PyNdt", ptr(libndtypes.ndt_t))
-PyNdtType = type(py_ndt_type)
+PyNdtType = create_numba_type("PyNdt", ptr(libndtypes.ndt_t))
+py_ndt_type = PyNdtType()
 
 
 @numba.extending.typeof_impl.register(ndtypes.ndt)
