@@ -11,6 +11,7 @@ jobs:
           keys:
             - conda-pkgs
       - run: conda env create
+      - run: conda clean --yes --all
       - save_cache:
           key: conda-pkgs
           paths:
