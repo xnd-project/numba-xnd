@@ -11,29 +11,37 @@ x = xnd([[1, 2, 3], [4, 5, 6]])
 
 
 @njit
-def subtree_none(py_xnd_):
-    xnd_ = py_xnd_to_xnd(py_xnd_)
-    index = libxnd.create_xnd_index()
-    ctx = libndtypes.create_ndt_context()
-    return xnd_to_py_xnd(libxnd.xnd_subtree(xnd_, index, shared.i32_const(0), ctx))
-
-
-@njit
 def subtree_single_index(py_xnd_, i):
     xnd_ = py_xnd_to_xnd(py_xnd_)
     index = libxnd.create_xnd_index()
     index.tag = libxnd.XND_KEY_INDEX
     index.Index = i
     ctx = libndtypes.create_ndt_context()
-    return xnd_to_py_xnd(libxnd.xnd_subtree(xnd_, index, shared.i64_to_i32(1), ctx))
+    ret = libxnd.create_xnd()
+    libxnd.xnd_subtree(ret, xnd_, index, shared.i64_to_i32(1), ctx)
+    return xnd_to_py_xnd(ret)
 
 
 class TestSubtree(unittest.TestCase):
-    def test_none(self):
-        self.assertEqual(subtree_none(x), x)
-
     def test_single_int(self):
         self.assertEqual(subtree_single_index(x, 0), x[0])
+
+
+@njit
+def multikey_single_index(py_xnd_, i):
+    xnd_ = py_xnd_to_xnd(py_xnd_)
+    index = libxnd.create_xnd_index()
+    index.tag = libxnd.XND_KEY_INDEX
+    index.Index = i
+    ctx = libndtypes.create_ndt_context()
+    ret = libxnd.create_xnd()
+    libxnd.xnd_multikey(ret, xnd_, index, shared.i32_const(1), ctx)
+    return xnd_to_py_xnd(ret)
+
+
+class TestMultikey(unittest.TestCase):
+    def test_single_int(self):
+        self.assertEqual(multikey_single_index(x, 0), x[0])
 
 
 @njit

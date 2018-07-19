@@ -12,11 +12,12 @@ from .. import libndtypes, shared
 # arrays.
 xnd_subtree = shared.wrap_c_func(
     "xnd_subtree",
-    structs.xnd_type,
+    numba.types.void,
     (
         structs.xnd_type,
+        structs.xnd_type,
         structs.xnd_index_type,
-        numba.types.int32,
+        numba.types.intc,
         libndtypes.ndt_context_type,
     ),
 )
@@ -32,23 +33,24 @@ xnd_subtree = shared.wrap_c_func(
 # and slicing.
 xnd_multikey = shared.wrap_c_func(
     "xnd_multikey",
-    structs.xnd_type,
+    numba.types.void,
     (
         structs.xnd_type,
+        structs.xnd_type,
         structs.xnd_index_type,
-        numba.types.int32,
+        numba.types.intc,
         libndtypes.ndt_context_type,
     ),
 )
 
 xnd_equal = shared.wrap_c_func(
     "xnd_equal",
-    numba.types.int32,
+    numba.types.intc,
     (structs.xnd_type, structs.xnd_type, libndtypes.ndt_context_type),
 )
 
 xnd_strict_equal = shared.wrap_c_func(
     "xnd_strict_equal",
-    numba.types.int32,
+    numba.types.intc,
     (structs.xnd_type, structs.xnd_type, libndtypes.ndt_context_type),
 )
