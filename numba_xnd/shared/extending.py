@@ -55,32 +55,44 @@ def create_opaque_struct(c_struct_name, attrs):
                     f"Did not register `${attr}` attribute on ${c_struct_name}"
                 )
 
-    for attr, val in attrs.items():
-        attr_llvm_type = llvm_type_from_numba_type(val)
+    def _get_attr(builder, value, attr):
+        attr_llvm_type = llvm_type_from_numba_type(attrs[attr])
 
-        @numba.extending.lower_getattr(InnerType, attr)
-        def _inner_getattr_impl(
-            context, builder, typ, value, attr_llvm_type=attr_llvm_type, attr=attr
-        ):
-            # we only get a ptr to the return type if isn't a pointer already
-            # https://github.com/plures/xndtools/blob/8c46cdfddc1ff7ffd9dd40a33d102bdd543e4280/xndtools/structinfo_generator.py#L180-L186
-            is_scalar = not attr_llvm_type.is_pointer
-            return_type = ptr(attr_llvm_type) if is_scalar else attr_llvm_type
-            return_value = builder.call(
-                builder.module.get_or_insert_function(
-                    llvmlite.ir.FunctionType(return_type, [ptr(struct_llvm_type)]),
-                    name=f"get_{c_struct_name}_{attr}",
-                ),
-                [value],
-            )
-            return builder.load(return_value) if is_scalar else return_value
+        # we only get a ptr to the return type if isn't a pointer already
+        # https://github.com/plures/xndtools/blob/8c46cdfddc1ff7ffd9dd40a33d102bdd543e4280/xndtools/structinfo_generator.py#L180-L186
+        is_scalar = not attr_llvm_type.is_pointer
+        return_type = ptr(attr_llvm_type) if is_scalar else attr_llvm_type
+        return_value = builder.call(
+            builder.module.get_or_insert_function(
+                llvmlite.ir.FunctionType(return_type, [ptr(struct_llvm_type)]),
+                name=f"get_{c_struct_name}_{attr}",
+            ),
+            [value],
+        )
+        return is_scalar, return_value
 
-    @numba.extending.intrinsic
-    def create_inner(typingctx):
+    @numba.extending.lower_getattr_generic(InnerType)
+    def _inner_getattr_impl(context, builder, typ, value, attr):
+        is_scalar, return_value = _get_attr(builder, value, attr)
+        return builder.load(return_value) if is_scalar else return_value
+
+    @numba.extending.lower_setattr_generic(InnerType)
+    def _inner_settattr_impl(context, builder, sig, args, attr):
+        target, value = args
+        is_scalar, target_attr = _get_attr(builder, target, attr)
+        builder.store(
+            value=value if is_scalar else builder.load(value), ptr=target_attr
+        )
+
+    @numba.extending.intrinsic(support_literals=True)
+    def create_inner(typingctx, n_t=numba.types.Const(1)):
+        if not isinstance(n_t, numba.types.Const):
+            return
+
         def codegen(context, builder, sig, args):
-            return builder.alloca(struct_llvm_type)
+            return builder.alloca(struct_llvm_type, n_t.value)
 
-        return inner_type(), codegen
+        return inner_type(numba.types.int64), codegen
 
     return inner_type, struct_llvm_type, create_inner
 
