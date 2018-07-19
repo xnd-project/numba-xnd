@@ -22,9 +22,27 @@ def subtree_single_index(py_xnd_, i):
     return xnd_to_py_xnd(ret)
 
 
+@njit
+def subtree_two_ints(py_xnd_, i, j):
+    xnd_ = py_xnd_to_xnd(py_xnd_)
+    index = libxnd.create_xnd_index()
+    index.tag = libxnd.XND_KEY_INDEX
+    index.Index = i
+    second_index = libxnd.get_xnd_index(index, 1)
+    second_index.tag = libxnd.XND_KEY_INDEX
+    second_index.Index = j
+    ctx = libndtypes.create_ndt_context()
+    ret = libxnd.create_xnd()
+    libxnd.xnd_subtree(ret, xnd_, index, shared.i64_to_i32(2), ctx)
+    return xnd_to_py_xnd(ret)
+
+
 class TestSubtree(unittest.TestCase):
     def test_single_int(self):
         self.assertEqual(subtree_single_index(x, 0), x[0])
+
+    def test_two_ints(self):
+        self.assertEqual(subtree_two_ints(x, 1, 1), xnd(5))
 
 
 @njit

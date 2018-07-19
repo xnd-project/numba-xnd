@@ -15,7 +15,7 @@ xnd_subtree = shared.wrap_c_func(
     numba.types.void,
     (
         structs.xnd_type,
-        structs.xnd_type,
+        structs.xnd_type,  # this is the return value, but is passed in at LLVM level
         structs.xnd_index_type,
         numba.types.intc,
         libndtypes.ndt_context_type,
@@ -35,7 +35,7 @@ xnd_multikey = shared.wrap_c_func(
     "xnd_multikey",
     numba.types.void,
     (
-        structs.xnd_type,
+        structs.xnd_type,  # this is the return value, but is passed in at LLVM level
         structs.xnd_type,
         structs.xnd_index_type,
         numba.types.intc,
