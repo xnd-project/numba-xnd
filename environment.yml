@@ -8,3 +8,5 @@ dependencies:
   - numpy
   - gumath
   - xnd
+  - coverage
+  - codecov

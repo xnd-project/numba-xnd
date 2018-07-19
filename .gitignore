@@ -4,3 +4,4 @@ build/
 sizes
 *.egg-info
 *.so
+.coverage

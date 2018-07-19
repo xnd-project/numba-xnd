@@ -1,6 +1,6 @@
 # Numba integration for XND
 
-[![CircleCI branch](https://img.shields.io/circleci/project/github/Quansight/numba-xnd/master.svg)](https://circleci.com/gh/Quansight/workflows/numba-xnd/tree/master) [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
+[![CircleCI branch](https://img.shields.io/circleci/project/github/Quansight/numba-xnd/master.svg)](https://circleci.com/gh/Quansight/workflows/numba-xnd/tree/master) [![Code style: black]![Codecov branch](https://img.shields.io/codecov/c/github/quansight/numba-xnd/master.svg)](https://codecov.io/gh/quansight/numba-xnd)(https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 
 ## Usage
 

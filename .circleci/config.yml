@@ -17,7 +17,8 @@ jobs:
             - /opt/conda/pkgs
       - run: source activate numba-xnd && cd numba && python setup.py develop
       - run: source activate numba-xnd && python setup.py develop
-      - run: source activate numba-xnd && python -m unittest
+      - run: source activate numba-xnd && coverage run --include "numba_xnd/*" -m unittest
+      - run: source activate numba-xnd && codecov
 workflows:
   version: 2
   test:
