@@ -7,7 +7,7 @@ from .. import libxnd
 from .. import ndtypes
 
 
-PyXndType = create_numba_type("PyNdt", ptr(libxnd.xnd_t))
+PyXndType = create_numba_type("PyXnd", ptr(libxnd.xnd_t))
 py_xnd_type = PyXndType()
 
 

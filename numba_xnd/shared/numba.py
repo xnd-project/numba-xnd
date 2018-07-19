@@ -2,7 +2,7 @@ import numba
 import numba.types
 import numba.targets.listobj
 import numba.targets.imputils
-from .llvm import ptr, i64
+from .llvm import ptr, i64, i32
 from .extending import create_numba_type
 
 integer_list = ptr(i64)
@@ -35,5 +35,18 @@ def integer_list_to_python_list(typingctx, integer_list_t, n_t):
         return numba.targets.imputils.impl_ret_new_ref(
             context, builder, list_type, inst.value
         )
+
+    return sig, codegen
+
+
+@numba.extending.intrinsic
+def i64_to_i32(typingctx, i64_t):
+    if i64_t != numba.types.int64:
+        return
+
+    sig = numba.types.int32(numba.types.int64)
+
+    def codegen(context, builder, sig, args):
+        return builder.trunc(args[0], i32)
 
     return sig, codegen

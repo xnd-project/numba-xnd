@@ -12,6 +12,11 @@ c_string = shared.ptr(shared.char)
 c_string_type = shared.create_numba_type("CString", c_string)()
 
 
+# xnd_key enums for tag property
+XND_KEY_INDEX = 0
+XND_KEY_FIELD_NAME = 1
+XND_KEY_SLICE = 2
+
 xnd_index_type, xnd_index_t, create_xnd_index = shared.create_opaque_struct(
     "xnd_index_t",
     {
