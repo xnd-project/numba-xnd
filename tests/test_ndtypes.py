@@ -1,10 +1,9 @@
 import unittest
 
-from numba import njit
 from ndtypes import ndt
 
 import numba_xnd
-
+from numba import njit
 
 n = ndt("10 * 4 * 4 * 5 * 10 * int64")
 

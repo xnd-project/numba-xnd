@@ -1,10 +1,12 @@
-import numba
-import numba.types
-import numba.targets.listobj
-import numba.targets.imputils
 import llvmlite.ir
-from .llvm import ptr, i64, i32
+
+import numba
+import numba.targets.imputils
+import numba.targets.listobj
+import numba.types
+
 from .extending import create_numba_type
+from .llvm import i32, i64, ptr
 
 integer_list = ptr(i64)
 integer_list_type = create_numba_type("IntegerList", integer_list)()

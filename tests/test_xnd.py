@@ -1,10 +1,9 @@
 import unittest
 
-from numba import njit
 from xnd import xnd
 
 import numba_xnd
-
+from numba import njit
 
 x = xnd([[1, 2, 3], [4, 5, 6]])
 

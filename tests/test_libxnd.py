@@ -1,10 +1,10 @@
 import unittest
 
 from xnd import xnd
-from numba import njit
 
 import numba_xnd
-from numba_xnd import libxnd, libndtypes, shared
+from numba import njit
+from numba_xnd import libndtypes, libxnd, shared
 from numba_xnd.xnd import py_xnd_to_xnd, xnd_to_py_xnd
 
 x = xnd([[1, 2, 3], [4, 5, 6]])

@@ -1,6 +1,6 @@
 import numba.types
-from .. import shared
 
+from .. import shared
 
 ndt_type, ndt_t, create_ndt = shared.create_opaque_struct(
     "ndt_t", {"ndim": numba.types.int32}

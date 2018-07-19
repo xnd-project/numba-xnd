@@ -1,9 +1,12 @@
 import inspect
+
 import llvmlite.ir
-import xnd_structinfo
+
 import numba.extending
-import numba.typing.templates
 import numba.types
+import numba.typing.templates
+import xnd_structinfo
+
 from .llvm import char, ptr
 
 

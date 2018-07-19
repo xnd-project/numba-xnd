@@ -1,11 +1,11 @@
-import xnd
 import llvmlite.ir
+import xnd
+
 import numba.datamodel
 import numba.extending
-from ..shared import create_numba_type, ptr
-from .. import libxnd
-from .. import ndtypes
 
+from .. import libxnd, ndtypes
+from ..shared import create_numba_type, ptr
 
 PyXndType = create_numba_type("PyXnd", ptr(libxnd.xnd_t))
 py_xnd_type = PyXndType()

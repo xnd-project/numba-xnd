@@ -1,15 +1,15 @@
 import unittest
 
 from ndtypes import ndt
-from numba import njit
 from xnd import xnd
 
 # load shared libraries
 import numba_xnd  # NOQA
-
-from numba_xnd.ndtypes import py_ndt_to_ndt
-from numba_xnd.libndtypes import ndt_as_ndarray, create_ndt_context, create_ndt_ndarray
+from numba import njit
 from numba_xnd import libndtypes
+from numba_xnd.libndtypes import (create_ndt_context, create_ndt_ndarray,
+                                  ndt_as_ndarray)
+from numba_xnd.ndtypes import py_ndt_to_ndt
 from numba_xnd.xnd import py_xnd_to_xnd
 
 n = ndt("10 * 4 * 4 * int64")

@@ -1,10 +1,11 @@
-import ndtypes
 import llvmlite.ir
+import ndtypes
+
 import numba.datamodel
 import numba.extending
-from ..shared import create_numba_type, ptr, integer_list_to_python_list
-from .. import libndtypes
 
+from .. import libndtypes
+from ..shared import create_numba_type, integer_list_to_python_list, ptr
 
 PyNdtType = create_numba_type("PyNdt", ptr(libndtypes.ndt_t))
 py_ndt_type = PyNdtType()
