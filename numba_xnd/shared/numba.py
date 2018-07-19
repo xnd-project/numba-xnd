@@ -2,6 +2,7 @@ import numba
 import numba.types
 import numba.targets.listobj
 import numba.targets.imputils
+import llvmlite.ir
 from .llvm import ptr, i64, i32
 from .extending import create_numba_type
 
@@ -48,5 +49,18 @@ def i64_to_i32(typingctx, i64_t):
 
     def codegen(context, builder, sig, args):
         return builder.trunc(args[0], i32)
+
+    return sig, codegen
+
+
+@numba.extending.intrinsic(support_literals=True)
+def i32_const(typingctx, i_t):
+    if not isinstance(i_t, numba.types.Const):
+        return
+
+    sig = numba.types.int32(numba.types.int64)
+
+    def codegen(context, builder, sig, args):
+        return llvmlite.ir.Constant(i32, i_t.value)
 
     return sig, codegen

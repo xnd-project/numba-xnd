@@ -108,7 +108,6 @@ def wrap_c_func(func_name, numba_ret_type, numba_arg_types):
             return
 
         sig = numba_ret_type(*numba_arg_types)
-        print("SIG", sig)
 
         def codegen(context, builder, sig, args):
             return builder.call(
