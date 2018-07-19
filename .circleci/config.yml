@@ -9,11 +9,12 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - conda-pkgs
+            - conda-pkgs-{{ checksum "environment.yml" }}
+            - conda-pkgs-
       - run: conda env create
       - run: conda clean --yes --all
       - save_cache:
-          key: conda-pkgs
+          key: conda-pkgs-{{ checksum "environment.yml" }}
           paths:
             - /opt/conda/pkgs
       - run: source activate numba-xnd && cd numba && python setup.py develop
