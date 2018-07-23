@@ -1,53 +1,44 @@
-import llvmlite.ir
 import ndtypes
 
 import numba.datamodel
 import numba.extending
 
-from .. import libndtypes
-from ..shared import create_numba_type, integer_list_to_python_list, ptr
+from .. import pyndtypes, shared
 
-PyNdtType = create_numba_type("PyNdt", ptr(libndtypes.ndt_t))
-py_ndt_type = PyNdtType()
+NdtObjectWrapperType = shared.create_numba_type(
+    "NdtObjectWrapper", shared.ptr(pyndtypes.ndt_object)
+)
+ndt_object_wrapper_type = NdtObjectWrapperType()
 
 
 @numba.extending.typeof_impl.register(ndtypes.ndt)
 def typeof_ndt(val, c):
-    return py_ndt_type
+    return ndt_object_wrapper_type
 
 
-@numba.extending.unbox(PyNdtType)
+@numba.extending.unbox(NdtObjectWrapperType)
 def unbox_ndt(typ, obj, c):
-    """
-    Convert a ndt object to a native ndt_t ptr.
-    """
-    get_NdtObject_ndt = c.builder.module.get_or_insert_function(
-        llvmlite.ir.FunctionType(ptr(libndtypes.ndt_t), [c.pyapi.pyobj]),
-        name="get_NdtObject_ndt",
+    return numba.extending.NativeValue(
+        c.builder.bitcast(obj, shared.ptr(pyndtypes.ndt_object))
     )
-    return numba.extending.NativeValue(c.builder.call(get_NdtObject_ndt, [obj]))
 
 
-@numba.extending.box(PyNdtType)
+@numba.extending.box(NdtObjectWrapperType)
 def box_ndt(typ, val, c):
     """
     Convert a native ptr(ndt_t) structure to a ndt object.
     """
-    ndt_from_type = c.builder.module.get_or_insert_function(
-        llvmlite.ir.FunctionType(c.pyapi.pyobj, [ptr(libndtypes.ndt_t)]),
-        name="ndt_from_type",
-    )
-    res = c.builder.call(ndt_from_type, [val])
-    c.pyapi.incref(res)
-    return res
+    obj = c.builder.bitcast(val, c.pyapi.pyobj)
+    c.pyapi.incref(obj)
+    return obj
 
 
 @numba.extending.intrinsic
-def py_ndt_to_ndt(typingctx, py_ndt_t):
-    if py_ndt_t != py_ndt_type:
+def unwrap_ndt_object(typingctx, ndt_object_wrapper_t):
+    if ndt_object_wrapper_t != ndt_object_wrapper_type:
         return
 
-    sig = libndtypes.ndt_type(py_ndt_type)
+    sig = pyndtypes.ndt_object_type(ndt_object_wrapper_type)
 
     def codegen(context, builder, sig, args):
         return args[0]
@@ -56,11 +47,11 @@ def py_ndt_to_ndt(typingctx, py_ndt_t):
 
 
 @numba.extending.intrinsic
-def ndt_to_py_ndt(typingctx, ndt_t_):
-    if ndt_t_ != libndtypes.ndt_type:
+def wrap_ndt_object(typingctx, ndt_object_t):
+    if ndt_object_t != pyndtypes.ndt_object_type:
         return
 
-    sig = py_ndt_type(libndtypes.ndt_type)
+    sig = ndt_object_wrapper_type(pyndtypes.ndt_object_type)
 
     def codegen(context, builder, sig, args):
         return args[0]
@@ -68,21 +59,21 @@ def ndt_to_py_ndt(typingctx, ndt_t_):
     return sig, codegen
 
 
-@numba.extending.overload_attribute(PyNdtType, "shape")
-def py_ndt_shape(_):
+@numba.extending.overload_attribute(NdtObjectWrapperType, "shape")
+def ndt_shape_impl(_):
     def get(py_ndt):
-        n = py_ndt_to_ndt(py_ndt)
+        n = unwrap_ndt_object(py_ndt)
         a = libndtypes.create_ndt_ndarray()
         ctx = libndtypes.create_ndt_context()
-        libndtypes.ndt_as_ndarray(a, n, ctx)
-        return integer_list_to_python_list(a.shape, a.ndim)
+        libndtypes.ndt_as_ndarray(a, n.ndt, ctx)
+        return libndtypes.ndt_dim_array_to_python_list(a.shape, n.ndim)
 
     return get
 
 
-@numba.extending.overload_attribute(PyNdtType, "ndim")
-def py_ndt_ndim(_):
+@numba.extending.overload_attribute(NdtObjectWrapperType, "ndim")
+def ndt_ndim_impl(_):
     def get(py_ndt):
-        return py_ndt_to_ndt(py_ndt).ndim
+        return unwrap_ndt_object(py_ndt).ndt.ndim
 
     return get

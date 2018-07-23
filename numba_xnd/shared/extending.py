@@ -27,7 +27,7 @@ def create_numba_type(name, llvm_type):
     return InnerType
 
 
-def create_opaque_struct(c_struct_name, attrs):
+def create_opaque_struct(c_struct_name, attrs, embedded=None):
     """
     Creates a Numba type and model for the c struct `c_struct_name`
 
@@ -35,7 +35,12 @@ def create_opaque_struct(c_struct_name, attrs):
 
     It also registers typing and lowering for it's attributes.
     `attrs` should be a dictionary mapping attribute names to the numba type of that attribute.
+
+    `embedded` is a set of attribute names that actually are embedded in the struct instead of referenced.
+    So if `hi` is an attribute that has a numba type with a data model of `some_other_thing*`, then if `hi`
+    is in `embedded`, this struct has `some_other_thing` embedded in it, instead of a pointer to it.
     """
+    embedded = embedded or set()
     struct_llvm_type = llvmlite.ir.ArrayType(
         char, getattr(xnd_structinfo, f"sizeof_{c_struct_name}")()
     )
@@ -58,33 +63,30 @@ def create_opaque_struct(c_struct_name, attrs):
                     f"Did not register `${attr}` attribute on ${c_struct_name}"
                 )
 
-    def _get_attr(builder, value, attr):
+    def _get_attr(builder, value, attr, is_embedded):
         attr_llvm_type = llvm_type_from_numba_type(attrs[attr])
-
-        # we only get a ptr to the return type if isn't a pointer already
-        # https://github.com/plures/xndtools/blob/8c46cdfddc1ff7ffd9dd40a33d102bdd543e4280/xndtools/structinfo_generator.py#L180-L186
-        is_scalar = not attr_llvm_type.is_pointer
-        return_type = ptr(attr_llvm_type) if is_scalar else attr_llvm_type
-        return_value = builder.call(
-            builder.module.get_or_insert_function(
-                llvmlite.ir.FunctionType(return_type, [ptr(struct_llvm_type)]),
-                name=f"get_{c_struct_name}_{attr}",
-            ),
-            [value],
+        ret_type = attr_llvm_type if is_embedded else ptr(attr_llvm_type)
+        fn = builder.module.get_or_insert_function(
+            llvmlite.ir.FunctionType(ret_type, [ptr(struct_llvm_type)]),
+            name=f"get_{c_struct_name}_{attr}",
         )
-        return is_scalar, return_value
+        print(f"get_{c_struct_name}_{attr}", fn.type)
+        return_value = builder.call(fn, [value])
+        return return_value
 
     @numba.extending.lower_getattr_generic(InnerType)
     def _inner_getattr_impl(context, builder, typ, value, attr):
-        is_scalar, return_value = _get_attr(builder, value, attr)
-        return builder.load(return_value) if is_scalar else return_value
+        is_embedded = attr in embedded
+        ret = _get_attr(builder, value, attr, is_embedded)
+        return ret if is_embedded else builder.load(ret)
 
     @numba.extending.lower_setattr_generic(InnerType)
     def _inner_settattr_impl(context, builder, sig, args, attr):
         target, value = args
-        is_scalar, target_attr = _get_attr(builder, target, attr)
+        is_embedded = attr in embedded
         builder.store(
-            value=value if is_scalar else builder.load(value), ptr=target_attr
+            value=builder.load(value) if is_embedded else value,
+            ptr=_get_attr(builder, target, attr, is_embedded),
         )
 
     @numba.extending.intrinsic(support_literals=True)

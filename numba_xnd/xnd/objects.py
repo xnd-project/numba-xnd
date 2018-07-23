@@ -1,55 +1,44 @@
-import llvmlite.ir
 import xnd
 
 import numba.datamodel
 import numba.extending
 
-from .. import libxnd, ndtypes
-from ..shared import create_numba_type, ptr
+from .. import ndtypes, pyxnd, shared
 
-PyXndType = create_numba_type("PyXnd", ptr(libxnd.xnd_t))
-py_xnd_type = PyXndType()
+XndObjectWrapperType = shared.create_numba_type(
+    "XndObjectWrapper", shared.ptr(pyxnd.xnd_object)
+)
+xnd_object_wrapper_type = XndObjectWrapperType()
 
 
 @numba.extending.typeof_impl.register(xnd.xnd)
 def typeof_xnd(val, c):
-    return py_xnd_type
+    return xnd_object_wrapper_type
 
 
-@numba.extending.unbox(PyXndType)
-def unbox_ndt(typ, obj, c):
-    """
-    Convert a xnd object to a native xnd_t ptr.
-    """
-    get_XndObject_xnd = c.builder.module.get_or_insert_function(
-        llvmlite.ir.FunctionType(ptr(libxnd.xnd_t), [c.pyapi.pyobj]),
-        name="get_XndObject_xnd",
+@numba.extending.unbox(XndObjectWrapperType)
+def unbox_xnd(typ, obj, c):
+    return numba.extending.NativeValue(
+        c.builder.bitcast(obj, shared.ptr(pyxnd.xnd_object))
     )
-    return numba.extending.NativeValue(c.builder.call(get_XndObject_xnd, [obj]))
 
 
-@numba.extending.box(PyXndType)
-def box_ndt(typ, val, c):
+@numba.extending.box(XndObjectWrapperType)
+def box_xnd(typ, val, c):
     """
     Convert a native ptr(xnd_t) structure to a xnd object.
     """
-    xnd_from_type_xnd = c.builder.module.get_or_insert_function(
-        llvmlite.ir.FunctionType(c.pyapi.pyobj, [c.pyapi.pyobj, ptr(libxnd.xnd_t)]),
-        name="xnd_from_type_xnd",
-    )
-    xnd_type = c.pyapi.unserialize(c.pyapi.serialize_object(xnd.xnd))
-    res = c.builder.call(xnd_from_type_xnd, [xnd_type, val])
-    c.pyapi.decref(xnd_type)
-    c.pyapi.incref(res)
-    return res
+    obj = c.builder.bitcast(val, c.pyapi.pyobj)
+    c.pyapi.incref(obj)
+    return obj
 
 
 @numba.extending.intrinsic
-def py_xnd_to_xnd(typingctx, py_xnd_t):
-    if py_xnd_t != py_xnd_type:
+def unwrap_xnd_object(typingctx, xnd_object_wrapper_t):
+    if xnd_object_wrapper_t != xnd_object_wrapper_type:
         return
 
-    sig = libxnd.xnd_type(py_xnd_type)
+    sig = pyxnd.xnd_object_type(xnd_object_wrapper_type)
 
     def codegen(context, builder, sig, args):
         return args[0]
@@ -58,11 +47,11 @@ def py_xnd_to_xnd(typingctx, py_xnd_t):
 
 
 @numba.extending.intrinsic
-def xnd_to_py_xnd(typingctx, xnd_t_):
-    if xnd_t_ != libxnd.xnd_type:
+def wrap_xnd_object(typingctx, xnd_object_t):
+    if xnd_object_t != pyxnd.xnd_object_type:
         return
 
-    sig = py_xnd_type(libxnd.xnd_type)
+    sig = xnd_object_wrapper_type(pyxnd.xnd_object_type)
 
     def codegen(context, builder, sig, args):
         return args[0]
@@ -70,10 +59,9 @@ def xnd_to_py_xnd(typingctx, xnd_t_):
     return sig, codegen
 
 
-@numba.extending.overload_attribute(PyXndType, "type")
-def py_xnd_type_(_):
+@numba.extending.overload_attribute(XndObjectWrapperType, "type")
+def xnd_type_impl(_):
     def get(py_xnd):
-        x = py_xnd_to_xnd(py_xnd)
-        return ndtypes.ndt_to_py_ndt(x.type)
+        return ndtypes.wrap_ndt_object(unwrap_xnd_object(py_xnd).type)
 
     return get

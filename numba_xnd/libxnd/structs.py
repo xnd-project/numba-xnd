@@ -1,15 +1,11 @@
-import numba.types
 import numba.extending
+import numba.types
 
-from .. import shared
-from .. import libndtypes
+from .. import libndtypes, shared
 
 xnd_type, xnd_t, create_xnd = shared.create_opaque_struct(
     "xnd_t", {"type": libndtypes.ndt_type}
 )
-
-c_string = shared.ptr(shared.char)
-c_string_type = shared.create_numba_type("CString", c_string)()
 
 
 # xnd_key enums for tag property
@@ -20,11 +16,18 @@ XND_KEY_SLICE = 2
 xnd_index_type, xnd_index_t, create_xnd_index = shared.create_opaque_struct(
     "xnd_index_t",
     {
-        "tag": numba.types.int32,
+        "tag": numba.types.int64,
         "Index": numba.types.int64,
-        "FieldName": c_string_type,
+        "FieldName": shared.c_string_type,
         "Slice": libndtypes.ndt_slice_type,
     },
+    embedded={"Slice"},
+)
+
+xnd_master_type, xnd_master_t, create_xnd_master = shared.create_opaque_struct(
+    "xnd_master_t",
+    {"flags": numba.types.int32, "master": xnd_type},
+    embedded={"master"},
 )
 
 
@@ -39,4 +42,3 @@ def get_xnd_index(typing_ctx, x_t, i_t):
         return builder.gep(x, [i])
 
     return sig, codegen
-

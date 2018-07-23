@@ -1,37 +1,42 @@
 import unittest
 
 from ndtypes import ndt
-from xnd import xnd
 
-# load shared libraries
-import numba_xnd  # NOQA
+import numba_xnd
 from numba import njit
-from numba_xnd import libndtypes
-from numba_xnd.libndtypes import (create_ndt_context, create_ndt_ndarray,
-                                  ndt_as_ndarray)
-from numba_xnd.ndtypes import py_ndt_to_ndt
-from numba_xnd.xnd import py_xnd_to_xnd
 
 n = ndt("10 * 4 * 4 * int64")
 
 
 @njit
 def get_ndim(x):
-    c = create_ndt_context()
-    a = create_ndt_ndarray()
-    n = py_ndt_to_ndt(x)
-    ndt_as_ndarray(a, n, c)
-    return a.ndim
+    return numba_xnd.ndtypes.unwrap_ndt_object(x).ndt.ndim
+
+
+@njit
+def get_shape(x):
+    a = numba_xnd.libndtypes.create_ndt_ndarray()
+    numba_xnd.libndtypes.ndt_as_ndarray(
+        a,
+        numba_xnd.ndtypes.unwrap_ndt_object(x).ndt,
+        numba_xnd.libndtypes.create_ndt_context(),
+    )
+    return numba_xnd.libndtypes.ndt_dim_array_to_tuple(a.shape, 3)
 
 
 @njit
 def is_concrete(x):
-    return libndtypes.ndt_is_concrete(py_xnd_to_xnd(x).type)
+    return numba_xnd.libndtypes.ndt_is_concrete(
+        numba_xnd.ndtypes.unwrap_ndt_object(x).ndt
+    )
 
 
 class TestNdt(unittest.TestCase):
     def test_ndim(self):
         self.assertEqual(get_ndim(n), 3)
 
+    def test_shape(self):
+        self.assertEqual(get_shape(n), (10, 4, 4))
+
     def test_is_concrete(self):
-        self.assertEqual(is_concrete(xnd([[1, 2, 3]])), 1)
+        self.assertEqual(is_concrete(n), 1)

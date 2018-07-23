@@ -2,30 +2,30 @@
 Implementation of math operations on Array objects.
 """
 
-from __future__ import print_function, absolute_import, division
+from __future__ import absolute_import, division, print_function
 
 import math
 from collections import namedtuple
 from enum import IntEnum
 
-import numpy as np
-
-from llvmlite import ir
 import llvmlite.llvmpy.core as lc
+import numpy as np
+from llvmlite import ir
 from llvmlite.llvmpy.core import Constant, Type
 
-from numba import types, cgutils, typing
-from numba.extending import overload, overload_method, register_jitable
+from numba import cgutils, types, typing
+from numba.errors import RequireConstValue, TypingError
+from numba.extending import (intrinsic, overload, overload_method,
+                             register_jitable)
 from numba.numpy_support import as_dtype
 from numba.numpy_support import version as numpy_version
-from numba.targets.imputils import (lower_builtin, impl_ret_borrowed,
-                                    impl_ret_new_ref, impl_ret_untracked)
+from numba.targets.imputils import (impl_ret_borrowed, impl_ret_new_ref,
+                                    impl_ret_untracked, lower_builtin)
 from numba.typing import signature
-from .arrayobj import make_array, load_item, store_item, _empty_nd_impl
+
+from .arrayobj import _empty_nd_impl, load_item, make_array, store_item
 from .linalg import ensure_blas
 
-from numba.extending import intrinsic
-from numba.errors import RequireConstValue, TypingError
 
 def _check_blas():
     # Checks if a BLAS is available so e.g. dot will work

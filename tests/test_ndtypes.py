@@ -14,6 +14,3 @@ class TestPyNdt(unittest.TestCase):
 
     def test_ndim(self):
         self.assertEqual(njit(lambda x: x.ndim)(n), 5)
-
-    def test_shape(self):
-        self.assertSequenceEqual(njit(lambda x: x.shape)(n), [10, 4, 4, 5, 10])

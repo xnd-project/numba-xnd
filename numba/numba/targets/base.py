@@ -1,26 +1,24 @@
 from __future__ import print_function
 
-from collections import namedtuple, defaultdict
 import copy
 import os
 import sys
+from collections import defaultdict, namedtuple
 from itertools import permutations, takewhile
 
-import numpy as np
-
-from llvmlite import ir as llvmir
-import llvmlite.llvmpy.core as lc
-from llvmlite.llvmpy.core import Type, Constant, LLVMException
 import llvmlite.binding as ll
+import llvmlite.llvmpy.core as lc
+import numpy as np
+from llvmlite import ir as llvmir
+from llvmlite.llvmpy.core import Constant, LLVMException, Type
 
-from numba import types, utils, cgutils, typing, funcdesc, debuginfo
-from numba import _dynfunc, _helperlib
+from numba import (_dynfunc, _helperlib, cgutils, datamodel, debuginfo,
+                   funcdesc, types, typing, utils)
 from numba.pythonapi import PythonAPI
+
 from . import arrayobj, builtins, imputils
-from .imputils import (user_function, user_generator,
-                       builtin_registry, impl_ret_borrowed,
-                       RegistryLoader)
-from numba import datamodel
+from .imputils import (RegistryLoader, builtin_registry, impl_ret_borrowed,
+                       user_function, user_generator)
 
 GENERIC_POINTER = Type.pointer(Type.int(8))
 PYOBJECT = GENERIC_POINTER

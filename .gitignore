@@ -5,3 +5,6 @@ sizes
 *.egg-info
 *.so
 .coverage
+*.ll
+tmp.py
+dist/

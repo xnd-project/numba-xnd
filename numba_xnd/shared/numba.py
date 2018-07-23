@@ -6,40 +6,7 @@ import numba.targets.listobj
 import numba.types
 
 from .extending import create_numba_type
-from .llvm import i32, i64, ptr
-
-integer_list = ptr(i64)
-integer_list_type = create_numba_type("IntegerList", integer_list)()
-
-
-@numba.extending.intrinsic
-def integer_list_to_python_list(typingctx, integer_list_t, n_t):
-    if integer_list_t != integer_list_type or n_t != numba.types.int32:
-        return
-
-    list_type = numba.types.List(numba.types.int64)
-    sig = list_type(integer_list_type, numba.types.int32)
-
-    def codegen(context, builder, sig, args):
-        array, ndim = args
-        ndim = builder.sext(ndim, i64)
-        inst = numba.targets.listobj.ListInstance.allocate(
-            context, builder, list_type, ndim
-        )
-        inst.size = ndim
-        with numba.cgutils.for_range(builder, ndim) as loop:
-            i = loop.index
-            inst.setitem(
-                idx=i,
-                val=builder.load(builder.gep(array, [i])),
-                incref=True,  # no idea what incref does
-            )
-
-        return numba.targets.imputils.impl_ret_new_ref(
-            context, builder, list_type, inst.value
-        )
-
-    return sig, codegen
+from .llvm import char, i32, i64, ptr
 
 
 @numba.extending.intrinsic
@@ -55,14 +22,83 @@ def i64_to_i32(typingctx, i64_t):
     return sig, codegen
 
 
+c_string = ptr(char)
+c_string_type = create_numba_type("CString", c_string)()
+
+
 @numba.extending.intrinsic(support_literals=True)
-def i32_const(typingctx, i_t):
-    if not isinstance(i_t, numba.types.Const):
+def c_string_const(typingctx, str_t):
+    if not isinstance(str_t, numba.types.Const):
         return
 
-    sig = numba.types.int32(numba.types.int64)
+    sig = c_string_type(numba.types.Any)
 
     def codegen(context, builder, sig, args):
-        return llvmlite.ir.Constant(i32, i_t.value)
+        return context.insert_const_string(builder.module, str_t.value)
+
+    return sig, codegen
+
+
+@numba.extending.intrinsic
+def print_bytes(typingctx, ptr_t, size_t):
+    """
+    Prints the bytes at a certain ptr. Useful for debugging.
+
+    C function in `structinfo_config.py` from
+    https://stackoverflow.com/a/920534/907060
+
+    It was easier for me to get this to type sucessfully if I returned an int
+    instead of void, so it just returns the size passed in.
+    """
+    if not isinstance(size_t, numba.types.Integer):
+        return
+    sig = numba.types.int64(numba.types.Any, numba.types.int64)
+
+    def codegen(context, builder, sig, args):
+        p, s = args
+        builder.call(
+            builder.module.get_or_insert_function(
+                llvmlite.ir.FunctionType(llvmlite.ir.VoidType(), [ptr(char), i64]),
+                name="print_bytes",
+            ),
+            [builder.bitcast(p, ptr(char)), s],
+        )
+        return s
+
+    return sig, codegen
+
+
+@numba.extending.intrinsic
+def ptr_to_int(typingctx, ptr_t):
+    """
+    Converts a ptr to an int. Useful for debugging.
+    """
+    sig = numba.types.int64(numba.types.Any)
+
+    def codegen(context, builder, sig, args):
+        p, s = args
+        builder.call(
+            builder.module.get_or_insert_function(
+                llvmlite.ir.FunctionType(llvmlite.ir.VoidType(), [ptr(char), i64]),
+                name="print_bytes",
+            ),
+            [builder.bitcast(p, ptr(char)), s],
+        )
+        return s
+
+    return sig, codegen
+
+
+@numba.extending.intrinsic(support_literals=True)
+def literal_pyobject(typingctx, pyobject_t):
+    if not isinstance(pyobject_t, numba.types.Const):
+        return
+
+    sig = numba.types.pyobject(numba.types.Any)
+
+    def codegen(context, builder, sig, args):
+        return context.pyapi.unserialize(
+            context.pyapi.serialize_object(pyobject_t.value)
+        )
 
     return sig, codegen
