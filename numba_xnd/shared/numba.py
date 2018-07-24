@@ -145,12 +145,12 @@ def ptr_store_type(typingctx, numba_type_t, ptr_t, value_t):
     if ptr_t != c_string_type:
         return
     return_type = numba_type_t.instance_type
-    sig = numba.types.void(numba_type_t, ptr_t, value_t)
+    sig = return_type(numba_type_t, ptr_t, return_type)
 
     def codegen(context, builder, sig, args):
         _, ptr_, value = args
         ptr_cast = builder.bitcast(ptr_, ptr(llvm_type_from_numba_type(return_type)))
-        print(value.type, ptr_cast.type)
         builder.store(value, ptr_cast)
+        return value
 
     return sig, codegen

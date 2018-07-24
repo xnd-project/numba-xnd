@@ -219,61 +219,63 @@ class TestStorePtr(unittest.TestCase):
         x = xnd(True)
         set_bool(x, False)
         self.assertEqual(x, xnd(False))
-        # self.assertTrue(get_bool(xnd(True)))
+        set_bool(x, True)
+        self.assertEqual(x, xnd(True))
 
-    # def test_int8(self):
-    #     @njit
-    #     def get_int8(x):
-    #         return numba_xnd.shared.ptr_load_type(
-    #             numba.types.int8, numba_xnd.xnd.unwrap_xnd_object(x).xnd.ptr
-    #         )
+    def test_int8(self):
+        @njit
+        def set_int8(x, y):
+            numba_xnd.shared.ptr_store_type(
+                numba.types.int8, numba_xnd.xnd.unwrap_xnd_object(x).xnd.ptr, y
+            )
 
-    #     self.assertEqual(get_int8(xnd(10, type="int8")), 10)
+        x = xnd(123, type="int8")
+        set_int8(x, 10)
+        self.assertEqual(x, xnd(10, type="int8"))
 
-    # def test_int16(self):
-    #     @njit
-    #     def get_int16(x):
-    #         return numba_xnd.shared.ptr_load_type(
-    #             numba.types.int16, numba_xnd.xnd.unwrap_xnd_object(x).xnd.ptr
-    #         )
+    def test_int16(self):
+        @njit
+        def set_int16(x, y):
+            numba_xnd.shared.ptr_store_type(
+                numba.types.int16, numba_xnd.xnd.unwrap_xnd_object(x).xnd.ptr, y
+            )
 
-    #     self.assertEqual(get_int16(xnd(10, type="int16")), 10)
+        x = xnd(123, type="int16")
+        set_int16(x, 10)
+        self.assertEqual(x, xnd(10, type="int16"))
 
-    # def test_int32(self):
-    #     @njit
-    #     def get_int32(x):
-    #         return numba_xnd.shared.ptr_load_type(
-    #             numba.types.int32, numba_xnd.xnd.unwrap_xnd_object(x).xnd.ptr
-    #         )
+    def test_int32(self):
+        @njit
+        def set_int32(x, y):
+            numba_xnd.shared.ptr_store_type(
+                numba.types.int32, numba_xnd.xnd.unwrap_xnd_object(x).xnd.ptr, y
+            )
 
-    #     self.assertEqual(get_int32(xnd(10, type="int32")), 10)
+        x = xnd(123, type="int32")
+        set_int32(x, 10)
+        self.assertEqual(x, xnd(10, type="int32"))
 
-    # def test_int64(self):
-    #     @njit
-    #     def get_int64(x):
-    #         return numba_xnd.shared.ptr_load_type(
-    #             numba.types.int64, numba_xnd.xnd.unwrap_xnd_object(x).xnd.ptr
-    #         )
+    def test_uint8(self):
+        @njit
+        def set_uint8(x, y):
+            numba_xnd.shared.ptr_store_type(
+                numba.types.uint8, numba_xnd.xnd.unwrap_xnd_object(x).xnd.ptr, y
+            )
 
-    #     self.assertEqual(get_int64(xnd(10, type="int64")), 10)
+        x = xnd(123, type="uint8")
+        set_uint8(x, 10)
+        self.assertEqual(x, xnd(10, type="uint8"))
 
-    # def test_uint8(self):
-    #     @njit
-    #     def get_uint8(x):
-    #         return numba_xnd.shared.ptr_load_type(
-    #             numba.types.uint8, numba_xnd.xnd.unwrap_xnd_object(x).xnd.ptr
-    #         )
+    def test_float32(self):
+        @njit
+        def set_float32(x, y):
+            numba_xnd.shared.ptr_store_type(
+                numba.types.float32, numba_xnd.xnd.unwrap_xnd_object(x).xnd.ptr, y
+            )
 
-    #     self.assertEqual(get_uint8(xnd(10, type="uint8")), 10)
-
-    # def test_float32(self):
-    #     @njit
-    #     def get_float32(x):
-    #         return numba_xnd.shared.ptr_load_type(
-    #             numba.types.float32, numba_xnd.xnd.unwrap_xnd_object(x).xnd.ptr
-    #         )
-
-    #     self.assertEqual(get_float32(xnd(10.0, type="float32")), 10.0)
+        x = xnd(123.123, type="float32")
+        set_float32(x, 10.0)
+        self.assertEqual(x, xnd(10.0, type="float32"))
 
 
 # class MatrixMultiplyTest(unittest.TestCase):
