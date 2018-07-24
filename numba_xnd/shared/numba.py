@@ -5,7 +5,7 @@ import numba.targets.imputils
 import numba.targets.listobj
 import numba.types
 
-from .extending import create_numba_type
+from .extending import create_numba_type, llvm_type_from_numba_type
 from .llvm import char, i32, i64, ptr
 
 
@@ -114,6 +114,25 @@ def literal_pyobject(typingctx, pyobject_t):
     def codegen(context, builder, sig, args):
         return context.pyapi.unserialize(
             context.pyapi.serialize_object(pyobject_t.value)
+        )
+
+    return sig, codegen
+
+
+@numba.extending.intrinsic(support_literals=True)
+def ptr_load_type(typingctx, ptr_t, numba_type_t):
+    """
+    Called with a char* and a numba types, it will load the value  at the pointer asusming
+    it is stored as LLVM version of the numa type
+    """
+    if ptr_t != c_string_type:
+        return
+    return_type = numba_type_t.instance_type
+    sig = return_type(ptr_t, numba_type_t)
+
+    def codegen(context, builder, sig, args):
+        return builder.load(
+            builder.bitcast(args[0], ptr(llvm_type_from_numba_type(return_type)))
         )
 
     return sig, codegen

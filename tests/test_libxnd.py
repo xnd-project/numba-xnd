@@ -2,6 +2,7 @@ import unittest
 
 from xnd import xnd
 
+import numba
 import numba_xnd
 import xnd_structinfo
 from numba import njit
@@ -139,3 +140,69 @@ class TestEqual(unittest.TestCase):
 
     def test_arrays_not_equal(self):
         self.assertFalse(is_equal(xnd([1, 2, 3]), xnd([1, 2, 4])))
+
+
+class TestPtrValue(unittest.TestCase):
+    def test_bool(self):
+        @njit
+        def get_bool(x):
+            return numba_xnd.shared.ptr_load_type(
+                numba_xnd.xnd.unwrap_xnd_object(x).xnd.ptr, numba.types.boolean
+            )
+
+        self.assertTrue(get_bool(xnd(True)))
+        self.assertFalse(get_bool(xnd(False)))
+
+    def test_int8(self):
+        @njit
+        def get_int8(x):
+            return numba_xnd.shared.ptr_load_type(
+                numba_xnd.xnd.unwrap_xnd_object(x).xnd.ptr, numba.types.int8
+            )
+
+        self.assertEqual(get_int8(xnd(10, type="int8")), 10)
+
+    def test_int16(self):
+        @njit
+        def get_int16(x):
+            return numba_xnd.shared.ptr_load_type(
+                numba_xnd.xnd.unwrap_xnd_object(x).xnd.ptr, numba.types.int16
+            )
+
+        self.assertEqual(get_int16(xnd(10, type="int16")), 10)
+
+    def test_int32(self):
+        @njit
+        def get_int32(x):
+            return numba_xnd.shared.ptr_load_type(
+                numba_xnd.xnd.unwrap_xnd_object(x).xnd.ptr, numba.types.int32
+            )
+
+        self.assertEqual(get_int32(xnd(10, type="int32")), 10)
+
+    def test_int64(self):
+        @njit
+        def get_int64(x):
+            return numba_xnd.shared.ptr_load_type(
+                numba_xnd.xnd.unwrap_xnd_object(x).xnd.ptr, numba.types.int64
+            )
+
+        self.assertEqual(get_int64(xnd(10, type="int64")), 10)
+
+    def test_uint8(self):
+        @njit
+        def get_uint8(x):
+            return numba_xnd.shared.ptr_load_type(
+                numba_xnd.xnd.unwrap_xnd_object(x).xnd.ptr, numba.types.uint8
+            )
+
+        self.assertEqual(get_uint8(xnd(10, type="uint8")), 10)
+
+    def test_float32(self):
+        @njit
+        def get_float32(x):
+            return numba_xnd.shared.ptr_load_type(
+                numba_xnd.xnd.unwrap_xnd_object(x).xnd.ptr, numba.types.float32
+            )
+
+        self.assertEqual(get_float32(xnd(10.0, type="float32")), 10.0)
