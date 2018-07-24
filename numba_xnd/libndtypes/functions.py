@@ -48,7 +48,7 @@ def ndt_dim_array_to_tuple(typingctx, ndt_dim_array_t, n_t):
 
     ndim = n_t.value
     tuple_type = numba.types.Tuple([numba.types.int64] * ndim)
-    sig = tuple_type(structs.ndt_dim_array_type, numba.types.Any)
+    sig = tuple_type(structs.ndt_dim_array_type, n_t)
 
     def codegen(context, builder, sig, args):
         array, _ = args

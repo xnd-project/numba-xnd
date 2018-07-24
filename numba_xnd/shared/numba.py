@@ -31,10 +31,10 @@ def c_string_const(typingctx, str_t):
     if not isinstance(str_t, numba.types.Const):
         return
 
-    sig = c_string_type(numba.types.Any)
+    sig = c_string_type(str_t)
 
-    def codegen(context, builder, sig, args):
-        return context.insert_const_string(builder.module, str_t.value)
+    def codegen(context, builder, sig, args, str_=str_t.value):
+        return context.insert_const_string(builder.module, str_)
 
     return sig, codegen
 
@@ -67,7 +67,7 @@ def print_bytes(typingctx, ptr_t, size_t):
     """
     if not isinstance(size_t, numba.types.Integer):
         return
-    sig = numba.types.int64(numba.types.Any, numba.types.int64)
+    sig = numba.types.int64(ptr_t, size_t)
 
     def codegen(context, builder, sig, args):
         p, s = args
@@ -85,7 +85,7 @@ def print_bytes(typingctx, ptr_t, size_t):
 
 @numba.extending.intrinsic
 def ptr_to_int(typingctx, ptr_t):
-    sig = numba.types.int64(numba.types.Any)
+    sig = numba.types.int64(ptr_t)
 
     def codegen(context, builder, sig, args):
         return builder.ptrtoint(args[0], i64)
@@ -95,7 +95,7 @@ def ptr_to_int(typingctx, ptr_t):
 
 @numba.extending.intrinsic
 def ptr_is_none(typingctx, ptr_t):
-    sig = numba.types.boolean(numba.types.Any)
+    sig = numba.types.boolean(ptr_t)
 
     def codegen(context, builder, sig, args):
         ptr_ = args[0]
@@ -109,7 +109,7 @@ def literal_pyobject(typingctx, pyobject_t):
     if not isinstance(pyobject_t, numba.types.Const):
         return
 
-    sig = numba.types.pyobject(numba.types.Any)
+    sig = numba.types.pyobject(pyobject_t)
 
     def codegen(context, builder, sig, args):
         return context.pyapi.unserialize(
