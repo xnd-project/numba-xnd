@@ -1,7 +1,7 @@
 /* This file is generated using structinfo_generator from the xndtools project */
 #include "pyndtypes.h"
 #include "pyxnd.h"
-#include "gumath.h"
+#include "pygumath.h"
 
 extern PyObject* ndt_from_type(ndt_t* val) { return Ndt_FromType(val); }
 extern PyObject* xnd_from_type_xnd(PyTypeObject* t, xnd_t* val) { return Xnd_FromXnd(t, val); };
@@ -2457,6 +2457,7 @@ PyInit_xnd_structinfo(void) {
   
   import_ndtypes();
   import_xnd();
+  import_gumath();
 
   return PyModule_Create(&xnd_structinfomodule);
 }

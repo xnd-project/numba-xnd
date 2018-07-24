@@ -6,5 +6,5 @@ sizes
 *.so
 .coverage
 *.ll
-tmp.py
 dist/
+tmp*

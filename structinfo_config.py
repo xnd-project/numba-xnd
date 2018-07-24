@@ -20,7 +20,7 @@ modulename = "xnd_structinfo"
 
 include_dirs = [NDTYPES_ROOT, XND_ROOT, GUMATH_ROOT, os.path.join(PREFIX, "include")]
 library_dirs = [os.path.join(PREFIX, "lib")]
-includes = ["pyndtypes.h", "pyxnd.h", "gumath.h"]
+includes = ["pyndtypes.h", "pyxnd.h", "pygumath.h"]
 libraries = []
 
 # Additional C code to be added to output
@@ -65,4 +65,5 @@ PyMethodDef_items = """
 PyInit_source = """
   import_ndtypes();
   import_xnd();
+  import_gumath();
 """
