@@ -120,19 +120,37 @@ def literal_pyobject(typingctx, pyobject_t):
 
 
 @numba.extending.intrinsic(support_literals=True)
-def ptr_load_type(typingctx, ptr_t, numba_type_t):
+def ptr_load_type(typingctx, numba_type_t, ptr_t):
     """
-    Called with a char* and a numba types, it will load the value  at the pointer asusming
-    it is stored as LLVM version of the numa type
+    Called with a numba type and a char*, it will load the value at the pointer as the numba type.
     """
     if ptr_t != c_string_type:
         return
     return_type = numba_type_t.instance_type
-    sig = return_type(ptr_t, numba_type_t)
+    sig = return_type(numba_type_t, ptr_t)
 
     def codegen(context, builder, sig, args):
         return builder.load(
-            builder.bitcast(args[0], ptr(llvm_type_from_numba_type(return_type)))
+            builder.bitcast(args[1], ptr(llvm_type_from_numba_type(return_type)))
         )
+
+    return sig, codegen
+
+
+@numba.extending.intrinsic(support_literals=True)
+def ptr_store_type(typingctx, numba_type_t, ptr_t, value_t):
+    """
+    Called with a char* and a numba type, it will load the value at the pointer as the numba type.
+    """
+    if ptr_t != c_string_type:
+        return
+    return_type = numba_type_t.instance_type
+    sig = numba.types.void(numba_type_t, ptr_t, value_t)
+
+    def codegen(context, builder, sig, args):
+        _, ptr_, value = args
+        ptr_cast = builder.bitcast(ptr_, ptr(llvm_type_from_numba_type(return_type)))
+        print(value.type, ptr_cast.type)
+        builder.store(value, ptr_cast)
 
     return sig, codegen
