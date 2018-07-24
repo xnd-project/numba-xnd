@@ -814,8 +814,10 @@ class TestParfors(TestParforsBase):
         N = 100
         A = np.random.ranf(N)
         B = np.random.randint(10, size=(N, 3))
+        C = A + 1j * A
         self.check(test_impl, A)
         self.check(test_impl, B)
+        self.check(test_impl, C)
         self.assertTrue(countParfors(test_impl, (types.Array(types.float64, 1, 'C'), )) == 2)
         self.assertTrue(countParfors(test_impl, (types.Array(types.float64, 2, 'C'), )) == 2)
 
@@ -826,8 +828,10 @@ class TestParfors(TestParforsBase):
         N = 100
         A = np.random.ranf(N)
         B = np.random.randint(10, size=(N, 3))
+        C = A + 1j * A
         self.check(test_impl, A)
         self.check(test_impl, B)
+        self.check(test_impl, C)
         self.assertTrue(countParfors(test_impl, (types.Array(types.float64, 1, 'C'), )) == 2)
         self.assertTrue(countParfors(test_impl, (types.Array(types.float64, 2, 'C'), )) == 2)
 
@@ -1117,6 +1121,17 @@ class TestParfors(TestParforsBase):
         self.check(test_impl, n)
         self.assertEqual(countNonParforArrayAccesses(test_impl, (types.intp,)), 0)
 
+    @skip_unsupported
+    def test_parfor_hoist_setitem(self):
+        # Make sure that read of out is not hoisted.
+        def test_impl(out):
+            for i in prange(10):
+                out[0] = 2 * out[0] 
+            return out[0]
+
+        out = np.ones(1)
+        self.check(test_impl, out)
+        
     @skip_unsupported
     @needs_blas
     def test_parfor_generate_fuse(self):
