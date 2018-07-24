@@ -70,7 +70,6 @@ def create_opaque_struct(c_struct_name, attrs, embedded=None):
             llvmlite.ir.FunctionType(ret_type, [ptr(struct_llvm_type)]),
             name=f"get_{c_struct_name}_{attr}",
         )
-        print(f"get_{c_struct_name}_{attr}", fn.type)
         return_value = builder.call(fn, [value])
         return return_value
 
@@ -139,3 +138,12 @@ def wrap_c_func(func_name, numba_ret_type, numba_arg_types):
         ]
     )
     return numba.extending.intrinsic(intrinsic_inner)
+
+
+def overload_intrinsic(fn):
+    """
+    Like `numba.extending.overload`, but you just wrap a function
+    directly and you don't provide an existing one. Then you can use that function
+    inside a jitted function and it will work.
+    """
+    return numba.extending.overload(fn)(fn)

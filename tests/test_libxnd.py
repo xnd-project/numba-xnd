@@ -18,13 +18,13 @@ def subtree_single_index(x, i):
     index.tag = numba_xnd.libxnd.XND_KEY_INDEX
     index.Index = i
     ret_xnd = numba_xnd.libxnd.create_xnd()
+    ctx = numba_xnd.libndtypes.ndt_static_context()
     numba_xnd.libxnd.xnd_subtree(
-        ret_xnd,
-        xnd_object.xnd,
-        index,
-        numba_xnd.shared.i64_to_i32(1),
-        numba_xnd.libndtypes.create_ndt_context(),
+        ret_xnd, xnd_object.xnd, index, numba_xnd.shared.i64_to_i32(1), ctx
     )
+    assert not numba_xnd.shared.ptr_is_none(ret_xnd.ptr)
+    assert not numba_xnd.libndtypes.ndt_err_occurred(ctx)
+
     # copy the original xnd_object
     ret_xnd_object = numba_xnd.pyxnd.xnd_view_move_ndt(xnd_object, xnd_object.type.ndt)
     ret_xnd_object.type.ndt = ret_xnd.type
@@ -42,13 +42,13 @@ def subtree_two_ints(x, i, j):
     second_index.tag = numba_xnd.libxnd.XND_KEY_INDEX
     second_index.Index = j
     ret_xnd = numba_xnd.libxnd.create_xnd()
+    ctx = numba_xnd.libndtypes.ndt_static_context()
     numba_xnd.libxnd.xnd_subtree(
-        ret_xnd,
-        xnd_object.xnd,
-        index,
-        numba_xnd.shared.i64_to_i32(2),
-        numba_xnd.libndtypes.create_ndt_context(),
+        ret_xnd, xnd_object.xnd, index, numba_xnd.shared.i64_to_i32(2), ctx
     )
+    assert not numba_xnd.shared.ptr_is_none(ret_xnd.ptr)
+    assert not numba_xnd.libndtypes.ndt_err_occurred(ctx)
+
     # copy the original xnd_object
     ret_xnd_object = numba_xnd.pyxnd.xnd_view_move_ndt(xnd_object, xnd_object.type.ndt)
     ret_xnd_object.type.ndt = ret_xnd.type
@@ -62,19 +62,14 @@ def subtree_field(x):
     index = numba_xnd.libxnd.create_xnd_index()
     index.tag = numba_xnd.libxnd.XND_KEY_FIELD_NAME
     index.FieldName = numba_xnd.shared.c_string_const("there")
-    numba_xnd.shared.print_bytes(index, size)
-    numba_xnd.shared.print_bytes(index.FieldName, 10)
     ret_xnd = numba_xnd.libxnd.create_xnd()
+    ctx = numba_xnd.libndtypes.ndt_static_context()
     numba_xnd.libxnd.xnd_subtree(
-        ret_xnd,
-        xnd_object.xnd,
-        index,
-        numba_xnd.shared.i64_to_i32(1),
-        numba_xnd.libndtypes.create_ndt_context(),
+        ret_xnd, xnd_object.xnd, index, numba_xnd.shared.i64_to_i32(1), ctx
     )
-    print("HI")
-    assert ret_xnd.type.ndim == 1
-    print("THERE")
+    assert not numba_xnd.shared.ptr_is_none(ret_xnd.ptr), "ptr is not null"
+    assert not numba_xnd.libndtypes.ndt_err_occurred(ctx), "ndt error"
+
     # copy the original xnd_object
     ret_xnd_object = numba_xnd.pyxnd.xnd_view_move_ndt(xnd_object, xnd_object.type.ndt)
     ret_xnd_object.type.ndt = ret_xnd.type
@@ -94,7 +89,7 @@ class TestSubtree(unittest.TestCase):
     def test_field(self):
         make_x = lambda: xnd({"hi": [1, 2], "there": [[3, 4]]})
         orig_value = make_x()
-        self.assertEqual(subtree_field(orig_value), xnd([1, 2]))
+        self.assertEqual(subtree_field(orig_value), xnd([[3, 4]]))
         self.assertEqual(orig_value, make_x())
 
 
@@ -107,13 +102,13 @@ def multikey_slice(x, start, stop, step):
     index.Slice.stop = stop
     index.Slice.step = step
     ret_xnd = numba_xnd.libxnd.create_xnd()
+    ctx = numba_xnd.libndtypes.ndt_static_context()
     numba_xnd.libxnd.xnd_multikey(
-        ret_xnd,
-        xnd_object.xnd,
-        index,
-        numba_xnd.shared.i64_to_i32(1),
-        numba_xnd.libndtypes.create_ndt_context(),
+        ret_xnd, xnd_object.xnd, index, numba_xnd.shared.i64_to_i32(1), ctx
     )
+    assert not numba_xnd.shared.ptr_is_none(ret_xnd.ptr)
+    assert not numba_xnd.libndtypes.ndt_err_occurred(ctx)
+
     # copy the original xnd_object
     ret_xnd_object = numba_xnd.pyxnd.xnd_view_move_ndt(xnd_object, xnd_object.type.ndt)
     ret_xnd_object.type.ndt = ret_xnd.type

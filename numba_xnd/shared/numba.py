@@ -40,6 +40,21 @@ def c_string_const(typingctx, str_t):
 
 
 @numba.extending.intrinsic
+def print_c_string(typingctx, c_str_t):
+    sig = numba.types.int32(c_string_type)
+
+    def codegen(context, builder, sig, args):
+        return builder.call(
+            builder.module.get_or_insert_function(
+                llvmlite.ir.FunctionType(i32, [c_string]), name="puts"
+            ),
+            args,
+        )
+
+    return sig, codegen
+
+
+@numba.extending.intrinsic
 def print_bytes(typingctx, ptr_t, size_t):
     """
     Prints the bytes at a certain ptr. Useful for debugging.
@@ -70,21 +85,21 @@ def print_bytes(typingctx, ptr_t, size_t):
 
 @numba.extending.intrinsic
 def ptr_to_int(typingctx, ptr_t):
-    """
-    Converts a ptr to an int. Useful for debugging.
-    """
     sig = numba.types.int64(numba.types.Any)
 
     def codegen(context, builder, sig, args):
-        p, s = args
-        builder.call(
-            builder.module.get_or_insert_function(
-                llvmlite.ir.FunctionType(llvmlite.ir.VoidType(), [ptr(char), i64]),
-                name="print_bytes",
-            ),
-            [builder.bitcast(p, ptr(char)), s],
-        )
-        return s
+        return builder.ptrtoint(args[0], i64)
+
+    return sig, codegen
+
+
+@numba.extending.intrinsic
+def ptr_is_none(typingctx, ptr_t):
+    sig = numba.types.boolean(numba.types.Any)
+
+    def codegen(context, builder, sig, args):
+        ptr_ = args[0]
+        return builder.icmp_unsigned("==", ptr_, llvmlite.ir.Constant(ptr_.type, None))
 
     return sig, codegen
 

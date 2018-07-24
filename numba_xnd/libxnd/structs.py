@@ -4,7 +4,7 @@ import numba.types
 from .. import libndtypes, shared
 
 xnd_type, xnd_t, create_xnd = shared.create_opaque_struct(
-    "xnd_t", {"type": libndtypes.ndt_type}
+    "xnd_t", {"type": libndtypes.ndt_type, "ptr": shared.c_string_type}
 )
 
 
