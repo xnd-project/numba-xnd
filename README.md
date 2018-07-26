@@ -78,13 +78,17 @@ Open questions:
 
 - Should numba types for xnd include shape information? What if some shapes are not known until runtime?
   - If we have compile time shape information, then we maybe we shouldn't use libxnd's indexing functions, because these are not shape aware.
-    They have to introspect shapes at runtime, so the code won't be as optimized as if we produced llvm for the specific dimensions we have.
+    They have to introspect shapes at runtime, so the code won't be as optimized as if we produced llvm for the specific dimensions we have. - **SOLUTION**: We have low level code that has no typing information. We can always fall back to this for flexbility. Them, using that, we build high level API with typing information that can be more optimized and have a better UI
   - Is it possible in numba to go back and forth between lowered and unlowered code? Erm, I mean like if we know some partial shape information for the program
     can we execute part of it, then use that resulting shape information to re-compile the rest? I guess this would be too slow.
+    - **SOLUTION**: We can't do this. See above.
 - How do we get garbage collection/memory allocation working?
   - Do we use the `xnd_master_t` struct?
+    - **SOLUTION**: Don't worry about this for now. Forget xnd_master_t
 - Should we be using numba's array type? That we can get all the optimizations they have built in for it.
   - I am leaning towards no, since it might be hard to extend to fit xnd's model
+    - **SOLUTION**: Yeah, don't use Numba's array. Eventually we should refactor their array support to be able to
+      support other data types. They want to do this anyway.
 
 Current status:
 
