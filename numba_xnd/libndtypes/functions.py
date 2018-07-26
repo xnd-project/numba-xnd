@@ -26,17 +26,14 @@ ndt_context_msg = shared.wrap_c_func(
 )
 
 
-@shared.overload_intrinsic
+@numba.njit
 def ndt_static_context():
-    def impl():
-        ctx = structs.create_ndt_context()
-        ctx.flags = 0
-        ctx.err = 0
-        ctx.msg = 0
-        ctx.ConstMsg = shared.c_string_const("Success")
-        return ctx
-
-    return impl
+    ctx = structs.create_ndt_context()
+    ctx.flags = 0
+    ctx.err = 0
+    ctx.msg = 0
+    ctx.ConstMsg = shared.c_string_const("Success")
+    return ctx
 
 
 @numba.extending.intrinsic(support_literals=True)
