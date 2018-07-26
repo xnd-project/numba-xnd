@@ -29,16 +29,3 @@ xnd_master_type, xnd_master_t, create_xnd_master = shared.create_opaque_struct(
     {"flags": numba.types.int32, "master": xnd_type},
     embedded={"master"},
 )
-
-
-@numba.extending.intrinsic
-def get_xnd_index(typing_ctx, x_t, i_t):
-    if x_t != xnd_index_type or not isinstance(i_t, numba.types.Integer):
-        return
-    sig = xnd_index_type(xnd_index_type, numba.types.int64)
-
-    def codegen(context, builder, sig, args):
-        x, i = args
-        return builder.gep(x, [i])
-
-    return sig, codegen

@@ -36,7 +36,7 @@ def subtree_two_ints(x, i, j):
     index = numba_xnd.libxnd.create_xnd_index(2)
     index.tag = numba_xnd.libxnd.XND_KEY_INDEX
     index.Index = i
-    second_index = numba_xnd.libxnd.get_xnd_index(index, 1)
+    second_index = index[1]
     second_index.tag = numba_xnd.libxnd.XND_KEY_INDEX
     second_index.Index = j
     ret_xnd = numba_xnd.libxnd.create_xnd()

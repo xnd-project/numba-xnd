@@ -1,15 +1,16 @@
-from __future__ import print_function, division, absolute_import
+from __future__ import absolute_import, division, print_function
 
-from llvmlite.llvmpy.core import Type, Builder, Constant
 import llvmlite.llvmpy.core as lc
+from llvmlite.llvmpy.core import Builder, Constant, Type
 
-from numba import types, cgutils, config
+from numba import cgutils, config, types
 
 
 class _ArgManager(object):
     """
     A utility class to handle argument unboxing and cleanup
     """
+
     def __init__(self, context, builder, api, env_manager, endblk, nargs):
         self.context = context
         self.builder = builder
@@ -89,8 +90,7 @@ class _GilManager(object):
 
 
 class PyCallWrapper(object):
-    def __init__(self, context, module, func, fndesc, env, call_helper,
-                 release_gil):
+    def __init__(self, context, module, func, fndesc, env, call_helper, release_gil):
         self.context = context
         self.module = module
         self.func = func
@@ -107,16 +107,16 @@ class PyCallWrapper(object):
         wrapty = Type.function(pyobj, [pyobj, pyobj, pyobj])
         wrapper = self.module.add_function(wrapty, name=wrapname)
 
-        builder = Builder(wrapper.append_basic_block('entry'))
+        builder = Builder(wrapper.append_basic_block("entry"))
 
         # - `closure` will receive the `self` pointer stored in the
         #   PyCFunction object (see _dynfunc.c)
         # - `args` and `kws` will receive the tuple and dict objects
         #   of positional and keyword arguments, respectively.
         closure, args, kws = wrapper.args
-        closure.name = 'py_closure'
-        args.name = 'py_args'
-        kws.name = 'py_kws'
+        closure.name = "py_closure"
+        args.name = "py_args"
+        kws.name = "py_kws"
 
         api = self.context.get_python_api(builder)
         self.build_wrapper(api, builder, closure, args, kws)
@@ -127,8 +127,7 @@ class PyCallWrapper(object):
         nargs = len(self.fndesc.argtypes)
 
         objs = [api.alloca_obj() for _ in range(nargs)]
-        parseok = api.unpack_tuple(args, self.fndesc.qualname,
-                                   nargs, nargs, *objs)
+        parseok = api.unpack_tuple(args, self.fndesc.qualname, nargs, nargs, *objs)
 
         pred = builder.icmp(lc.ICMP_EQ, parseok, Constant.null(parseok.type))
         with cgutils.if_unlikely(builder, pred):
@@ -142,8 +141,9 @@ class PyCallWrapper(object):
         # Get the Environment object
         env_manager = self.get_env(api, builder)
 
-        cleanup_manager = _ArgManager(self.context, builder, api,
-                                      env_manager, endblk, nargs)
+        cleanup_manager = _ArgManager(
+            self.context, builder, api, env_manager, endblk, nargs
+        )
 
         # Compute the arguments to the compiled Numba function.
         innerargs = []
@@ -159,8 +159,8 @@ class PyCallWrapper(object):
             cleanup_manager = _GilManager(builder, api, cleanup_manager)
 
         status, retval = self.context.call_conv.call_function(
-            builder, self.func, self.fndesc.restype, self.fndesc.argtypes,
-            innerargs)
+            builder, self.func, self.fndesc.restype, self.fndesc.argtypes, innerargs
+        )
         # Do clean up
         self.debug_print(builder, "# callwrapper: emit_cleanup")
         cleanup_manager.emit_cleanup()

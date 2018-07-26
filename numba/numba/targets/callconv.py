@@ -2,38 +2,43 @@
 Calling conventions for Numba-compiled functions.
 """
 
-from collections import namedtuple
 import itertools
+from collections import namedtuple
 
 from llvmlite import ir as ir
 
 from numba import cgutils, types
-from .base import PYOBJECT, GENERIC_POINTER
 
+from .base import GENERIC_POINTER, PYOBJECT
 
-Status = namedtuple("Status",
-                    ("code",
-                     # If the function returned ok (a value or None)
-                     "is_ok",
-                     # If the function returned None
-                     "is_none",
-                     # If the function errored out (== not is_ok)
-                     "is_error",
-                     # If the generator exited with StopIteration
-                     "is_stop_iteration",
-                     # If the function errored with an already set exception
-                     "is_python_exc",
-                     # If the function errored with a user exception
-                     "is_user_exc",
-                     # The pointer to the exception info structure (for user exceptions)
-                     "excinfoptr",
-                     ))
+Status = namedtuple(
+    "Status",
+    (
+        "code",
+        # If the function returned ok (a value or None)
+        "is_ok",
+        # If the function returned None
+        "is_none",
+        # If the function errored out (== not is_ok)
+        "is_error",
+        # If the generator exited with StopIteration
+        "is_stop_iteration",
+        # If the function errored with an already set exception
+        "is_python_exc",
+        # If the function errored with a user exception
+        "is_user_exc",
+        # The pointer to the exception info structure (for user exceptions)
+        "excinfoptr",
+    ),
+)
 
 int32_t = ir.IntType(32)
 errcode_t = int32_t
 
+
 def _const_int(code):
     return ir.Constant(errcode_t, code)
+
 
 RETCODE_OK = _const_int(0)
 RETCODE_EXC = _const_int(-1)
@@ -46,10 +51,7 @@ FIRST_USEREXC = 1
 RETCODE_USEREXC = _const_int(FIRST_USEREXC)
 
 
-
-
 class BaseCallConv(object):
-
     def __init__(self, context):
         self.context = context
 
@@ -64,8 +66,7 @@ class BaseCallConv(object):
 
             validbit = cgutils.as_bool_bit(builder, optval.valid)
             with builder.if_then(validbit):
-                retval = self.context.get_return_value(builder, retty.type,
-                                                       optval.data)
+                retval = self.context.get_return_value(builder, retty.type, optval.data)
                 self.return_value(builder, retval)
 
             self.return_native_none(builder)
@@ -73,14 +74,12 @@ class BaseCallConv(object):
         elif not isinstance(valty, types.Optional):
             # Value is not an optional, need a cast
             if valty != retty.type:
-                value = self.context.cast(builder, value, fromty=valty,
-                                          toty=retty.type)
+                value = self.context.cast(builder, value, fromty=valty, toty=retty.type)
             retval = self.context.get_return_value(builder, retty.type, value)
             self.return_value(builder, retval)
 
         else:
-            raise NotImplementedError("returning {0} for {1}".format(valty,
-                                                                     retty))
+            raise NotImplementedError("returning {0} for {1}".format(valty, retty))
 
     def return_native_none(self, builder):
         self._return_errcode_raw(builder, RETCODE_NONE)
@@ -120,8 +119,7 @@ class BaseCallConv(object):
             # Make sure another error may not interfere.
             api.err_clear()
             exc = api.unserialize(status.excinfoptr)
-            with cgutils.if_likely(builder,
-                                   cgutils.is_not_null(builder, exc)):
+            with cgutils.if_likely(builder, cgutils.is_not_null(builder, exc)):
                 api.raise_object(exc)  # steals ref
             builder.branch(bbend)
 
@@ -133,8 +131,9 @@ class BaseCallConv(object):
             # Error already raised => nothing to do
             builder.branch(bbend)
 
-        api.err_set_string("PyExc_SystemError",
-                           "unknown error when calling native function")
+        api.err_set_string(
+            "PyExc_SystemError", "unknown error when calling native function"
+        )
         builder.branch(bbend)
 
         builder.position_at_end(bbend)
@@ -152,8 +151,7 @@ class BaseCallConv(object):
         """
         Fix argument types, removing any omitted arguments.
         """
-        return tuple(ty for ty in argtypes
-                     if not isinstance(ty, types.Omitted))
+        return tuple(ty for ty in argtypes if not isinstance(ty, types.Omitted))
 
     def _get_arg_packer(self, argtypes):
         """
@@ -181,18 +179,18 @@ class MinimalCallConv(BaseCallConv):
 
     def return_value(self, builder, retval):
         retptr = builder.function.args[0]
-        assert retval.type == retptr.type.pointee, \
-            (str(retval.type), str(retptr.type.pointee))
+        assert retval.type == retptr.type.pointee, (
+            str(retval.type),
+            str(retptr.type.pointee),
+        )
         builder.store(retval, retptr)
         self._return_errcode_raw(builder, RETCODE_OK)
 
     def return_user_exc(self, builder, exc, exc_args=None):
         if exc is not None and not issubclass(exc, BaseException):
-            raise TypeError("exc should be None or exception class, got %r"
-                            % (exc,))
+            raise TypeError("exc should be None or exception class, got %r" % (exc,))
         if exc_args is not None and not isinstance(exc_args, tuple):
-            raise TypeError("exc_args should be None or tuple, got %r"
-                            % (exc_args,))
+            raise TypeError("exc_args should be None or tuple, got %r" % (exc_args,))
         call_helper = self._get_call_helper(builder)
         exc_id = call_helper._add_exception(exc, exc_args)
         self._return_errcode_raw(builder, _const_int(exc_id))
@@ -209,22 +207,24 @@ class MinimalCallConv(BaseCallConv):
         """
         Given a return *code*, get a Status instance.
         """
-        norm = builder.icmp_signed('==', code, RETCODE_OK)
-        none = builder.icmp_signed('==', code, RETCODE_NONE)
+        norm = builder.icmp_signed("==", code, RETCODE_OK)
+        none = builder.icmp_signed("==", code, RETCODE_NONE)
         ok = builder.or_(norm, none)
         err = builder.not_(ok)
-        exc = builder.icmp_signed('==', code, RETCODE_EXC)
-        is_stop_iteration = builder.icmp_signed('==', code, RETCODE_STOPIT)
-        is_user_exc = builder.icmp_signed('>=', code, RETCODE_USEREXC)
+        exc = builder.icmp_signed("==", code, RETCODE_EXC)
+        is_stop_iteration = builder.icmp_signed("==", code, RETCODE_STOPIT)
+        is_user_exc = builder.icmp_signed(">=", code, RETCODE_USEREXC)
 
-        status = Status(code=code,
-                        is_ok=ok,
-                        is_error=err,
-                        is_python_exc=exc,
-                        is_none=none,
-                        is_user_exc=is_user_exc,
-                        is_stop_iteration=is_stop_iteration,
-                        excinfoptr=None)
+        status = Status(
+            code=code,
+            is_ok=ok,
+            is_error=err,
+            is_python_exc=exc,
+            is_none=none,
+            is_user_exc=is_user_exc,
+            is_stop_iteration=is_stop_iteration,
+            excinfoptr=None,
+        )
         return status
 
     def get_function_type(self, restype, argtypes):
@@ -243,8 +243,7 @@ class MinimalCallConv(BaseCallConv):
         """
         assert not noalias
         arginfo = self._get_arg_packer(fe_argtypes)
-        arginfo.assign_names(self.get_arguments(fn),
-                             ['arg.' + a for a in args])
+        arginfo.assign_names(self.get_arguments(fn), ["arg." + a for a in args])
         fn.args[0].name = ".ret"
         return fn
 
@@ -315,6 +314,7 @@ class CPUCallConv(BaseCallConv):
     and the exception info pointer (passed as first and second arguments,
     respectively).
     """
+
     _status_ids = itertools.count(1)
 
     def _make_call_helper(self, builder):
@@ -322,18 +322,18 @@ class CPUCallConv(BaseCallConv):
 
     def return_value(self, builder, retval):
         retptr = self._get_return_argument(builder.function)
-        assert retval.type == retptr.type.pointee, \
-            (str(retval.type), str(retptr.type.pointee))
+        assert retval.type == retptr.type.pointee, (
+            str(retval.type),
+            str(retptr.type.pointee),
+        )
         builder.store(retval, retptr)
         self._return_errcode_raw(builder, RETCODE_OK)
 
     def return_user_exc(self, builder, exc, exc_args=None):
         if exc is not None and not issubclass(exc, BaseException):
-            raise TypeError("exc should be None or exception class, got %r"
-                            % (exc,))
+            raise TypeError("exc should be None or exception class, got %r" % (exc,))
         if exc_args is not None and not isinstance(exc_args, tuple):
-            raise TypeError("exc_args should be None or tuple, got %r"
-                            % (exc_args,))
+            raise TypeError("exc_args should be None or tuple, got %r" % (exc_args,))
         pyapi = self.context.get_python_api(builder)
         # Build excinfo struct
         if exc_args is not None:
@@ -355,24 +355,27 @@ class CPUCallConv(BaseCallConv):
         """
         Given a return *code* and *excinfoptr*, get a Status instance.
         """
-        norm = builder.icmp_signed('==', code, RETCODE_OK)
-        none = builder.icmp_signed('==', code, RETCODE_NONE)
-        exc = builder.icmp_signed('==', code, RETCODE_EXC)
-        is_stop_iteration = builder.icmp_signed('==', code, RETCODE_STOPIT)
+        norm = builder.icmp_signed("==", code, RETCODE_OK)
+        none = builder.icmp_signed("==", code, RETCODE_NONE)
+        exc = builder.icmp_signed("==", code, RETCODE_EXC)
+        is_stop_iteration = builder.icmp_signed("==", code, RETCODE_STOPIT)
         ok = builder.or_(norm, none)
         err = builder.not_(ok)
-        is_user_exc = builder.icmp_signed('>=', code, RETCODE_USEREXC)
-        excinfoptr = builder.select(is_user_exc, excinfoptr,
-                                    ir.Constant(excinfo_ptr_t, ir.Undefined))
+        is_user_exc = builder.icmp_signed(">=", code, RETCODE_USEREXC)
+        excinfoptr = builder.select(
+            is_user_exc, excinfoptr, ir.Constant(excinfo_ptr_t, ir.Undefined)
+        )
 
-        status = Status(code=code,
-                        is_ok=ok,
-                        is_error=err,
-                        is_python_exc=exc,
-                        is_none=none,
-                        is_user_exc=is_user_exc,
-                        is_stop_iteration=is_stop_iteration,
-                        excinfoptr=excinfoptr)
+        status = Status(
+            code=code,
+            is_ok=ok,
+            is_error=err,
+            is_python_exc=exc,
+            is_none=none,
+            is_user_exc=is_user_exc,
+            is_stop_iteration=is_stop_iteration,
+            excinfoptr=excinfoptr,
+        )
         return status
 
     def get_function_type(self, restype, argtypes):
@@ -382,9 +385,9 @@ class CPUCallConv(BaseCallConv):
         arginfo = self._get_arg_packer(argtypes)
         argtypes = list(arginfo.argument_types)
         resptr = self.get_return_type(restype)
-        fnty = ir.FunctionType(errcode_t,
-                               [resptr, ir.PointerType(excinfo_ptr_t)]
-                               + argtypes)
+        fnty = ir.FunctionType(
+            errcode_t, [resptr, ir.PointerType(excinfo_ptr_t)] + argtypes
+        )
         return fnty
 
     def decorate_function(self, fn, args, fe_argtypes, noalias=False):
@@ -392,8 +395,7 @@ class CPUCallConv(BaseCallConv):
         Set names of function arguments, and add useful attributes to them.
         """
         arginfo = self._get_arg_packer(fe_argtypes)
-        arginfo.assign_names(self.get_arguments(fn),
-                             ['arg.' + a for a in args])
+        arginfo.assign_names(self.get_arguments(fn), ["arg." + a for a in args])
         retarg = self._get_return_argument(fn)
         retarg.name = "retptr"
         retarg.add_attribute("nocapture")
@@ -435,22 +437,25 @@ class CPUCallConv(BaseCallConv):
         # initialize return value to zeros
         builder.store(cgutils.get_null_value(retty), retvaltmp)
 
-        excinfoptr = cgutils.alloca_once(builder, ir.PointerType(excinfo_t),
-                                         name="excinfo")
+        excinfoptr = cgutils.alloca_once(
+            builder, ir.PointerType(excinfo_t), name="excinfo"
+        )
 
         arginfo = self._get_arg_packer(argtys)
         args = list(arginfo.as_arguments(builder, args))
         realargs = [retvaltmp, excinfoptr] + args
-        code = builder.call(callee, realargs)
-        status = self._get_return_status(builder, code,
-                                         builder.load(excinfoptr))
+        try:
+            code = builder.call(callee, realargs)
+        except TypeError:
+            print("err")
+
+        status = self._get_return_status(builder, code, builder.load(excinfoptr))
         retval = builder.load(retvaltmp)
         out = self.context.get_returned_value(builder, resty, retval)
         return status, out
 
 
 class ErrorModel(object):
-
     def __init__(self, call_conv):
         self.call_conv = call_conv
 
@@ -466,6 +471,7 @@ class PythonErrorModel(ErrorModel):
     """
     The Python error model.  Any invalid FP input raises an exception.
     """
+
     raise_on_fp_zero_division = True
 
 
@@ -481,13 +487,11 @@ class NumpyErrorModel(ErrorModel):
         http://lists.llvm.org/pipermail/llvm-dev/2014-September/076918.html
         http://lists.llvm.org/pipermail/llvm-commits/Week-of-Mon-20140929/237997.html
     """
+
     raise_on_fp_zero_division = False
 
 
-error_models = {
-    'python': PythonErrorModel,
-    'numpy': NumpyErrorModel,
-    }
+error_models = {"python": PythonErrorModel, "numpy": NumpyErrorModel}
 
 
 def create_error_model(model_name, context):

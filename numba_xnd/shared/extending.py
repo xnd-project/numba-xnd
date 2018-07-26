@@ -98,6 +98,28 @@ def create_opaque_struct(c_struct_name, attrs, embedded=None):
 
         return inner_type(numba.types.int64), codegen
 
+    # Add default unboxing as just itself, so that creating a gumath kernel with xnd_t and ndt_context_t
+    # works
+    @numba.extending.unbox(InnerType)
+    def unbox_inner(typ, obj, c):
+        return numba.extending.NativeValue(
+            c.builder.bitcast(obj, ptr(struct_llvm_type))
+        )
+
+    # add support for indexing that moves pointer over if multiple are allocated
+    @numba.extending.type_callable("getitem")
+    def type_array_wrap(context):
+        def typer(val_t, i_t):
+            if val_t == inner_type and isinstance(i_t, numba.types.Integer):
+                return inner_type
+
+        return typer
+
+    @numba.targets.imputils.lower_builtin("getitem", InnerType, numba.types.Integer)
+    def getitem_inner(context, builder, sig, args):
+        x, i = args
+        return builder.gep(x, [i])
+
     return inner_type, struct_llvm_type, create_inner
 
 
@@ -137,6 +159,7 @@ def wrap_c_func(func_name, numba_ret_type, numba_arg_types):
             for i in range(len(numba_arg_types) + 1)
         ]
     )
+
     return numba.extending.intrinsic(intrinsic_inner)
 
 
