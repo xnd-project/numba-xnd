@@ -2,7 +2,7 @@ import unittest
 
 from xnd import xnd
 
-import numba_xnd
+import numba_xnd  # NOQA
 from numba import njit
 
 x = xnd([[1, 2, 3], [4, 5, 6]])

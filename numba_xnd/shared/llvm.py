@@ -5,7 +5,9 @@ i8, i16, i32, i64 = map(ir.IntType, [8, 16, 32, 64])
 int_ = i32
 char = i8
 
-index = lambda i: ir.Constant(i32, i)
+
+def index(i):
+    return ir.Constant(i32, i)
 
 
 def pycapsule_import(c, path, i: int, fntype, name=None):

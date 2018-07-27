@@ -15,4 +15,3 @@ xnd_view_move_ndt = shared.wrap_c_func(
     structs.xnd_object_type,
     (structs.xnd_object_type, libndtypes.ndt_type),
 )
-

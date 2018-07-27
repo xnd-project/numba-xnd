@@ -2,7 +2,7 @@ import unittest
 
 from ndtypes import ndt
 
-import numba_xnd
+import numba_xnd  # NOQA
 from numba import njit
 
 n = ndt("10 * 4 * 4 * 5 * 10 * int64")

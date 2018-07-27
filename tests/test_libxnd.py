@@ -85,7 +85,9 @@ class TestSubtree(unittest.TestCase):
         self.assertEqual(x, xnd([[1, 2, 3], [4, 5, 6]]))
 
     def test_field(self):
-        make_x = lambda: xnd({"hi": [1, 2], "there": [[3, 4]]})
+        def make_x():
+            return xnd({"hi": [1, 2], "there": [[3, 4]]})
+
         orig_value = make_x()
         self.assertEqual(subtree_field(orig_value), xnd([[3, 4]]))
         self.assertEqual(orig_value, make_x())

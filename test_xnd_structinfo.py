@@ -1,4 +1,5 @@
 import ndtypes
+
 import xnd_structinfo as xinfo
 
 # print('\n'.join(sorted(dir(xinfo))))
@@ -15,11 +16,11 @@ def show_ndt_members(ndt, tab=""):
     flags = xinfo.value_int32(xinfo.get_ndt_t_flags(ndt))
     ndim = xinfo.value_int32(xinfo.get_ndt_t_ndim(ndt))
     datasize = xinfo.value_int64(xinfo.get_ndt_t_datasize(ndt))
-    if ndim>0:
+    if ndim > 0:
         shape = xinfo.value_int64(xinfo.get_ndt_t_FixedDim_shape(ndt))
     else:
-        shape = 'NA'
-        
+        shape = "NA"
+
     print(
         f"{tab}tag={tag}, access={access}, flags={flags}, ndim={ndim}, datasize={datasize}, shape={shape}"
     )
