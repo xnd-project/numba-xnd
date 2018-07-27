@@ -1,8 +1,8 @@
-import xnd
 import llvmlite
+import xnd
 
-# expose
-from .structs import *  # NOQA
 from .functions import *  # NOQA
+from .objects import *  # NOQA
+from .structs import *  # NOQA
 
 llvmlite.binding.load_library_permanently(xnd._xnd.__file__)
