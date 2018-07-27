@@ -3,17 +3,23 @@ import xnd
 import numba.datamodel
 import numba.extending
 
-from .. import ndtypes, pyxnd, shared
+from .. import libxnd, ndtypes, pyxnd, shared
 
-XndObjectWrapperType = shared.create_numba_type(
-    "XndObjectWrapper", shared.ptr(pyxnd.xnd_object)
-)
-xnd_object_wrapper_type = XndObjectWrapperType()
+
+class XndObjectWrapperType(libxnd.XndSpec):
+    def __init__(self, ndt_type):
+        super().__init__(ndt_type, name="XndObjectWrapper")
+
+
+@numba.extending.register_model(XndObjectWrapperType)
+class XndObjectWrapperModel(numba.extending.models.PrimitiveModel):
+    def __init__(self, dmm, fe_type):
+        super().__init__(dmm, fe_type, shared.ptr(pyxnd.xnd_object))
 
 
 @numba.extending.typeof_impl.register(xnd.xnd)
 def typeof_xnd(val, c):
-    return xnd_object_wrapper_type
+    return XndObjectWrapperType(val.type)
 
 
 @numba.extending.unbox(XndObjectWrapperType)
@@ -35,10 +41,10 @@ def box_xnd(typ, val, c):
 
 @numba.extending.intrinsic
 def unwrap_xnd_object(typingctx, xnd_object_wrapper_t):
-    if xnd_object_wrapper_t != xnd_object_wrapper_type:
+    if not isinstance(xnd_object_wrapper_t, XndObjectWrapperType):
         return
 
-    sig = pyxnd.xnd_object_type(xnd_object_wrapper_type)
+    sig = pyxnd.xnd_object_type(xnd_object_wrapper_t)
 
     def codegen(context, builder, sig, args):
         return args[0]
@@ -46,22 +52,14 @@ def unwrap_xnd_object(typingctx, xnd_object_wrapper_t):
     return sig, codegen
 
 
-@numba.extending.intrinsic
-def wrap_xnd_object(typingctx, xnd_object_t):
-    if xnd_object_t != pyxnd.xnd_object_type:
-        return
+# @numba.extending.intrinsic
+# def wrap_xnd_object(typingctx, xnd_object_t, type_t):
+#     if xnd_object_t != pyxnd.xnd_object_type, :
+#         return
 
-    sig = xnd_object_wrapper_type(pyxnd.xnd_object_type)
+#     sig = xnd_object_wrapper_type(pyxnd.xnd_object_type)
 
-    def codegen(context, builder, sig, args):
-        return args[0]
+#     def codegen(context, builder, sig, args):
+#         return args[0]
 
-    return sig, codegen
-
-
-@numba.extending.overload_attribute(XndObjectWrapperType, "type")
-def xnd_type_impl(_):
-    def get(py_xnd):
-        return ndtypes.wrap_ndt_object(unwrap_xnd_object(py_xnd).type)
-
-    return get
+#     return sig, codegen
