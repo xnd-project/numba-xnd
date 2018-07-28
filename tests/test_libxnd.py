@@ -27,7 +27,8 @@ def subtree_single_index(x, i):
     ret_xnd_object = numba_xnd.pyxnd.xnd_view_move_ndt(xnd_object, xnd_object.type.ndt)
     ret_xnd_object.type.ndt = ret_xnd.type
     ret_xnd_object.xnd = ret_xnd
-    return numba_xnd.xnd.wrap_xnd_object(ret_xnd_object)
+    # return ret_xnd_object
+    return numba_xnd.xnd.wrap_xnd_object(ret_xnd_object, x.type)
 
 
 @njit
@@ -51,7 +52,7 @@ def subtree_two_ints(x, i, j):
     ret_xnd_object = numba_xnd.pyxnd.xnd_view_move_ndt(xnd_object, xnd_object.type.ndt)
     ret_xnd_object.type.ndt = ret_xnd.type
     ret_xnd_object.xnd = ret_xnd
-    return numba_xnd.xnd.wrap_xnd_object(ret_xnd_object)
+    return numba_xnd.xnd.wrap_xnd_object(ret_xnd_object, x.type)
 
 
 @njit
@@ -72,7 +73,7 @@ def subtree_field(x):
     ret_xnd_object = numba_xnd.pyxnd.xnd_view_move_ndt(xnd_object, xnd_object.type.ndt)
     ret_xnd_object.type.ndt = ret_xnd.type
     ret_xnd_object.xnd = ret_xnd
-    return numba_xnd.xnd.wrap_xnd_object(ret_xnd_object)
+    return numba_xnd.xnd.wrap_xnd_object(ret_xnd_object, x.type)
 
 
 class TestSubtree(unittest.TestCase):
@@ -113,7 +114,7 @@ def multikey_slice(x, start, stop, step):
     ret_xnd_object = numba_xnd.pyxnd.xnd_view_move_ndt(xnd_object, xnd_object.type.ndt)
     ret_xnd_object.type.ndt = ret_xnd.type
     ret_xnd_object.xnd = ret_xnd
-    return numba_xnd.xnd.wrap_xnd_object(ret_xnd_object)
+    return numba_xnd.xnd.wrap_xnd_object(ret_xnd_object, x.type)
 
 
 class TestMultikey(unittest.TestCase):

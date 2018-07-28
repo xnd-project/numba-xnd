@@ -22,3 +22,6 @@ class TestPyXnd(unittest.TestCase):
 
     def test_type(self):
         self.assertEqual(njit(lambda x: x.type)(x), x.type)
+
+    def test_ndim(self):
+        self.assertEqual(njit(lambda x: x.ndim)(x), x.ndim)
