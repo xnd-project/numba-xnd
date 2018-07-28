@@ -28,21 +28,6 @@ def xnd_wrapper_type(x):
     return get
 
 
-# @numba.extending.infer_getattr
-# class XndObjectWrapperTemplate(numba.typing.templates.AttributeTemplate):
-#     key = XndObjectWrapperType
-
-#     def resolve_type(self, xnd_spec_t):
-#         return ndtypes.NdtObjectWrapperType(xnd_spec_t.ndt_type)
-
-
-# @numba.extending.lower_getattr(XndObjectWrapperType, "type")
-# def _inner_getattr_impl(context, builder, typ, value, attr):
-#     is_embedded = attr in embedded
-#     ret = _get_attr(builder, value, attr, is_embedded)
-#     return ret if is_embedded else builder.load(ret)
-
-
 @numba.extending.typeof_impl.register(xnd.xnd)
 def typeof_xnd(val, c):
     return XndObjectWrapperType(val.type)
