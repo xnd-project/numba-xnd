@@ -154,3 +154,21 @@ def ptr_store_type(typingctx, numba_type_t, ptr_t, value_t):
         return value
 
     return sig, codegen
+
+
+@numba.extending.intrinsic(support_literals=True)
+def array_index(typingctx, array_t, i_t):
+    """
+    Indexes an LLVM array of ints with a constant value.
+    """
+    if not isinstance(i_t, numba.types.Const):
+        return
+
+    sig = numba.types.int64(array_t, i_t)
+    i = i_t.value
+
+    def codegen(context, builder, sig, args):
+        array, _ = args
+        return builder.extract_value(array, i)
+
+    return sig, codegen

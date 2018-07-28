@@ -5,7 +5,7 @@ import llvmlite.ir
 
 import numba
 
-from .. import libndtypes, libxnd, shared
+from . import libndtypes, libxnd, shared
 
 
 def register_gumath_kernel(name, signature):

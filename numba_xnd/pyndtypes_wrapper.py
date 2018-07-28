@@ -3,10 +3,10 @@ import ndtypes
 import numba.datamodel
 import numba.extending
 
-from .. import libndtypes, pyndtypes, shared
+from . import libndtypes, libndtypes_wrapper, pyndtypes, shared
 
 
-class NdtObjectWrapperType(libndtypes.NdtSpec):
+class NdtObjectWrapperType(libndtypes_wrapper.NdtSpec):
     def __init__(self, ndt):
         super().__init__(ndt, "NdtObjectWrapper")
 
@@ -63,7 +63,7 @@ def wrap_ndt_object(typingctx, ndt_object_t, ndt_type_t):
     if isinstance(ndt_type_t, numba.types.Const):
         n = ndtypes.ndt(ndt_type_t.value)
         arg_type = numba.types.string
-    elif isinstance(ndt_type_t, libndtypes.NdtSpec):
+    elif isinstance(ndt_type_t, libndtypes_wrapper.NdtSpec):
         n = ndt_type_t.ndt_type
         arg_type = ndt_type_t
     else:

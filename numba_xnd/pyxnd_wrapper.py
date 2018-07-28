@@ -3,10 +3,10 @@ import xnd
 import numba.datamodel
 import numba.extending
 
-from .. import libndtypes, libxnd, ndtypes, pyxnd, shared
+from . import libndtypes_wrapper, libxnd_wrapper, pyndtypes_wrapper, pyxnd, shared
 
 
-class XndObjectWrapperType(libxnd.XndSpec):
+class XndObjectWrapperType(libxnd_wrapper.XndSpec):
     def __init__(self, ndt_type):
         super().__init__(ndt_type, name="XndObjectWrapper")
 
@@ -23,7 +23,7 @@ def xnd_wrapper_type(x):
 
     def get(x):
         x_ = unwrap_xnd_object(x)
-        return ndtypes.wrap_ndt_object(x_.type, type_)
+        return pyndtypes_wrapper.wrap_ndt_object(x_.type, type_)
 
     return get
 
@@ -71,7 +71,7 @@ def unwrap_xnd_object(typingctx, xnd_object_wrapper_t):
 @numba.extending.intrinsic(support_literals=True)
 def wrap_xnd_object(typingctx, xnd_object_t, ndt_spec_t):
     if xnd_object_t != pyxnd.xnd_object_type or not isinstance(
-        ndt_spec_t, libndtypes.NdtSpec
+        ndt_spec_t, libndtypes_wrapper.NdtSpec
     ):
         return
 

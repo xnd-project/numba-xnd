@@ -2,8 +2,6 @@ import ndtypes
 
 import numba
 
-from .. import libndtypes
-
 
 class XndSpec(numba.types.Type):
     """

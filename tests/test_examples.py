@@ -10,9 +10,9 @@ from numba import njit
 @njit
 def integer_matrix_multiply(x_p, y_p, res_p):
     x, y, res = (
-        numba_xnd.xnd.unwrap_xnd_object(x_p).xnd,
-        numba_xnd.xnd.unwrap_xnd_object(y_p).xnd,
-        numba_xnd.xnd.unwrap_xnd_object(res_p).xnd,
+        numba_xnd.pyxnd_wrapper.unwrap_xnd_object(x_p).xnd,
+        numba_xnd.pyxnd_wrapper.unwrap_xnd_object(y_p).xnd,
+        numba_xnd.pyxnd_wrapper.unwrap_xnd_object(res_p).xnd,
     )
 
     # get shape of x
@@ -20,12 +20,14 @@ def integer_matrix_multiply(x_p, y_p, res_p):
     a = numba_xnd.libndtypes.create_ndt_ndarray()
     numba_xnd.libndtypes.ndt_as_ndarray(a, x.type, ctx)
     # assert not numba_xnd.libndtypes.ndt_err_occurred(ctx)
-    n, m = numba_xnd.libndtypes.ndt_dim_array_to_tuple(a.shape, 2)
+    n = numba_xnd.shared.array_index(a.shape, 0)
+    m = numba_xnd.shared.array_index(a.shape, 1)
 
     # get shape of y
     numba_xnd.libndtypes.ndt_as_ndarray(a, y.type, ctx)
     # assert not numba_xnd.libndtypes.ndt_err_occurred(ctx)
-    m_1, p = numba_xnd.libndtypes.ndt_dim_array_to_tuple(a.shape, 2)
+    m_1 = numba_xnd.shared.array_index(a.shape, 0)
+    p = numba_xnd.shared.array_index(a.shape, 1)
     # assert m_1 == m
 
     for i in range(n):
