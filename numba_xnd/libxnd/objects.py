@@ -24,3 +24,9 @@ def xnd_wrapper_ndim(x):
     return get
 
 
+def ndtypes_index(t):
+    """
+    Returns the resulting ndtype after indexing t by some int.
+    """
+    first, *rest = str(t).split(" * ")
+    return ndtypes.ndt(" * ".join(rest))
