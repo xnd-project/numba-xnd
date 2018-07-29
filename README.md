@@ -4,6 +4,8 @@
 [![Codecov branch](https://img.shields.io/codecov/c/github/quansight/numba-xnd/master.svg)](https://codecov.io/gh/quansight/numba-xnd)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 
+_Code coverage is lower than it should be, since it can't count Numba jitted functions_
+
 ## Usage
 
 ```python
