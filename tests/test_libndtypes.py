@@ -10,7 +10,7 @@ n = ndt("10 * 4 * 4 * int64")
 
 @njit
 def get_ndim(x):
-    return numba_xnd.pyndtypes_wrapper.unwrap_ndt_object(x).ndt.ndim
+    return numba_xnd.pyndtypes.unwrap_ndt_object(x).ndt.ndim
 
 
 @njit
@@ -18,7 +18,7 @@ def get_shape(x):
     a = numba_xnd.libndtypes.create_ndt_ndarray()
     numba_xnd.libndtypes.ndt_as_ndarray(
         a,
-        numba_xnd.pyndtypes_wrapper.unwrap_ndt_object(x).ndt,
+        numba_xnd.pyndtypes.unwrap_ndt_object(x).ndt,
         numba_xnd.libndtypes.create_ndt_context(),
     )
     return (
@@ -31,7 +31,7 @@ def get_shape(x):
 @njit
 def is_concrete(x):
     return numba_xnd.libndtypes.ndt_is_concrete(
-        numba_xnd.pyndtypes_wrapper.unwrap_ndt_object(x).ndt
+        numba_xnd.pyndtypes.unwrap_ndt_object(x).ndt
     )
 
 

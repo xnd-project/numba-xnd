@@ -30,8 +30,8 @@ class TestViewMoveNdt(unittest.TestCase):
     def test_wrap_unwrap_same(self):
         @njit
         def wrap_unwrap(x):
-            return numba_xnd.pyxnd_wrapper.wrap_xnd_object(
-                numba_xnd.pyxnd_wrapper.unwrap_xnd_object(x), x.type
+            return numba_xnd.pyxnd.wrap_xnd_object(
+                numba_xnd.pyxnd.unwrap_xnd_object(x), x.type
             )
 
         for create in creators:
@@ -43,11 +43,11 @@ class TestViewMoveNdt(unittest.TestCase):
     def test_move_new_object(self):
         @njit
         def move(x):
-            xnd_object = numba_xnd.pyxnd_wrapper.unwrap_xnd_object(x)
+            xnd_object = numba_xnd.pyxnd.unwrap_xnd_object(x)
             ret_xnd_object = numba_xnd.pyxnd.xnd_view_move_ndt(
                 xnd_object, xnd_object.type.ndt
             )
-            return numba_xnd.pyxnd_wrapper.wrap_xnd_object(ret_xnd_object, x.type)
+            return numba_xnd.pyxnd.wrap_xnd_object(ret_xnd_object, x.type)
 
         for create in creators:
             x = create()
@@ -56,3 +56,25 @@ class TestViewMoveNdt(unittest.TestCase):
                 self.assertIsNot(res, x)
                 self.assertEqual(res, x)
                 self.assertEqual(x, create())
+
+
+x = xnd([[1, 2, 3], [4, 5, 6]])
+x2 = xnd({"hi": [1, 2, 3], "there": [1, 2, 3]})
+
+
+@njit
+def identity(x):
+    return x
+
+
+class TestXndObjectWrapper(unittest.TestCase):
+    def test_boxes_unboxes(self):
+        self.assertEqual(identity(x), x)
+        self.assertEqual(identity(x2), x2)
+        self.assertEqual(identity(x2["hi"]), x2["hi"])
+
+    def test_type(self):
+        self.assertEqual(njit(lambda x: x.type)(x), x.type)
+
+    def test_ndim(self):
+        self.assertEqual(njit(lambda x: x.ndim)(x), x.ndim)

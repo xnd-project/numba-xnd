@@ -23,7 +23,7 @@ def i64_to_i32(typingctx, i64_t):
 
 
 c_string = ptr(char)
-c_string_type = create_numba_type("CString", c_string)()
+c_string_type = create_numba_type("CString", c_string)
 
 
 @numba.extending.intrinsic(support_literals=True)

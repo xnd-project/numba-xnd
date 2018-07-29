@@ -1,6 +1,8 @@
 import llvmlite
+import ndtypes
 import xnd
 
+import numba
 import numba.extending
 import numba.types
 
@@ -9,8 +11,14 @@ from . import libndtypes, shared
 llvmlite.binding.load_library_permanently(xnd._xnd.__file__)
 
 
-xnd_type, xnd_t, create_xnd = shared.create_opaque_struct(
-    "xnd_t", {"type": libndtypes.ndt_type, "ptr": shared.c_string_type}
+class XndSpec(numba.types.Type):
+    pass
+
+
+xnd_type, xnd_t, create_xnd, XndWrapperType, wrap_xnd, unwrap_xnd = shared.create_opaque_struct(
+    "xnd_t",
+    {"type": libndtypes.ndt_type, "ptr": shared.c_string_type},
+    wrapper_spec_class=XndSpec,
 )
 
 
@@ -85,3 +93,19 @@ xnd_strict_equal = shared.wrap_c_func(
     numba.types.intc,
     (xnd_type, xnd_type, libndtypes.ndt_context_type),
 )
+
+
+@numba.extending.overload_attribute(XndSpec, "ndim")
+def xnd_wrapper_ndim(x):
+    def get(x):
+        return x.type.ndim
+
+    return get
+
+
+def ndtypes_index(t):
+    """
+    Returns the resulting ndtype after indexing t by some int.
+    """
+    first, *rest = str(t).split(" * ")
+    return ndtypes.ndt(" * ".join(rest))

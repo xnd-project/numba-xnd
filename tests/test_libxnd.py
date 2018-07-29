@@ -11,7 +11,7 @@ x = xnd([[1, 2, 3], [4, 5, 6]])
 
 @njit
 def subtree_single_index(x, i):
-    xnd_object = numba_xnd.pyxnd_wrapper.unwrap_xnd_object(x)
+    xnd_object = numba_xnd.pyxnd.unwrap_xnd_object(x)
     index = numba_xnd.libxnd.create_xnd_index()
     index.tag = numba_xnd.libxnd.XND_KEY_INDEX
     index.Index = i
@@ -28,12 +28,12 @@ def subtree_single_index(x, i):
     ret_xnd_object.type.ndt = ret_xnd.type
     ret_xnd_object.xnd = ret_xnd
     # return ret_xnd_object
-    return numba_xnd.pyxnd_wrapper.wrap_xnd_object(ret_xnd_object, x.type)
+    return numba_xnd.pyxnd.wrap_xnd_object(ret_xnd_object, x.type)
 
 
 @njit
 def subtree_two_ints(x, i, j):
-    xnd_object = numba_xnd.pyxnd_wrapper.unwrap_xnd_object(x)
+    xnd_object = numba_xnd.pyxnd.unwrap_xnd_object(x)
     index = numba_xnd.libxnd.create_xnd_index(2)
     index.tag = numba_xnd.libxnd.XND_KEY_INDEX
     index.Index = i
@@ -52,12 +52,12 @@ def subtree_two_ints(x, i, j):
     ret_xnd_object = numba_xnd.pyxnd.xnd_view_move_ndt(xnd_object, xnd_object.type.ndt)
     ret_xnd_object.type.ndt = ret_xnd.type
     ret_xnd_object.xnd = ret_xnd
-    return numba_xnd.pyxnd_wrapper.wrap_xnd_object(ret_xnd_object, x.type)
+    return numba_xnd.pyxnd.wrap_xnd_object(ret_xnd_object, x.type)
 
 
 @njit
 def subtree_field(x):
-    xnd_object = numba_xnd.pyxnd_wrapper.unwrap_xnd_object(x)
+    xnd_object = numba_xnd.pyxnd.unwrap_xnd_object(x)
     index = numba_xnd.libxnd.create_xnd_index()
     index.tag = numba_xnd.libxnd.XND_KEY_FIELD_NAME
     index.FieldName = numba_xnd.shared.c_string_const("there")
@@ -73,7 +73,7 @@ def subtree_field(x):
     ret_xnd_object = numba_xnd.pyxnd.xnd_view_move_ndt(xnd_object, xnd_object.type.ndt)
     ret_xnd_object.type.ndt = ret_xnd.type
     ret_xnd_object.xnd = ret_xnd
-    return numba_xnd.pyxnd_wrapper.wrap_xnd_object(ret_xnd_object, x.type)
+    return numba_xnd.pyxnd.wrap_xnd_object(ret_xnd_object, x.type)
 
 
 class TestSubtree(unittest.TestCase):
@@ -96,7 +96,7 @@ class TestSubtree(unittest.TestCase):
 
 @njit
 def multikey_slice(x, start, stop, step):
-    xnd_object = numba_xnd.pyxnd_wrapper.unwrap_xnd_object(x)
+    xnd_object = numba_xnd.pyxnd.unwrap_xnd_object(x)
     index = numba_xnd.libxnd.create_xnd_index()
     index.tag = numba_xnd.libxnd.XND_KEY_SLICE
     index.Slice.start = start
@@ -114,7 +114,7 @@ def multikey_slice(x, start, stop, step):
     ret_xnd_object = numba_xnd.pyxnd.xnd_view_move_ndt(xnd_object, xnd_object.type.ndt)
     ret_xnd_object.type.ndt = ret_xnd.type
     ret_xnd_object.xnd = ret_xnd
-    return numba_xnd.pyxnd_wrapper.wrap_xnd_object(ret_xnd_object, x.type)
+    return numba_xnd.pyxnd.wrap_xnd_object(ret_xnd_object, x.type)
 
 
 class TestMultikey(unittest.TestCase):
@@ -128,8 +128,8 @@ class TestMultikey(unittest.TestCase):
 @njit
 def is_equal(x, y):
     return numba_xnd.libxnd.xnd_equal(
-        numba_xnd.pyxnd_wrapper.unwrap_xnd_object(x).xnd,
-        numba_xnd.pyxnd_wrapper.unwrap_xnd_object(y).xnd,
+        numba_xnd.pyxnd.unwrap_xnd_object(x).xnd,
+        numba_xnd.pyxnd.unwrap_xnd_object(y).xnd,
         numba_xnd.libndtypes.create_ndt_context(),
     )
 
@@ -147,7 +147,7 @@ class TestLoadPtr(unittest.TestCase):
         @njit
         def get_bool(x):
             return numba_xnd.shared.ptr_load_type(
-                numba.types.boolean, numba_xnd.pyxnd_wrapper.unwrap_xnd_object(x).xnd.ptr
+                numba.types.boolean, numba_xnd.pyxnd.unwrap_xnd_object(x).xnd.ptr
             )
 
         self.assertTrue(get_bool(xnd(True)))
@@ -157,7 +157,7 @@ class TestLoadPtr(unittest.TestCase):
         @njit
         def get_int8(x):
             return numba_xnd.shared.ptr_load_type(
-                numba.types.int8, numba_xnd.pyxnd_wrapper.unwrap_xnd_object(x).xnd.ptr
+                numba.types.int8, numba_xnd.pyxnd.unwrap_xnd_object(x).xnd.ptr
             )
 
         self.assertEqual(get_int8(xnd(10, type="int8")), 10)
@@ -166,7 +166,7 @@ class TestLoadPtr(unittest.TestCase):
         @njit
         def get_int16(x):
             return numba_xnd.shared.ptr_load_type(
-                numba.types.int16, numba_xnd.pyxnd_wrapper.unwrap_xnd_object(x).xnd.ptr
+                numba.types.int16, numba_xnd.pyxnd.unwrap_xnd_object(x).xnd.ptr
             )
 
         self.assertEqual(get_int16(xnd(10, type="int16")), 10)
@@ -175,7 +175,7 @@ class TestLoadPtr(unittest.TestCase):
         @njit
         def get_int32(x):
             return numba_xnd.shared.ptr_load_type(
-                numba.types.int32, numba_xnd.pyxnd_wrapper.unwrap_xnd_object(x).xnd.ptr
+                numba.types.int32, numba_xnd.pyxnd.unwrap_xnd_object(x).xnd.ptr
             )
 
         self.assertEqual(get_int32(xnd(10, type="int32")), 10)
@@ -184,7 +184,7 @@ class TestLoadPtr(unittest.TestCase):
         @njit
         def get_int64(x):
             return numba_xnd.shared.ptr_load_type(
-                numba.types.int64, numba_xnd.pyxnd_wrapper.unwrap_xnd_object(x).xnd.ptr
+                numba.types.int64, numba_xnd.pyxnd.unwrap_xnd_object(x).xnd.ptr
             )
 
         self.assertEqual(get_int64(xnd(10, type="int64")), 10)
@@ -193,7 +193,7 @@ class TestLoadPtr(unittest.TestCase):
         @njit
         def get_uint8(x):
             return numba_xnd.shared.ptr_load_type(
-                numba.types.uint8, numba_xnd.pyxnd_wrapper.unwrap_xnd_object(x).xnd.ptr
+                numba.types.uint8, numba_xnd.pyxnd.unwrap_xnd_object(x).xnd.ptr
             )
 
         self.assertEqual(get_uint8(xnd(10, type="uint8")), 10)
@@ -202,7 +202,7 @@ class TestLoadPtr(unittest.TestCase):
         @njit
         def get_float32(x):
             return numba_xnd.shared.ptr_load_type(
-                numba.types.float32, numba_xnd.pyxnd_wrapper.unwrap_xnd_object(x).xnd.ptr
+                numba.types.float32, numba_xnd.pyxnd.unwrap_xnd_object(x).xnd.ptr
             )
 
         self.assertEqual(get_float32(xnd(10.0, type="float32")), 10.0)
@@ -213,7 +213,7 @@ class TestStorePtr(unittest.TestCase):
         @njit
         def set_bool(x, y):
             numba_xnd.shared.ptr_store_type(
-                numba.types.boolean, numba_xnd.pyxnd_wrapper.unwrap_xnd_object(x).xnd.ptr, y
+                numba.types.boolean, numba_xnd.pyxnd.unwrap_xnd_object(x).xnd.ptr, y
             )
 
         x = xnd(True)
@@ -226,7 +226,7 @@ class TestStorePtr(unittest.TestCase):
         @njit
         def set_int8(x, y):
             numba_xnd.shared.ptr_store_type(
-                numba.types.int8, numba_xnd.pyxnd_wrapper.unwrap_xnd_object(x).xnd.ptr, y
+                numba.types.int8, numba_xnd.pyxnd.unwrap_xnd_object(x).xnd.ptr, y
             )
 
         x = xnd(123, type="int8")
@@ -237,7 +237,7 @@ class TestStorePtr(unittest.TestCase):
         @njit
         def set_int16(x, y):
             numba_xnd.shared.ptr_store_type(
-                numba.types.int16, numba_xnd.pyxnd_wrapper.unwrap_xnd_object(x).xnd.ptr, y
+                numba.types.int16, numba_xnd.pyxnd.unwrap_xnd_object(x).xnd.ptr, y
             )
 
         x = xnd(123, type="int16")
@@ -248,7 +248,7 @@ class TestStorePtr(unittest.TestCase):
         @njit
         def set_int32(x, y):
             numba_xnd.shared.ptr_store_type(
-                numba.types.int32, numba_xnd.pyxnd_wrapper.unwrap_xnd_object(x).xnd.ptr, y
+                numba.types.int32, numba_xnd.pyxnd.unwrap_xnd_object(x).xnd.ptr, y
             )
 
         x = xnd(123, type="int32")
@@ -259,7 +259,7 @@ class TestStorePtr(unittest.TestCase):
         @njit
         def set_uint8(x, y):
             numba_xnd.shared.ptr_store_type(
-                numba.types.uint8, numba_xnd.pyxnd_wrapper.unwrap_xnd_object(x).xnd.ptr, y
+                numba.types.uint8, numba_xnd.pyxnd.unwrap_xnd_object(x).xnd.ptr, y
             )
 
         x = xnd(123, type="uint8")
@@ -270,7 +270,7 @@ class TestStorePtr(unittest.TestCase):
         @njit
         def set_float32(x, y):
             numba_xnd.shared.ptr_store_type(
-                numba.types.float32, numba_xnd.pyxnd_wrapper.unwrap_xnd_object(x).xnd.ptr, y
+                numba.types.float32, numba_xnd.pyxnd.unwrap_xnd_object(x).xnd.ptr, y
             )
 
         x = xnd(123.123, type="float32")

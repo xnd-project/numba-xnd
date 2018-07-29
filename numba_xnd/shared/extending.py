@@ -1,6 +1,7 @@
 import inspect
 
 import llvmlite.ir
+import ndtypes
 
 import numba.extending
 import numba.types
@@ -24,10 +25,13 @@ def create_numba_type(name, llvm_type):
         def __init__(self, dmm, fe_type):
             super().__init__(dmm, fe_type, llvm_type)
 
-    return InnerType
+    return InnerType()
 
 
-def create_opaque_struct(c_struct_name, attrs, embedded=None):
+# TODO: Convert to class to be able to accesss functions/types as attributes instead of unpacking return arguments
+def create_opaque_struct(
+    c_struct_name, attrs, embedded=tuple(), wrapper_spec_class=None
+):
     """
     Creates a Numba type and model for the c struct `c_struct_name`
 
@@ -39,16 +43,29 @@ def create_opaque_struct(c_struct_name, attrs, embedded=None):
     `embedded` is a set of attribute names that actually are embedded in the struct instead of referenced.
     So if `hi` is an attribute that has a numba type with a data model of `some_other_thing*`, then if `hi`
     is in `embedded`, this struct has `some_other_thing` embedded in it, instead of a pointer to it.
+
+    If you pass in a class to `wrapper_spec_class`, this will be used to create a wrapper type as well, with a
+    `ndt_type` attribute that holds a ndtypes.ndt instance. In this case, it also returns a wrapper type, wrap function,
+    and unwrap function.
     """
-    embedded = embedded or set()
     struct_llvm_type = llvmlite.ir.ArrayType(
         char, getattr(xnd_structinfo, f"sizeof_{c_struct_name}")()
     )
 
-    InnerType = create_numba_type(
-        "".join(word.capitalize() for word in c_struct_name.split("_") if word != "t"),
-        ptr(struct_llvm_type),
+    llvm_repr = ptr(struct_llvm_type)
+    type_name = "".join(
+        word.capitalize() for word in c_struct_name.split("_") if word != "t"
     )
+
+    class InnerType(numba.types.Type):
+        def __init__(self):
+            super().__init__(name=type_name)
+
+    @numba.extending.register_model(InnerType)
+    class InnerModel(numba.extending.models.PrimitiveModel):
+        def __init__(self, dmm, fe_type):
+            super().__init__(dmm, fe_type, llvm_repr)
+
     inner_type = InnerType()
 
     @numba.extending.infer_getattr
@@ -67,7 +84,7 @@ def create_opaque_struct(c_struct_name, attrs, embedded=None):
         attr_llvm_type = llvm_type_from_numba_type(attrs[attr])
         ret_type = attr_llvm_type if is_embedded else ptr(attr_llvm_type)
         fn = builder.module.get_or_insert_function(
-            llvmlite.ir.FunctionType(ret_type, [ptr(struct_llvm_type)]),
+            llvmlite.ir.FunctionType(ret_type, [llvm_repr]),
             name=f"get_{c_struct_name}_{attr}",
         )
         return_value = builder.call(fn, [value])
@@ -102,9 +119,7 @@ def create_opaque_struct(c_struct_name, attrs, embedded=None):
     # works
     @numba.extending.unbox(InnerType)
     def unbox_inner(typ, obj, c):
-        return numba.extending.NativeValue(
-            c.builder.bitcast(obj, ptr(struct_llvm_type))
-        )
+        return numba.extending.NativeValue(c.builder.bitcast(obj, llvm_repr))
 
     # add support for indexing that moves pointer over if multiple are allocated
     @numba.extending.type_callable("getitem")
@@ -120,7 +135,52 @@ def create_opaque_struct(c_struct_name, attrs, embedded=None):
         x, i = args
         return builder.gep(x, [i])
 
-    return inner_type, struct_llvm_type, create_inner
+    return_vals = inner_type, struct_llvm_type, create_inner
+    if not wrapper_spec_class:
+        return return_vals
+
+    class WrapperType(wrapper_spec_class):
+        def __init__(self, n):
+            assert isinstance(n, ndtypes.ndt)
+            self.ndt_type = n
+            super().__init__(f"{type_name}Wrapper({n})")
+
+    numba.extending.register_model(WrapperType)(InnerModel)
+
+    @numba.extending.intrinsic(support_literals=True)
+    def wrap_inner(typingctx, inner_t, ndt_type_t):
+        if inner_t != inner_type:
+            return
+        # supports passing in strings as ndt's
+        if isinstance(ndt_type_t, numba.types.Const):
+            n = ndtypes.ndt(ndt_type_t.value)
+            arg_type = numba.types.string
+        elif hasattr(ndt_type_t, "ndt_type"):
+            n = ndt_type_t.ndt_type
+            arg_type = ndt_type_t
+        else:
+            return
+
+        sig = WrapperType(n)(inner_type, arg_type)
+
+        def codegen(context, builder, sig, args):
+            return args[0]
+
+        return sig, codegen
+
+    @numba.extending.intrinsic
+    def unwrap_inner(typingctx, wrapper_t):
+        if not isinstance(wrapper_t, WrapperType):
+            return
+
+        sig = inner_type(wrapper_t)
+
+        def codegen(context, builder, sig, args):
+            return args[0]
+
+        return sig, codegen
+
+    return return_vals + (WrapperType, wrap_inner, unwrap_inner)
 
 
 def llvm_type_from_numba_type(numba_type):

@@ -15,11 +15,17 @@ llvmlite.binding.load_library_permanently(ndtypes._ndtypes.__file__)
 
 NDT_MAX_DIM = 128
 
-ndt_dim_array = llvmlite.ir.ArrayType(shared.i64, NDT_MAX_DIM)
-ndt_dim_array_type = shared.create_numba_type("NdtDimArray", ndt_dim_array)()
 
-ndt_type, ndt_t, create_ndt = shared.create_opaque_struct(
-    "ndt_t", {"ndim": numba.types.int32}
+ndt_dim_array = llvmlite.ir.ArrayType(shared.i64, NDT_MAX_DIM)
+ndt_dim_array_type = shared.create_numba_type("NdtDimArray", ndt_dim_array)
+
+
+class NdtSpec(numba.types.Type):
+    pass
+
+
+ndt_type, ndt_t, create_ndt, NdtWrapperType, wrap_ndt, unwrap_ndt = shared.create_opaque_struct(
+    "ndt_t", {"ndim": numba.types.int32}, wrapper_spec_class=NdtSpec
 )
 
 ndt_ndarray_type, ndt_ndarray_t, create_ndt_ndarray = shared.create_opaque_struct(
@@ -64,3 +70,24 @@ def ndt_static_context():
     ctx.msg = 0
     ctx.ConstMsg = shared.c_string_const("Success")
     return ctx
+
+
+# TODO: look into geting all properties of ndt and auto generate these, maybe using inspect
+@numba.extending.overload_attribute(NdtSpec, "shape")
+def ndt_wrapper_shape(t):
+    shape = t.ndt_type.shape
+
+    def get(t):
+        return shape
+
+    return get
+
+
+@numba.extending.overload_attribute(NdtSpec, "ndim")
+def ndt_wrapper_ndim(t):
+    ndim = t.ndt_type.ndim
+
+    def get(t):
+        return ndim
+
+    return get

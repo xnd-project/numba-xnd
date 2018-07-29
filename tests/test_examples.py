@@ -10,25 +10,25 @@ from numba import njit
 @njit
 def integer_matrix_multiply(x_p, y_p, res_p):
     x, y, res = (
-        numba_xnd.pyxnd_wrapper.unwrap_xnd_object(x_p).xnd,
-        numba_xnd.pyxnd_wrapper.unwrap_xnd_object(y_p).xnd,
-        numba_xnd.pyxnd_wrapper.unwrap_xnd_object(res_p).xnd,
+        numba_xnd.pyxnd.unwrap_xnd_object(x_p).xnd,
+        numba_xnd.pyxnd.unwrap_xnd_object(y_p).xnd,
+        numba_xnd.pyxnd.unwrap_xnd_object(res_p).xnd,
     )
 
     # get shape of x
     ctx = numba_xnd.libndtypes.ndt_static_context()
     a = numba_xnd.libndtypes.create_ndt_ndarray()
     numba_xnd.libndtypes.ndt_as_ndarray(a, x.type, ctx)
-    # assert not numba_xnd.libndtypes.ndt_err_occurred(ctx)
+    assert not numba_xnd.libndtypes.ndt_err_occurred(ctx)
     n = numba_xnd.shared.array_index(a.shape, 0)
     m = numba_xnd.shared.array_index(a.shape, 1)
 
     # get shape of y
     numba_xnd.libndtypes.ndt_as_ndarray(a, y.type, ctx)
-    # assert not numba_xnd.libndtypes.ndt_err_occurred(ctx)
+    assert not numba_xnd.libndtypes.ndt_err_occurred(ctx)
     m_1 = numba_xnd.shared.array_index(a.shape, 0)
     p = numba_xnd.shared.array_index(a.shape, 1)
-    # assert m_1 == m
+    assert m_1 == m
 
     for i in range(n):
         for j in range(p):
@@ -48,7 +48,7 @@ def integer_matrix_multiply(x_p, y_p, res_p):
                 numba_xnd.libxnd.xnd_subtree(
                     res_slice, res, index, numba_xnd.shared.i64_to_i32(2), ctx
                 )
-                # assert not numba_xnd.libndtypes.ndt_err_occurred(ctx)
+                assert not numba_xnd.libndtypes.ndt_err_occurred(ctx)
 
                 index.Index = i
                 second_index.Index = k
@@ -56,7 +56,7 @@ def integer_matrix_multiply(x_p, y_p, res_p):
                 numba_xnd.libxnd.xnd_subtree(
                     x_slice, x, index, numba_xnd.shared.i64_to_i32(2), ctx
                 )
-                # assert not numba_xnd.libndtypes.ndt_err_occurred(ctx)
+                assert not numba_xnd.libndtypes.ndt_err_occurred(ctx)
 
                 index.Index = k
                 second_index.Index = j
@@ -64,7 +64,7 @@ def integer_matrix_multiply(x_p, y_p, res_p):
                 numba_xnd.libxnd.xnd_subtree(
                     y_slice, y, index, numba_xnd.shared.i64_to_i32(2), ctx
                 )
-                # assert not numba_xnd.libndtypes.ndt_err_occurred(ctx)
+                assert not numba_xnd.libndtypes.ndt_err_occurred(ctx)
 
                 res_slice_val = numba_xnd.shared.ptr_load_type(
                     numba.types.int64, res_slice.ptr
