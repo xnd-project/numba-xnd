@@ -92,5 +92,17 @@ class MatrixMultiplyTest(unittest.TestCase):
         self.assertEqual(res, xnd([[58, 64], [139, 154]]))
 
 
+@njit
+def integer_const_add(a, b):
+    return a.value + b.value
+
+
+class SimpleAdditionTest(unittest.TestCase):
+    def test_integer_addition(self):
+        a = xnd(10)
+        b = xnd(20)
+        self.assertEqual(integer_const_add(a, b), 30)
+
+
 if __name__ == "__main__":
     unittest.main()
