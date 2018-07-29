@@ -68,16 +68,6 @@ def ndt_static_context():
     return ctx
 
 
-@numba.extending.box(NdtWrapperType)
-def box_ndt(typ, val, c):
-    return c.builder.bitcast(val, shared.ptr(shared.char))
-
-
-@numba.extending.unbox(NdtWrapperType)
-def unbox_ndt(typ, obj, c):
-    return numba.extending.NativeValue(c.builder.bitcast(obj, shared.ptr(ndt_t)))
-
-
 # TODO: look into geting all properties of ndt and auto generate these, maybe using inspect
 @numba.extending.overload_attribute(NdtWrapperType, "shape")
 def ndt_wrapper_shape(t):

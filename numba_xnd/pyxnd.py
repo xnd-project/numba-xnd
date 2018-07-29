@@ -20,6 +20,7 @@ xnd_object_type, xnd_object, create_xnd_object, XndObjectWrapperType, wrap_xnd_o
     },
     embedded={"xnd"},
     create_wrapper=True,
+    is_python_object=True,
 )
 
 
@@ -35,26 +36,6 @@ xnd_view_move_ndt = shared.wrap_c_func(
 @numba.extending.typeof_impl.register(xnd.xnd)
 def typeof_xnd(val, c):
     return XndObjectWrapperType(val.type)
-
-
-# TODO: Boxing/unboxing should maybe be defined on XndObjectType instead, because you don'y
-# need the ndt type to do this. However, then we would have to always convert to those when returning
-# or would need to setup automatic conversions. Another option might be to have XndObjectWrapperType subclass
-# XndObjectType, but then I would worry that maybe the attributes would carry over, which we don't want.
-# Explicit conversions here present less confusion.
-@numba.extending.box(XndObjectWrapperType)
-def box_xnd_object(typ, val, c):
-    """
-    Convert a native ptr(xnd_t) structure to a xnd object.
-    """
-    obj = c.builder.bitcast(val, c.pyapi.pyobj)
-    c.pyapi.incref(obj)
-    return obj
-
-
-@numba.extending.unbox(XndObjectWrapperType)
-def unbox_xnd_object(typ, obj, c):
-    return numba.extending.NativeValue(c.builder.bitcast(obj, shared.ptr(xnd_object)))
 
 
 @numba.extending.overload_attribute(XndObjectWrapperType, "type")

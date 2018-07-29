@@ -91,16 +91,6 @@ xnd_strict_equal = shared.wrap_c_func(
 )
 
 
-@numba.extending.box(XndWrapperType)
-def box_xnd(typ, val, c):
-    return c.builder.bitcast(val, shared.ptr(shared.char))
-
-
-@numba.extending.unbox(XndWrapperType)
-def unbox_xnd(typ, obj, c):
-    return numba.extending.NativeValue(c.builder.bitcast(obj, shared.ptr(xnd_t)))
-
-
 @numba.extending.overload_attribute(XndWrapperType, "type")
 def xnd_wrapper_type(x_wrapper_t):
     def get(x_wrapper):

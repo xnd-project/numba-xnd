@@ -29,7 +29,9 @@ def create_numba_type(name, llvm_type):
 
 
 # TODO: Convert to class to be able to accesss functions/types as attributes instead of unpacking return arguments
-def create_opaque_struct(c_struct_name, attrs, embedded=tuple(), create_wrapper=False):
+def create_opaque_struct(
+    c_struct_name, attrs, embedded=tuple(), create_wrapper=False, is_python_object=False
+):
     """
     Creates a Numba type and model for the c struct `c_struct_name`
 
@@ -45,6 +47,8 @@ def create_opaque_struct(c_struct_name, attrs, embedded=tuple(), create_wrapper=
     If `create_wrapper` is true, then this also creates a wrapper type that has same datamodel, but requires a
     `ndt_type` attribute that holds a ndtypes.ndt instance. In this case, it also returns a wrapper type, wrap function,
     and unwrap function.
+
+    If `is_python_object` is true, then adds incrementing reference to boxing.
     """
     struct_llvm_type = llvmlite.ir.ArrayType(
         char, getattr(xnd_structinfo, f"sizeof_{c_struct_name}")()
@@ -111,10 +115,17 @@ def create_opaque_struct(c_struct_name, attrs, embedded=tuple(), create_wrapper=
         return inner_type(numba.types.int64), codegen
 
     # Add default unboxing as just itself, so that creating a gumath kernel with xnd_t and ndt_context_t
-    # works
+    # works.
     @numba.extending.unbox(InnerType)
     def unbox_inner(typ, obj, c):
         return numba.extending.NativeValue(c.builder.bitcast(obj, llvm_repr))
+
+    @numba.extending.box(InnerType)
+    def box_inner(typ, val, c):
+        ret = c.builder.bitcast(val, ptr(char))
+        if is_python_object:
+            c.pyapi.incref(ret)
+        return ret
 
     # add support for indexing that moves pointer over if multiple are allocated
     @numba.extending.type_callable("getitem")
@@ -141,6 +152,10 @@ def create_opaque_struct(c_struct_name, attrs, embedded=tuple(), create_wrapper=
             super().__init__(f"{c_struct_name}Wrapper({n})")
 
     numba.extending.register_model(WrapperType)(InnerModel)
+
+    # Need boxing/unboxing for intrinsics to work
+    numba.extending.unbox(WrapperType)(unbox_inner)
+    numba.extending.box(WrapperType)(box_inner)
 
     @numba.extending.intrinsic(support_literals=True)
     def wrap_inner(typingctx, inner_t, ndt_type_t):
