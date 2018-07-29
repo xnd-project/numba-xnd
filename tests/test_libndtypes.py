@@ -44,3 +44,15 @@ class TestNdt(unittest.TestCase):
 
     def test_is_concrete(self):
         self.assertEqual(is_concrete(n), 1)
+
+
+class TestNdtWrapper(unittest.TestCase):
+    def test_ndim(self):
+        @njit
+        def get_ndim(t_object_wrapper):
+            t_object = numba_xnd.pyndtypes.unwrap_ndt_object(t_object_wrapper)
+            t = t_object.ndt
+            t_wrapper = numba_xnd.libndtypes.wrap_ndt(t, t_object_wrapper)
+            return t_wrapper.ndim
+
+        self.assertEqual(get_ndim(n), 3)

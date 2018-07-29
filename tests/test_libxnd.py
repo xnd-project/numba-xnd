@@ -28,7 +28,7 @@ def subtree_single_index(x, i):
     ret_xnd_object.type.ndt = ret_xnd.type
     ret_xnd_object.xnd = ret_xnd
     # return ret_xnd_object
-    return numba_xnd.pyxnd.wrap_xnd_object(ret_xnd_object, x.type)
+    return numba_xnd.pyxnd.wrap_xnd_object(ret_xnd_object, x)
 
 
 @njit
@@ -52,7 +52,7 @@ def subtree_two_ints(x, i, j):
     ret_xnd_object = numba_xnd.pyxnd.xnd_view_move_ndt(xnd_object, xnd_object.type.ndt)
     ret_xnd_object.type.ndt = ret_xnd.type
     ret_xnd_object.xnd = ret_xnd
-    return numba_xnd.pyxnd.wrap_xnd_object(ret_xnd_object, x.type)
+    return numba_xnd.pyxnd.wrap_xnd_object(ret_xnd_object, x)
 
 
 @njit
@@ -73,7 +73,7 @@ def subtree_field(x):
     ret_xnd_object = numba_xnd.pyxnd.xnd_view_move_ndt(xnd_object, xnd_object.type.ndt)
     ret_xnd_object.type.ndt = ret_xnd.type
     ret_xnd_object.xnd = ret_xnd
-    return numba_xnd.pyxnd.wrap_xnd_object(ret_xnd_object, x.type)
+    return numba_xnd.pyxnd.wrap_xnd_object(ret_xnd_object, x)
 
 
 class TestSubtree(unittest.TestCase):
@@ -114,7 +114,7 @@ def multikey_slice(x, start, stop, step):
     ret_xnd_object = numba_xnd.pyxnd.xnd_view_move_ndt(xnd_object, xnd_object.type.ndt)
     ret_xnd_object.type.ndt = ret_xnd.type
     ret_xnd_object.xnd = ret_xnd
-    return numba_xnd.pyxnd.wrap_xnd_object(ret_xnd_object, x.type)
+    return numba_xnd.pyxnd.wrap_xnd_object(ret_xnd_object, x)
 
 
 class TestMultikey(unittest.TestCase):
@@ -276,3 +276,27 @@ class TestStorePtr(unittest.TestCase):
         x = xnd(123.123, type="float32")
         set_float32(x, 10.0)
         self.assertEqual(x, xnd(10.0, type="float32"))
+
+
+class TestXndWrapper(unittest.TestCase):
+    def test_type(self):
+        x = xnd([1, 2, 3])
+
+        @njit
+        def get_type(x_object_wrapped):
+            x_wrapped = numba_xnd.pyxnd.to_wrapped_xnd(x_object_wrapped)
+            t_wrapped = x_wrapped.type
+            return t_wrapped.ndim
+
+        self.assertEqual(get_type(x), 1)
+        # self.assertEqual(x, xnd(123))
+
+    def test_value_int64(self):
+        @njit
+        def get_value(x_object_wrapped):
+            x_wrapped = numba_xnd.pyxnd.to_wrapped_xnd(x_object_wrapped)
+            return x_wrapped.value
+
+        x = xnd(123)
+        self.assertEqual(get_value(x), x.value)
+        self.assertEqual(x, xnd(123))

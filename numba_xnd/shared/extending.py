@@ -29,9 +29,7 @@ def create_numba_type(name, llvm_type):
 
 
 # TODO: Convert to class to be able to accesss functions/types as attributes instead of unpacking return arguments
-def create_opaque_struct(
-    c_struct_name, attrs, embedded=tuple(), wrapper_spec_class=None
-):
+def create_opaque_struct(c_struct_name, attrs, embedded=tuple(), create_wrapper=False):
     """
     Creates a Numba type and model for the c struct `c_struct_name`
 
@@ -44,7 +42,7 @@ def create_opaque_struct(
     So if `hi` is an attribute that has a numba type with a data model of `some_other_thing*`, then if `hi`
     is in `embedded`, this struct has `some_other_thing` embedded in it, instead of a pointer to it.
 
-    If you pass in a class to `wrapper_spec_class`, this will be used to create a wrapper type as well, with a
+    If `create_wrapper` is true, then this also creates a wrapper type that has same datamodel, but requires a
     `ndt_type` attribute that holds a ndtypes.ndt instance. In this case, it also returns a wrapper type, wrap function,
     and unwrap function.
     """
@@ -53,13 +51,10 @@ def create_opaque_struct(
     )
 
     llvm_repr = ptr(struct_llvm_type)
-    type_name = "".join(
-        word.capitalize() for word in c_struct_name.split("_") if word != "t"
-    )
 
     class InnerType(numba.types.Type):
         def __init__(self):
-            super().__init__(name=type_name)
+            super().__init__(name=c_struct_name)
 
     @numba.extending.register_model(InnerType)
     class InnerModel(numba.extending.models.PrimitiveModel):
@@ -136,14 +131,14 @@ def create_opaque_struct(
         return builder.gep(x, [i])
 
     return_vals = inner_type, struct_llvm_type, create_inner
-    if not wrapper_spec_class:
+    if not create_wrapper:
         return return_vals
 
-    class WrapperType(wrapper_spec_class):
+    class WrapperType(numba.types.Type):
         def __init__(self, n):
             assert isinstance(n, ndtypes.ndt)
-            self.ndt_type = n
-            super().__init__(f"{type_name}Wrapper({n})")
+            self.ndt_value = n
+            super().__init__(f"{c_struct_name}Wrapper({n})")
 
     numba.extending.register_model(WrapperType)(InnerModel)
 
@@ -155,8 +150,8 @@ def create_opaque_struct(
         if isinstance(ndt_type_t, numba.types.Const):
             n = ndtypes.ndt(ndt_type_t.value)
             arg_type = numba.types.string
-        elif hasattr(ndt_type_t, "ndt_type"):
-            n = ndt_type_t.ndt_type
+        elif hasattr(ndt_type_t, "ndt_value"):
+            n = ndt_type_t.ndt_value
             arg_type = ndt_type_t
         else:
             return
@@ -215,7 +210,10 @@ def wrap_c_func(func_name, numba_ret_type, numba_arg_types):
     # This should be like if you defined the intrinsic function explicitly with all the arguments
     intrinsic_inner.__signature__ = inspect.signature(intrinsic_inner).replace(
         parameters=[
-            inspect.Parameter(f"_p{i}", inspect.Parameter.POSITIONAL_OR_KEYWORD)
+            inspect.Parameter(
+                f"_p{i}",  # arg name doesn't matter
+                inspect.Parameter.POSITIONAL_OR_KEYWORD,
+            )
             for i in range(len(numba_arg_types) + 1)
         ]
     )

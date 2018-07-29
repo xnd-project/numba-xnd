@@ -31,7 +31,7 @@ class TestViewMoveNdt(unittest.TestCase):
         @njit
         def wrap_unwrap(x):
             return numba_xnd.pyxnd.wrap_xnd_object(
-                numba_xnd.pyxnd.unwrap_xnd_object(x), x.type
+                numba_xnd.pyxnd.unwrap_xnd_object(x), x
             )
 
         for create in creators:
@@ -47,7 +47,7 @@ class TestViewMoveNdt(unittest.TestCase):
             ret_xnd_object = numba_xnd.pyxnd.xnd_view_move_ndt(
                 xnd_object, xnd_object.type.ndt
             )
-            return numba_xnd.pyxnd.wrap_xnd_object(ret_xnd_object, x.type)
+            return numba_xnd.pyxnd.wrap_xnd_object(ret_xnd_object, x)
 
         for create in creators:
             x = create()
@@ -78,3 +78,7 @@ class TestXndObjectWrapper(unittest.TestCase):
 
     def test_ndim(self):
         self.assertEqual(njit(lambda x: x.ndim)(x), x.ndim)
+
+    def test_value_int64(self):
+        x = xnd(123)
+        self.assertEqual(njit(lambda x: x.value)(x), x.value)
