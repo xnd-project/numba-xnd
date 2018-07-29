@@ -1,16 +1,17 @@
-from __future__ import absolute_import, division, print_function
+from __future__ import print_function, division, absolute_import
 
+from collections import namedtuple
 import contextlib
 import pickle
-from collections import namedtuple
 
-import llvmlite.llvmpy.core as lc
 from llvmlite import ir
-from llvmlite.llvmpy.core import Constant, Type
+from llvmlite.llvmpy.core import Type, Constant
+import llvmlite.llvmpy.core as lc
 
-import numba.ctypes_support as ctypes
-from numba import _helperlib, cgutils, config, lowering, types, utils
 from numba.config import PYVERSION
+import numba.ctypes_support as ctypes
+from numba import config
+from numba import types, utils, cgutils, lowering, _helperlib
 
 
 class _Registry(object):
