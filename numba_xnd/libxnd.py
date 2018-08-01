@@ -127,3 +127,33 @@ def ndtypes_index(t):
     """
     first, *rest = str(t).split(" * ")
     return ndtypes.ndt(" * ".join(rest))
+
+
+@shared.overload_any("getitem", XndWrapperType, numba.types.Integer)
+def xnd_wrapper_getitem(x_wrapper, index):
+    if isinstance(index, numba.types.Integer):
+        resulting_type = str(ndtypes_index(x_wrapper.ndt_value))
+
+        def getitem(x_wrapper, index):
+            x = unwrap_xnd(x_wrapper)
+            x_index = create_xnd_index()
+            x_index.tag = XND_KEY_INDEX
+            x_index.Index = index
+            ret_xnd = create_xnd()
+            ctx = libndtypes.ndt_static_context()
+            xnd_subtree(ret_xnd, x, x_index, shared.i64_to_i32(1), ctx)
+            assert not shared.ptr_is_none(ret_xnd.ptr)
+            assert not libndtypes.ndt_err_occurred(ctx)
+            return wrap_xnd(ret_xnd, resulting_type)
+
+        return getitem
+
+
+@shared.overload_any("setitem", XndWrapperType, numba.types.Tuple, numba.types.Integer)
+def xnd_wrapper_setitem(x_wrapper, index, value):
+    if isinstance(index, numba.types.Tuple) and index.count == 0:
+
+        def setitem(x_wrapper, index, value):
+            shared.ptr_store_type(numba.types.int64, unwrap_xnd(x_wrapper).ptr, value)
+
+        return setitem

@@ -300,3 +300,15 @@ class TestXndWrapper(unittest.TestCase):
         x = xnd(123)
         self.assertEqual(get_value(x), x.value)
         self.assertEqual(x, xnd(123))
+
+    # def test_index_integer(self):
+    #     @numba_xnd.register_kernel("N * D, int64 -> D")
+    #     @njit
+    #     def index_something(x, i, ret):
+    #         ret[()] = numba_xnd.libxnd.xnd_wrapper_index(x, i.value)
+    #         return 0
+
+    #     x = xnd([1, 2, 3])
+    #     res = index_something(x, xnd(1))
+    #     self.assertEqual(res, xnd(2))
+    #     self.assertEqual(x, xnd([1, 2, 3]))

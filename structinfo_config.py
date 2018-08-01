@@ -51,6 +51,7 @@ extern void print_bytes(const void *object, size_t size)
     }
     printf("]\\n\\n");
 }
+extern
 """
 
 # Additional Python C/API code to be added to output

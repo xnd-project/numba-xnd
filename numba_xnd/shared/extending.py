@@ -151,7 +151,18 @@ def create_opaque_struct(
             self.ndt_value = n
             super().__init__(f"{c_struct_name}Wrapper({n})")
 
+        def can_convert_from(self, typingctx, other):
+            """
+            Support conversions from unwrapped to wrapped types implicitly.
+            """
+            if other == inner_type:
+                return numba.typeconv.Conversion.promote
+
     numba.extending.register_model(WrapperType)(InnerModel)
+
+    @numba.extending.lower_cast(InnerType, WrapperType)
+    def inner_to_wrapper(context, builder, fromty, toty, val):
+        return val
 
     # Need boxing/unboxing for intrinsics to work
     numba.extending.unbox(WrapperType)(unbox_inner)
@@ -196,6 +207,45 @@ def create_opaque_struct(
 def llvm_type_from_numba_type(numba_type):
     datamodel = numba.datamodel.registry.default_manager.lookup(numba_type)
     return datamodel.get_value_type()
+
+
+def overload_any(func, *types):
+    """
+    Like `numba.extending.overload` but works for things like `getitem`, etc.
+
+    Used likes `generated_jit`:
+
+        @overload_any("getitem", numba.types.Const, numba.types.Integer)
+        def getitem_const(val, i):
+            if val.value == "hi":
+                return lambda val, i: i
+            elif val.value == "there":
+                return lambda val, i: -i
+    """
+
+    def inner(overload_func):
+        # lower dispatcher based on `numba.typing.templates._OverloadMethodTemplate.do_class_init``
+        dispatcher = numba.generated_jit(nopython=True)(overload_func)
+        disp_type = numba.types.Dispatcher(dispatcher)
+
+        @numba.targets.imputils.lower_builtin(func, *types)
+        def getitem_inner(context, builder, sig, args):
+            call = context.get_function(
+                disp_type, disp_type.get_call_type(context.typing_context, sig.args, {})
+            )
+            return call(builder, args)
+
+        @numba.extending.type_callable(func)
+        def type_inner(context):
+            # need to pass in `dispatcher` or get "underlying object has vanished"
+            def typer(*args, dispatcher=dispatcher):
+                sig = disp_type.get_call_type(context, args, {})
+                if sig:
+                    return sig.return_type
+
+            return typer
+
+    return inner
 
 
 def wrap_c_func(func_name, numba_ret_type, numba_arg_types):

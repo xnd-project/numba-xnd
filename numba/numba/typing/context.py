@@ -1,22 +1,21 @@
-from __future__ import print_function, absolute_import
+from __future__ import absolute_import, print_function
 
-from collections import defaultdict, Sequence
+import contextlib
+import threading
 import types as pytypes
 import weakref
-import threading
-import contextlib
+from collections import Sequence, defaultdict
 
 import numba
-from numba import types, errors
+from numba import errors, types, utils
 from numba.typeconv import Conversion, rules
-from . import templates
-from .typeof import typeof, Purpose
 
-from numba import utils
+from . import templates
+from .typeof import Purpose, typeof
 
 
 class Rating(object):
-    __slots__ = 'promote', 'safe_convert', "unsafe_convert"
+    __slots__ = "promote", "safe_convert", "unsafe_convert"
 
     def __init__(self):
         self.promote = 0
@@ -104,6 +103,7 @@ class CallFrame(object):
     """
     A compile-time call frame
     """
+
     def __init__(self, typeinfer, func_id, args):
         self.typeinfer = typeinfer
         self.func_id = func_id
@@ -157,22 +157,22 @@ class BaseContext(object):
 
         elif func in self._functions:
             for tpl in self._functions[func]:
-                param = param or hasattr(tpl, 'generic')
-                defns.extend(getattr(tpl, 'cases', []))
+                param = param or hasattr(tpl, "generic")
+                defns.extend(getattr(tpl, "cases", []))
 
         else:
             msg = "No type info available for {func!r} as a callable."
             desc.append(msg.format(func=func))
 
         if defns:
-            desc = ['Known signatures:']
+            desc = ["Known signatures:"]
             for sig in defns:
-                desc.append(' * {0}'.format(sig))
+                desc.append(" * {0}".format(sig))
 
         if param:
-            desc.append(' * parameterized')
+            desc.append(" * parameterized")
 
-        return '\n'.join(desc)
+        return "\n".join(desc)
 
     def resolve_function_type(self, func, args, kws, literals=None):
         """
@@ -248,24 +248,24 @@ class BaseContext(object):
     def resolve_static_getitem(self, value, index):
         assert not isinstance(index, types.Type), index
         args = value, index
-        kws = ()
+        kws = {}
         return self.resolve_function_type("static_getitem", args, kws)
 
     def resolve_static_setitem(self, target, index, value):
         assert not isinstance(index, types.Type), index
         args = target, index, value
-        kws = ()
+        kws = {}
         return self.resolve_function_type("static_setitem", args, kws)
 
     def resolve_setitem(self, target, index, value):
         assert isinstance(index, types.Type), index
         args = target, index, value
-        kws = ()
+        kws = {}
         return self.resolve_function_type("setitem", args, kws)
 
     def resolve_delitem(self, target, index):
         args = target, index
-        kws = ()
+        kws = {}
         return self.resolve_function_type("delitem", args, kws)
 
     def resolve_module_constants(self, typ, attr):
@@ -332,6 +332,7 @@ class BaseContext(object):
         # Initialize declarations
         from . import builtins, arraydecl, npdatetime
         from . import ctypes_utils, bufproto
+
         self.install_registry(templates.builtin_registry)
 
     def load_additional_registries(self):
@@ -349,11 +350,11 @@ class BaseContext(object):
         except KeyError:
             loader = templates.RegistryLoader(registry)
             self._registries[registry] = loader
-        for ftcls in loader.new_registrations('functions'):
+        for ftcls in loader.new_registrations("functions"):
             self.insert_function(ftcls(self))
-        for ftcls in loader.new_registrations('attributes'):
+        for ftcls in loader.new_registrations("attributes"):
             self.insert_attributes(ftcls(self))
-        for gv, gty in loader.new_registrations('globals'):
+        for gv, gty in loader.new_registrations("globals"):
             existing = self._lookup_global(gv)
             if existing is None:
                 self.insert_global(gv, gty)
@@ -361,8 +362,7 @@ class BaseContext(object):
                 # A type was already inserted, see if we can add to it
                 newty = existing.augment(gty)
                 if newty is None:
-                    raise TypeError("cannot augment %s with %s"
-                                    % (existing, gty))
+                    raise TypeError("cannot augment %s with %s" % (existing, gty))
                 self._remove_global(gv)
                 self._insert_global(gv, newty)
 
@@ -385,10 +385,12 @@ class BaseContext(object):
         Register type *gty* for value *gv*.  Only a weak reference
         to *gv* is kept, if possible.
         """
+
         def on_disposal(wr, pop=self._globals.pop):
             # pop() is pre-looked up to avoid a crash late at shutdown on 3.5
             # (https://bugs.python.org/issue25217)
             pop(wr)
+
         try:
             gv = weakref.ref(gv, on_disposal)
         except TypeError:
@@ -500,8 +502,9 @@ class BaseContext(object):
             self.tm.set_compatible(actual, formal, conv)
         return True
 
-    def resolve_overload(self, key, cases, args, kws,
-                         allow_ambiguous=True, unsafe_casting=True):
+    def resolve_overload(
+        self, key, cases, args, kws, allow_ambiguous=True, unsafe_casting=True
+    ):
         """
         Given actual *args* and *kws*, find the best matching
         signature in *cases*, or None if none matches.
@@ -511,9 +514,7 @@ class BaseContext(object):
         If *unsafe_casting* is False, unsafe casting is forbidden.
         """
         assert not kws, "Keyword arguments are not supported, yet"
-        options = {
-            'unsafe_casting': unsafe_casting,
-        }
+        options = {"unsafe_casting": unsafe_casting}
         # Rate each case
         candidates = []
         for case in cases:
@@ -534,7 +535,7 @@ class BaseContext(object):
                         break
                     tied.append(case)
                 if len(tied) > 1:
-                    args = (key, args, '\n'.join(map(str, tied)))
+                    args = (key, args, "\n".join(map(str, tied)))
                     msg = "Ambiguous overloading for %s %s:\n%s" % args
                     raise TypeError(msg)
             # Simply return the best matching candidate in order.
@@ -552,7 +553,7 @@ class BaseContext(object):
             """Uses bitwidth to order numeric-types.
             Fallback to stable, deterministic sort.
             """
-            return getattr(obj, 'bitwidth', 0)
+            return getattr(obj, "bitwidth", 0)
 
         typelist = sorted(typelist, key=keyfunc)
         unified = typelist[0]
@@ -600,10 +601,19 @@ class BaseContext(object):
 
 
 class Context(BaseContext):
-
     def load_additional_registries(self):
-        from . import (cffi_utils, cmathdecl, enumdecl, listdecl, mathdecl,
-                       npydecl, operatordecl, randomdecl, setdecl)
+        from . import (
+            cffi_utils,
+            cmathdecl,
+            enumdecl,
+            listdecl,
+            mathdecl,
+            npydecl,
+            operatordecl,
+            randomdecl,
+            setdecl,
+        )
+
         self.install_registry(cffi_utils.registry)
         self.install_registry(cmathdecl.registry)
         self.install_registry(enumdecl.registry)
