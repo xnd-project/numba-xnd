@@ -14,13 +14,13 @@ def remove_outer_dimensions(t, n):
     return ndtypes.ndt(" * ".join(str(t).split(" * ")[n:]))
 
 
-def register_kernel(signatures):
+# TODO: Refactor this as a dispatcher subclass so it can easier access input type and can be jitted itself.
+def register_kernel(signature):
     """
     Registers a gumath kernel based on the dispatcher. Takes in each of the inputs and then the result as arguments.
 
     Like:
-        @register_kernel_direct(["... * ... -> ...", "float64 -> int64"])
-        @jit
+        @register_kernel_direct("... * float64, ... * int64 -> int64")
         def something(a, b, res):
             for i in range(a.shape):
                 a[i]
@@ -28,62 +28,36 @@ def register_kernel(signatures):
 
     This has to know the intputs/ouputs ndtypes at compile time, because the xnd wrapper Numba API relies on this.
     """
-    if isinstance(signatures, str):
-        signatures = [signatures]
 
-    signatures = list(map(ndtypes.ndt, signatures))
-
-    def inner(dispatcher):
-        name = f"numba__repr(dispatcher)"
+    def inner(fn):
         gufunc = None
         already_built = set()
 
         def wrap(*args):
             nonlocal gufunc
             arg_types = [a.type for a in args]
-            apply_spec = None
-            for signature in signatures:
-                try:
-                    apply_spec = signature.apply(arg_types)
-                except TypeError:
-                    continue
+            apply_spec = ndtypes.ndt(signature).apply(arg_types)
             if not apply_spec:
                 raise ValueError(
-                    f"Failed to generate kernel for {name}. Inputs of types {arg_types} do not match any of {signatures}."
+                    f"Failed to generate kernel for {fn}. Inputs of types {arg_types} do not match {signature}."
                 )
             # Removes the outer dimensions from the input/output types to get the types that are passed in on the stack
-            stack_types = [
+            stack_types = tuple(
                 remove_outer_dimensions(t, apply_spec.outer_dims)
                 for t in apply_spec.in_types + apply_spec.out_types
-            ]
-            stack_types_str = tuple(map(str, stack_types))
-            if stack_types_str in already_built:
-                return gufunc(*args)
+            )
+            if stack_types not in already_built:
+                dispatcher = numba.njit(tuple(map(libxnd.XndWrapperType, stack_types)))(
+                    fn
+                )
+                # there is some max name length in numba
+                name = f"numba__{dispatcher}"[:20]
 
-            # build_args_str = f'lambda stack: ({", ".join(f"libxnd.wrap_xnd(stack[{i}], {repr(type_str)})" for i, type_str in enumerate(stack_types_str))})'
-            # print(build_args_str)
-            # build_args = numba.njit(eval(build_args_str))
-            # recursively build up a jitted function that will take in the stack and return a tuple of inputs
-            # arguments for the dispatcher to be called with
-            # build_args = None
-            # for i, type_str in enumerate(stack_types_str):
-            #     type_str_ = type_str
-            #     if not build_args:
-            #         build_args = numba.njit(
-            #             lambda stack: (libxnd.wrap_xnd(stack[i], type_str_),)
-            #         )
-            #         continue
-            #     build_args = numba.njit(
-            #         lambda stack, build_args=build_args: build_args(stack)
-            #         + (libxnd.wrap_xnd(stack[i], type_str),)
-            #     )
+                gufunc = register_kernel_direct(name, signature)(
+                    wrap_kernel_dispatcher(len(stack_types))(dispatcher)
+                )
+                already_built.add(stack_types)
 
-            inner_str = f"""def inner(stack, ctx):
-    dispatcher({", ".join(f"libxnd.wrap_xnd(stack[{i}], {repr(type_str)})" for i, type_str in enumerate(stack_types_str))})
-    return 0"""
-            exec(inner_str)
-            gufunc = register_kernel_direct(name, signature)(numba.njit(inner))
-            already_built.add(stack_types_str)
             return gufunc(*args)
 
         return wrap

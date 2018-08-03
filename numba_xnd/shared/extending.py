@@ -72,12 +72,8 @@ def create_opaque_struct(
         key = InnerType
 
         def generic_resolve(self, val, attr):
-            try:
+            if attr in attrs:
                 return attrs[attr]
-            except IndexError:
-                raise NotImplementedError(
-                    f"Did not register `${attr}` attribute on ${c_struct_name}"
-                )
 
     def _get_attr(builder, value, attr, is_embedded):
         attr_llvm_type = llvm_type_from_numba_type(attrs[attr])

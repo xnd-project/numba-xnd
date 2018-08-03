@@ -146,3 +146,12 @@ class TestWrapKernelDispatcher(unittest.TestCase):
             ret[()] = a.value + 10
 
         self.assertEqual(something(xnd(10)), xnd(20))
+
+
+class TestRegisterKernel(unittest.TestCase):
+    def test_const_incr(self):
+        @numba_xnd.gumath.register_kernel("int64 -> int64")
+        def something(a, ret):
+            ret[()] = a.value + 10
+
+        self.assertEqual(something(xnd(10)), xnd(20))
