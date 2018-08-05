@@ -205,13 +205,13 @@ def llvm_type_from_numba_type(numba_type):
     return datamodel.get_value_type()
 
 
-def overload_any(func, *types):
+def overload_any(func):
     """
     Like `numba.extending.overload` but works for things like `getitem`, etc.
 
     Used likes `generated_jit`:
 
-        @overload_any("getitem", numba.types.Const, numba.types.Integer)
+        @overload_any("getitem")
         def getitem_const(val, i):
             if val.value == "hi":
                 return lambda val, i: i
@@ -220,23 +220,26 @@ def overload_any(func, *types):
     """
 
     def inner(overload_func):
-        # lower dispatcher based on `numba.typing.templates._OverloadMethodTemplate.do_class_init``
+        # lower dispatcher based on `numba.typing.templates._OverloadMethodTemplate.do_class_init`
         dispatcher = numba.generated_jit(nopython=True)(overload_func)
         disp_type = numba.types.Dispatcher(dispatcher)
 
-        @numba.targets.imputils.lower_builtin(func, *types)
-        def getitem_inner(context, builder, sig, args):
-            call = context.get_function(
-                disp_type, disp_type.get_call_type(context.typing_context, sig.args, {})
-            )
+        def impl(context, builder, sig, args):
+            call = context.get_function(disp_type, sig)
             return call(builder, args)
 
         @numba.extending.type_callable(func)
         def type_inner(context):
             # need to pass in `dispatcher` or get "underlying object has vanished"
             def typer(*args, dispatcher=dispatcher):
-                sig = disp_type.get_call_type(context, args, {})
+                try:
+                    sig = disp_type.get_call_type(context, args, {})
+                except TypeError:  # None returned by overloaded function
+                    return
                 if sig:
+                    # ideally, instead of adding a lowering for this specific type, we would just return the `impl`
+                    # with the typing so it doesn't have to look it up. I am not sure how to do this in `type_callable`, though.
+                    numba.targets.imputils.lower_builtin(func, *sig.args)(impl)
                     return sig.return_type
 
             return typer

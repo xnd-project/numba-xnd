@@ -108,6 +108,14 @@ def xnd_wrapper_ndim(x_wrapped):
     return get
 
 
+@numba.extending.overload_attribute(XndWrapperType, "shape")
+def xnd_wrapper_shape(x_wrapped):
+    def get(x_wrapped):
+        return x_wrapped.type.shape
+
+    return get
+
+
 @numba.extending.overload_attribute(XndWrapperType, "value")
 def xnd_wrapper_value(x_wrapper):
     n = x_wrapper.ndt_value
@@ -129,8 +137,11 @@ def ndtypes_index(t):
     return ndtypes.ndt(" * ".join(rest))
 
 
-@shared.overload_any("getitem", XndWrapperType, numba.types.Integer)
+@shared.overload_any("getitem")
 def xnd_wrapper_getitem(x_wrapper, index):
+    if not isinstance(x_wrapper, XndWrapperType):
+        return
+
     if isinstance(index, numba.types.Integer):
         resulting_type = str(ndtypes_index(x_wrapper.ndt_value))
 
@@ -147,13 +158,44 @@ def xnd_wrapper_getitem(x_wrapper, index):
             return wrap_xnd(ret_xnd, resulting_type)
 
         return getitem
+    elif isinstance(index, numba.types.BaseTuple):
+        resulting_type = x_wrapper.ndt_value
+        for i in index:
+            if isinstance(i, numba.types.Integer):
+                resulting_type = ndtypes_index(resulting_type)
+            else:
+                return
+        resulting_type = str(resulting_type)
+        n_items = len(index)
+        if n_items == 0:
+            return lambda x_wrapper, index: x_wrapper
+
+        def getitem(x_wrapper, index):
+            x = unwrap_xnd(x_wrapper)
+            x_index = create_xnd_index(n_items)
+            for i in range(n_items):
+                x_index_cur = x_index[i]
+                x_index_cur.tag = XND_KEY_INDEX
+                x_index_cur.Index = index[i]
+            ret_xnd = create_xnd()
+            ctx = libndtypes.ndt_static_context()
+            xnd_multikey(ret_xnd, x, x_index, shared.i64_to_i32(n_items), ctx)
+            assert not shared.ptr_is_none(ret_xnd.ptr)
+            assert not libndtypes.ndt_err_occurred(ctx)
+            return wrap_xnd(ret_xnd, resulting_type)
+
+        return getitem
 
 
-@shared.overload_any("setitem", XndWrapperType, numba.types.Tuple, numba.types.Integer)
+@shared.overload_any("setitem")
 def xnd_wrapper_setitem(x_wrapper, index, value):
-    if isinstance(index, numba.types.Tuple) and index.count == 0:
+    if not isinstance(x_wrapper, XndWrapperType):
+        return
+    if isinstance(value, numba.types.Integer):
 
         def setitem(x_wrapper, index, value):
-            shared.ptr_store_type(numba.types.int64, unwrap_xnd(x_wrapper).ptr, value)
+            shared.ptr_store_type(
+                numba.types.int64, unwrap_xnd(x_wrapper[index]).ptr, value
+            )
 
         return setitem

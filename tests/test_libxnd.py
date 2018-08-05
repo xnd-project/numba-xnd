@@ -289,7 +289,6 @@ class TestXndWrapper(unittest.TestCase):
             return t_wrapped.ndim
 
         self.assertEqual(get_type(x), 1)
-        # self.assertEqual(x, xnd(123))
 
     def test_value_int64(self):
         @njit
@@ -301,14 +300,23 @@ class TestXndWrapper(unittest.TestCase):
         self.assertEqual(get_value(x), x.value)
         self.assertEqual(x, xnd(123))
 
-    # def test_index_integer(self):
-    #     @numba_xnd.register_kernel("N * D, int64 -> D")
-    #     @njit
-    #     def index_something(x, i, ret):
-    #         ret[()] = numba_xnd.libxnd.xnd_wrapper_index(x, i.value)
-    #         return 0
+    def test_index_int(self):
+        @numba_xnd.register_kernel("A * int64, int64 -> int64")
+        def index_thing(a, i, res):
+            res[()] = a[i.value].value
 
-    #     x = xnd([1, 2, 3])
-    #     res = index_something(x, xnd(1))
-    #     self.assertEqual(res, xnd(2))
-    #     self.assertEqual(x, xnd([1, 2, 3]))
+        self.assertEqual(index_thing(xnd([10, 1]), xnd(1)), xnd(1))
+
+    def test_index_tuple(self):
+        @numba_xnd.register_kernel("A * B * int64, int64, int64 -> int64")
+        def index_tuple(a, i, j, res):
+            res[()] = a[1, 0].value
+
+        self.assertEqual(index_tuple(xnd([[1, 2], [3, 4]]), xnd(1), xnd(0)), xnd(3))
+
+    def test_index_tuple_empty(self):
+        @numba_xnd.register_kernel("int64 -> int64")
+        def index_tuple_empty(a, res):
+            res[()] = a[()].value
+
+        self.assertEqual(index_tuple_empty(xnd(20)), xnd(20))

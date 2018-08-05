@@ -1,3 +1,5 @@
+import random
+
 import gumath
 import llvmlite.ir
 import ndtypes
@@ -12,6 +14,13 @@ def remove_outer_dimensions(t, n):
     Remove `n` outer dimensions from type `t`.
     """
     return ndtypes.ndt(" * ".join(str(t).split(" * ")[n:]))
+
+
+def random_name(n):
+    """
+    Returns a random string of letters of length `n`.
+    """
+    return "".join(chr(random.randrange(ord("a"), ord("z"))) for _ in range(n))
 
 
 # TODO: Refactor this as a dispatcher subclass so it can easier access input type and can be jitted itself.
@@ -30,6 +39,7 @@ def register_kernel(signature):
     """
 
     def inner(fn):
+        name = random_name(30)
         gufunc = None
         already_built = set()
 
@@ -50,14 +60,10 @@ def register_kernel(signature):
                 dispatcher = numba.njit(tuple(map(libxnd.XndWrapperType, stack_types)))(
                     fn
                 )
-                # there is some max name length in numba
-                name = f"numba__{dispatcher}"[:20]
-
                 gufunc = register_kernel_direct(name, signature)(
                     wrap_kernel_dispatcher(len(stack_types))(dispatcher)
                 )
                 already_built.add(stack_types)
-
             return gufunc(*args)
 
         return wrap
@@ -191,4 +197,5 @@ def build_kernel_wrapper(cres):
 
     wrapperlib.add_ir_module(wrapper_module)
     wrapperlib.add_linking_library(library)
+
     return wrapperlib.get_pointer_to_function(wrapper.name)

@@ -18,10 +18,5 @@ class SimpleAdditionTest(unittest.TestCase):
         self.assertEqual(integer_const_add(a, b), 30)
 
 
-
-@njit
-def simple_matrix_multiply
-
-
 if __name__ == "__main__":
     unittest.main()

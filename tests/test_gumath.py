@@ -148,6 +148,19 @@ class TestWrapKernelDispatcher(unittest.TestCase):
         self.assertEqual(something(xnd(10)), xnd(20))
 
 
+@numba_xnd.gumath.register_kernel(
+    "... * N * M * int64, ... * M * K * int64 -> ... * N * K * int64"
+)
+def simple_matrix_multiply(a, b, c):
+    n, m = a.shape
+    m_, p = b.shape
+    for i in range(n):
+        for j in range(p):
+            c[i, j] = 0
+            for k in range(m):
+                c[i, j] = c[i, j].value + a[i, k].value * b[k, j].value
+
+
 class TestRegisterKernel(unittest.TestCase):
     def test_const_incr(self):
         @numba_xnd.gumath.register_kernel("int64 -> int64")
@@ -155,3 +168,15 @@ class TestRegisterKernel(unittest.TestCase):
             ret[()] = a.value + 10
 
         self.assertEqual(something(xnd(10)), xnd(20))
+
+    def test_matmul(self):
+        a_, b_ = a(), b()
+        self.assertEqual(simple_matrix_multiply(a_, b_), res())
+        self.assertEqual(a_, a())
+        self.assertEqual(b_, b())
+
+    def test_matmul_broadcasting(self):
+        a_, b_ = a_broadcast(), b_broadcast()
+        self.assertEqual(simple_matrix_multiply(a_, b_), res_broadcast())
+        self.assertEqual(a_, a_broadcast())
+        self.assertEqual(b_, b_broadcast())
