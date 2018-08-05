@@ -128,6 +128,14 @@ def xnd_wrapper_value(x_wrapper):
 
         return get
 
+    if n == ndtypes.ndt("float64"):
+
+        def get(x_wrapper):
+            x = unwrap_xnd(x_wrapper)
+            return shared.ptr_load_type(numba.types.float64, x.ptr)
+
+        return get
+
 
 def ndtypes_index(t):
     """
@@ -191,11 +199,20 @@ def xnd_wrapper_getitem(x_wrapper, index):
 def xnd_wrapper_setitem(x_wrapper, index, value):
     if not isinstance(x_wrapper, XndWrapperType):
         return
-    if isinstance(value, numba.types.Integer):
+    if value == numba.types.int64:
 
         def setitem(x_wrapper, index, value):
             shared.ptr_store_type(
                 numba.types.int64, unwrap_xnd(x_wrapper[index]).ptr, value
+            )
+
+        return setitem
+
+    if value == numba.types.float64:
+
+        def setitem(x_wrapper, index, value):
+            shared.ptr_store_type(
+                numba.types.float64, unwrap_xnd(x_wrapper[index]).ptr, value
             )
 
         return setitem

@@ -197,5 +197,4 @@ def build_kernel_wrapper(cres):
 
     wrapperlib.add_ir_module(wrapper_module)
     wrapperlib.add_linking_library(library)
-
     return wrapperlib.get_pointer_to_function(wrapper.name)

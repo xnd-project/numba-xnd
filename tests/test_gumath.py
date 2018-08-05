@@ -148,9 +148,7 @@ class TestWrapKernelDispatcher(unittest.TestCase):
         self.assertEqual(something(xnd(10)), xnd(20))
 
 
-@numba_xnd.gumath.register_kernel(
-    "... * N * M * int64, ... * M * K * int64 -> ... * N * K * int64"
-)
+@numba_xnd.gumath.register_kernel("... * N * M * D, ... * M * K * D -> ... * N * K * D")
 def simple_matrix_multiply(a, b, c):
     n, m = a.shape
     m_, p = b.shape
@@ -180,3 +178,8 @@ class TestRegisterKernel(unittest.TestCase):
         self.assertEqual(simple_matrix_multiply(a_, b_), res_broadcast())
         self.assertEqual(a_, a_broadcast())
         self.assertEqual(b_, b_broadcast())
+
+    def test_float(self):
+        a = xnd([[1.0, 1.0], [1.0, 1.0]])
+        res = xnd([[2.0, 2.0], [2.0, 2.0]])
+        self.assertEqual(simple_matrix_multiply(a, a), res)
