@@ -7,7 +7,7 @@
 import structinfo_config as xinfo_config
 
 try:
-    from setuptools import setup, Extension
+    from setuptools import setup, Extension, find_packages
 except ImportError:
     from distutils.core import setup, Extension
 
@@ -36,6 +36,6 @@ setup(
     license="BSD",
     version="0.1",
     url="https://github.com/Quansight/numba-xnd",
-    packages=["numba_xnd"],
+    packages=find_packages(),
     ext_modules=[ext for ext in ext_modules if ext is not None],
 )

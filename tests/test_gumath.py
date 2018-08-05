@@ -150,8 +150,8 @@ class TestWrapKernelDispatcher(unittest.TestCase):
 
 @numba_xnd.gumath.register_kernel("... * N * M * D, ... * M * K * D -> ... * N * K * D")
 def simple_matrix_multiply(a, b, c):
-    n, m = a.shape
-    m_, p = b.shape
+    n, m = a.type.shape
+    m_, p = b.type.shape
     for i in range(n):
         for j in range(p):
             c[i, j] = 0

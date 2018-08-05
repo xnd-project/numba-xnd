@@ -108,14 +108,6 @@ def xnd_wrapper_ndim(x_wrapped):
     return get
 
 
-@numba.extending.overload_attribute(XndWrapperType, "shape")
-def xnd_wrapper_shape(x_wrapped):
-    def get(x_wrapped):
-        return x_wrapped.type.shape
-
-    return get
-
-
 @numba.extending.overload_attribute(XndWrapperType, "value")
 def xnd_wrapper_value(x_wrapper):
     n = x_wrapper.ndt_value
