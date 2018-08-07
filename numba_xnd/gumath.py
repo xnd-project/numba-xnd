@@ -1,72 +1,43 @@
-import random
-
 import gumath
 import llvmlite.ir
-import ndtypes
 
 import numba
 
 from . import libndtypes, libxnd, shared
 
 
-def remove_outer_dimensions(t, n):
-    """
-    Remove `n` outer dimensions from type `t`.
-    """
-    return ndtypes.ndt(" * ".join(str(t).split(" * ")[n:]))
-
-
-def random_name(n):
-    """
-    Returns a random string of letters of length `n`.
-    """
-    return "".join(chr(random.randrange(ord("a"), ord("z"))) for _ in range(n))
-
-
-# TODO: Refactor this as a dispatcher subclass so it can easier access input type and can be jitted itself.
-def register_kernel(signature):
-    """
-    Registers a gumath kernel based on the dispatcher. Takes in each of the inputs and then the result as arguments.
-
-    Like:
-        @register_kernel_direct("... * float64, ... * int64 -> int64")
-        def something(a, b, res):
-            for i in range(a.shape):
-                a[i]
-                ...
-
-    This has to know the intputs/ouputs ndtypes at compile time, because the xnd wrapper Numba API relies on this.
-    """
+def register_kernel(signatures):
+    name = shared.random_kernel_name()
+    signatures = (signatures,) if isinstance(signatures, str) else signatures
 
     def inner(fn):
-        name = random_name(30)
-        gufunc = None
-        already_built = set()
-
-        def wrap(*args):
-            nonlocal gufunc
-            arg_types = [a.type for a in args]
-            apply_spec = ndtypes.ndt(signature).apply(arg_types)
-            if not apply_spec:
-                raise ValueError(
-                    f"Failed to generate kernel for {fn}. Inputs of types {arg_types} do not match {signature}."
-                )
-            # Removes the outer dimensions from the input/output types to get the types that are passed in on the stack
-            stack_types = tuple(
-                remove_outer_dimensions(t, apply_spec.outer_dims)
-                for t in apply_spec.in_types + apply_spec.out_types
+        for signature in signatures:
+            kernel = register_kernel_direct(name, signature)(
+                jit_and_wrap(signature)(fn)
             )
-            if stack_types not in already_built:
-                dispatcher = numba.njit(tuple(map(libxnd.XndWrapperType, stack_types)))(
-                    fn
-                )
-                gufunc = register_kernel_direct(name, signature)(
-                    wrap_kernel_dispatcher(len(stack_types))(dispatcher)
-                )
-                already_built.add(stack_types)
-            return gufunc(*args)
+        return kernel
 
-        return wrap
+    return inner
+
+
+def jit_and_wrap(signature):
+    """
+    Generates stack types from the signature and jit compiles a kernel that takes in those stack types
+
+    >>> @register_kernel_direct("some name", "int64, int64 -> int64")
+    ... @jit_and_register("int64, int64 -> int64")
+    ... def add_kernel(a, b, ret):
+    ...     ret[()] = a.value + b.value
+    >>> add_kernel(xnd.xnd(1), xnd.xnd(2))
+    xnd(3, type='int64')
+    """
+
+    stack_types = tuple(map(libxnd.XndWrapperType, shared.sig_to_stack(signature)))
+
+    def inner(fn):
+        dispatcher = numba.njit(stack_types)(fn)
+
+        return wrap_kernel_dispatcher(len(stack_types))(dispatcher)
 
     return inner
 
@@ -81,11 +52,12 @@ def wrap_kernel_dispatcher(n_args):
 
         @register_kernel_direct("some name", "int64, 10 * int64 -> int64")
         @wrap_kernel_dispatcher(3)
-        @njit(XndObjectWrapperType(ndt("int64"))(...))
+        @njit(XndWrapperType(ndt("int64"))(...))
         def something(a, b, ret):
             ret[()] = a + b[0]
     """
 
+    # TODO: Catch exceptions and return -1
     def inner(dispatcher):
         if n_args == 0:
 

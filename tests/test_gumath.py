@@ -20,15 +20,15 @@ def integer_matrix_multiply_direct(stack, ctx):
     numba_xnd.libndtypes.ndt_as_ndarray(a, x.type, ctx)
     if numba_xnd.libndtypes.ndt_err_occurred(ctx):
         return -1
-    n = numba_xnd.shared.array_index(a.shape, 0)
-    m = numba_xnd.shared.array_index(a.shape, 1)
+    n = a.shape[0]
+    m = a.shape[1]
 
     # get shape of y
     numba_xnd.libndtypes.ndt_as_ndarray(a, y.type, ctx)
     if numba_xnd.libndtypes.ndt_err_occurred(ctx):
         return -1
-    m_1 = numba_xnd.shared.array_index(a.shape, 0)
-    p = numba_xnd.shared.array_index(a.shape, 1)
+    m_1 = a.shape[0]
+    p = a.shape[1]
     if m_1 != m:
         return -1
 
@@ -148,7 +148,12 @@ class TestWrapKernelDispatcher(unittest.TestCase):
         self.assertEqual(something(xnd(10)), xnd(20))
 
 
-@numba_xnd.gumath.register_kernel("... * N * M * D, ... * M * K * D -> ... * N * K * D")
+@numba_xnd.gumath.register_kernel(
+    [
+        "... * N * M * int64, ... * M * K * int64 -> ... * N * K * int64",
+        "... * N * M * float64, ... * M * K * float64 -> ... * N * K * float64",
+    ]
+)
 def simple_matrix_multiply(a, b, c):
     n, m = a.type.shape
     m_, p = b.type.shape

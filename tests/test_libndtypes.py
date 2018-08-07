@@ -21,11 +21,7 @@ def get_shape(x):
         numba_xnd.pyndtypes.unwrap_ndt_object(x).ndt,
         numba_xnd.libndtypes.create_ndt_context(),
     )
-    return (
-        numba_xnd.shared.array_index(a.shape, 0),
-        numba_xnd.shared.array_index(a.shape, 1),
-        numba_xnd.shared.array_index(a.shape, 2),
-    )
+    return (a.shape[0], a.shape[1], a.shape[2])
 
 
 @njit
@@ -56,3 +52,13 @@ class TestNdtWrapper(unittest.TestCase):
             return t_wrapper.ndim
 
         self.assertEqual(get_ndim(n), 3)
+
+    def test_shape(self):
+        @njit
+        def get_shape(t_object_wrapper):
+            t_object = numba_xnd.pyndtypes.unwrap_ndt_object(t_object_wrapper)
+            t = t_object.ndt
+            t_wrapper = numba_xnd.libndtypes.wrap_ndt(t, t_object_wrapper)
+            return t_wrapper.shape
+
+        self.assertEqual(get_shape(n), (10, 4, 4))

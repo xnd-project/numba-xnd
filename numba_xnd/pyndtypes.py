@@ -23,10 +23,23 @@ def typeof_ndt(val, c):
     return NdtObjectWrapperType(val)
 
 
-# Copy some overloads from ndt wrapper
-numba.extending.overload_attribute(NdtObjectWrapperType, "shape")(
-    libndtypes.ndt_wrapper_shape
-)
-numba.extending.overload_attribute(NdtObjectWrapperType, "ndim")(
-    libndtypes.ndt_wrapper_ndim
-)
+@numba.njit
+def to_wrapped_ndt(ndt_object_wrapped):
+    ndt_object = unwrap_ndt_object(ndt_object_wrapped)
+    return libndtypes.wrap_ndt(ndt_object.ndt, ndt_object_wrapped)
+
+
+@numba.extending.overload_attribute(NdtObjectWrapperType, "shape")
+def ndt_wrapper_shape(t):
+    def get(t):
+        return to_wrapped_ndt(t).shape
+
+    return get
+
+
+@numba.extending.overload_attribute(NdtObjectWrapperType, "ndim")
+def ndt_wrapper_ndim(t):
+    def get(t):
+        return to_wrapped_ndt(t).ndim
+
+    return get
