@@ -3,6 +3,7 @@
 [![CircleCI branch](https://img.shields.io/circleci/project/github/Quansight/numba-xnd/master.svg)](https://circleci.com/gh/Quansight/workflows/numba-xnd/tree/master)
 [![Codecov branch](https://img.shields.io/codecov/c/github/quansight/numba-xnd/master.svg)](https://codecov.io/gh/quansight/numba-xnd)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
+[![Binder](http://mybinder.org/badge.svg)](https://mybinder.org/v2/gh/quansight/numba-xnd/master?urlpath=lab)
 
 _Code coverage is undercounted since it can't measure Numba jitted functions_
 
