@@ -25,7 +25,7 @@ xnd_object_type, xnd_object, create_xnd_object, XndObjectWrapperType, wrap_xnd_o
 
 
 xnd_from_type_xnd = shared.wrap_c_func(
-    "xnd_from_type_xnd", xnd_object_type, (numba.types.pyobject, libxnd.xnd_type)
+    "xnd_from_type_xnd", xnd_object_type, (shared.c_string_type, libxnd.xnd_type)
 )
 
 xnd_view_move_ndt = shared.wrap_c_func(
@@ -65,3 +65,14 @@ def xnd_object_wrapper_value(x_object_wrapped):
         return to_wrapped_xnd(x_object_wrapped).value
 
     return get
+
+
+@numba.extending.intrinsic
+def get_xnd_type_obj(typingctx):
+    sig = shared.c_string_type()
+
+    def codegen(context, builder, sig, args):
+        pyapi = context.get_python_api(builder)
+        return pyapi.unserialize(pyapi.serialize_object(xnd.xnd))
+
+    return sig, codegen

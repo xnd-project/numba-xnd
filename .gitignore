@@ -9,3 +9,4 @@ sizes
 dist/
 tmp*
 .asv
+.ipynb_checkpoints/
