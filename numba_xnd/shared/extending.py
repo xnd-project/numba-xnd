@@ -222,25 +222,24 @@ def overload_any(func):
     def inner(overload_func):
         # lower dispatcher based on `numba.typing.templates._OverloadMethodTemplate.do_class_init`
         dispatcher = numba.generated_jit(nopython=True)(overload_func)
-        disp_type = numba.types.Dispatcher(dispatcher)
-
-        def impl(context, builder, sig, args):
-            call = context.get_function(disp_type, sig)
-            return call(builder, args)
 
         @numba.extending.type_callable(func)
         def type_inner(context):
             # need to pass in `dispatcher` or get "underlying object has vanished"
             def typer(*args, dispatcher=dispatcher):
                 try:
-                    sig = disp_type.get_call_type(context, args, {})
+                    entry_point = dispatcher.compile(args)
                 except TypeError:  # None returned by overloaded function
                     return
-                if sig:
-                    # ideally, instead of adding a lowering for this specific type, we would just return the `impl`
-                    # with the typing so it doesn't have to look it up. I am not sure how to do this in `type_callable`, though.
-                    numba.targets.imputils.lower_builtin(func, *sig.args)(impl)
-                    return sig.return_type
+                cres = [
+                    cres
+                    for cres in dispatcher.overloads.values()
+                    if cres.entry_point == entry_point
+                ][0]
+                dispatcher.targetctx.insert_user_function(
+                    func, cres.fndesc, [cres.library]
+                )
+                return cres.signature.return_type
 
             return typer
 
