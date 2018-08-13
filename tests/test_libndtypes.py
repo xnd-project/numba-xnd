@@ -41,6 +41,14 @@ class TestNdt(unittest.TestCase):
     def test_is_concrete(self):
         self.assertEqual(is_concrete(n), 1)
 
+    def test_static_context(self):
+        @njit
+        def static_context():
+            ctx = numba_xnd.libndtypes.ndt_static_context()
+            assert not numba_xnd.libndtypes.ndt_err_occurred(ctx)
+
+        static_context()
+
 
 class TestNdtWrapper(unittest.TestCase):
     def test_ndim(self):
