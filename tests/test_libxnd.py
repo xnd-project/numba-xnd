@@ -27,7 +27,6 @@ def subtree_single_index(x, i):
     ret_xnd_object = numba_xnd.pyxnd.xnd_view_move_ndt(xnd_object, xnd_object.type.ndt)
     ret_xnd_object.type.ndt = ret_xnd.type
     ret_xnd_object.xnd = ret_xnd
-    # return ret_xnd_object
     return numba_xnd.pyxnd.wrap_xnd_object(ret_xnd_object, x)
 
 
