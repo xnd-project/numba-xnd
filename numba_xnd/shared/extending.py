@@ -106,7 +106,7 @@ def create_opaque_struct(
             return
 
         def codegen(context, builder, sig, args):
-            return builder.alloca(struct_llvm_type, n_t.value)
+            return numba.cgutils.alloca_once(builder, struct_llvm_type, n_t.value)
 
         return inner_type(numba.types.int64), codegen
 
