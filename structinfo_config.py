@@ -3,23 +3,17 @@ Configuration file to structinfo_generator.
 
 
 """
-import os
+from distutils.sysconfig import get_python_lib
 
-import gumath
-import ndtypes
-import xnd
-
-NDTYPES_ROOT = os.path.dirname(ndtypes.__file__)
-XND_ROOT = os.path.dirname(xnd.__file__)
-GUMATH_ROOT = os.path.dirname(gumath.__file__)
-
-PREFIX = os.environ["CONDA_PREFIX"]
+site_packages = get_python_lib()
+lib_dirs = [f'{site_packages}/{i}' for i in ['ndtypes', 'gumath', 'xnd']]
+include_dir = site_packages[:site_packages.find('lib')] + 'include'
 
 output_filename = "xnd_structinfo.c"
 modulename = "xnd_structinfo"
 
-include_dirs = [NDTYPES_ROOT, XND_ROOT, GUMATH_ROOT, os.path.join(PREFIX, "include")]
-library_dirs = [os.path.join(PREFIX, "lib")]
+include_dirs = lib_dirs + [include_dir]
+library_dirs = [site_packages[:site_packages.find('/python')]]
 includes = ["pyndtypes.h", "pyxnd.h", "pygumath.h"]
 libraries = []
 
