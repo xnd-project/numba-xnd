@@ -12,14 +12,12 @@ extern void print_bytes(const void *object, size_t size)
     // This is for C++; in C just drop the static_cast<>() and assign.
     const unsigned char *const bytes = object;
     size_t i;
-
     printf("Bytes: [ ");
     for (i = 0; i < size; i++)
     {
         printf("%lld ", (int64_t)bytes[i]);
     }
     printf("]\n");
-
     const int64_t *bytes2 = object;
     size_t i2;
     printf("Ints: [ ");
@@ -118,6 +116,8 @@ extern /* pointer to `char*` */ void * get_ndt_t_Module_name(void* ptr){ return 
 extern size_t offsetof_ndt_t_Module_name(void){ return offsetof(ndt_t, Module.name); }
 extern /* pointer to `ndt_t*` */ void * get_ndt_t_Module_type(void* ptr){ return &(((ndt_t*)ptr)->Module.type); }
 extern size_t offsetof_ndt_t_Module_type(void){ return offsetof(ndt_t, Module.type); }
+extern /* pointer to `bool` */ void * get_ndt_t_Function_elemwise(void* ptr){ return &(((ndt_t*)ptr)->Function.elemwise); }
+extern size_t offsetof_ndt_t_Function_elemwise(void){ return offsetof(ndt_t, Function.elemwise); }
 extern /* pointer to `int64_t` */ void * get_ndt_t_Function_nin(void* ptr){ return &(((ndt_t*)ptr)->Function.nin); }
 extern size_t offsetof_ndt_t_Function_nin(void){ return offsetof(ndt_t, Function.nin); }
 extern /* pointer to `int64_t` */ void * get_ndt_t_Function_nout(void* ptr){ return &(((ndt_t*)ptr)->Function.nout); }
@@ -294,6 +294,13 @@ extern /* pointer to `const char*` */ void * get_xnd_index_t_FieldName(void* ptr
 extern size_t offsetof_xnd_index_t_FieldName(void){ return offsetof(xnd_index_t, FieldName); }
 extern /* pointer to `ndt_slice_t` */ void * get_xnd_index_t_Slice(void* ptr){ return &(((xnd_index_t*)ptr)->Slice); }
 extern size_t offsetof_xnd_index_t_Slice(void){ return offsetof(xnd_index_t, Slice); }
+extern size_t sizeof_xnd_view_t(void){ return sizeof(xnd_view_t); }
+extern /* pointer to `uint32_t` */ void * get_xnd_view_t_flags(void* ptr){ return &(((xnd_view_t*)ptr)->flags); }
+extern size_t offsetof_xnd_view_t_flags(void){ return offsetof(xnd_view_t, flags); }
+extern /* pointer to `const void*` */ void * get_xnd_view_t_obj(void* ptr){ return &(((xnd_view_t*)ptr)->obj); }
+extern size_t offsetof_xnd_view_t_obj(void){ return offsetof(xnd_view_t, obj); }
+extern /* pointer to `xnd_t` */ void * get_xnd_view_t_view(void* ptr){ return &(((xnd_view_t*)ptr)->view); }
+extern size_t offsetof_xnd_view_t_view(void){ return offsetof(xnd_view_t, view); }
 extern size_t sizeof_MemoryBlockObject(void){ return sizeof(MemoryBlockObject); }
 extern /* pointer to `PyObject*` */ void * get_MemoryBlockObject_type(void* ptr){ return &(((MemoryBlockObject*)ptr)->type); }
 extern size_t offsetof_MemoryBlockObject_type(void){ return offsetof(MemoryBlockObject, type); }
@@ -313,6 +320,8 @@ extern /* pointer to `ndt_t*` */ void * get_gm_kernel_set_t_sig(void* ptr){ retu
 extern size_t offsetof_gm_kernel_set_t_sig(void){ return offsetof(gm_kernel_set_t, sig); }
 extern /* pointer to `const ndt_constraint_t*` */ void * get_gm_kernel_set_t_constraint(void* ptr){ return &(((gm_kernel_set_t*)ptr)->constraint); }
 extern size_t offsetof_gm_kernel_set_t_constraint(void){ return offsetof(gm_kernel_set_t, constraint); }
+extern /* pointer to `gm_xnd_kernel_t` */ void * get_gm_kernel_set_t_Opt(void* ptr){ return &(((gm_kernel_set_t*)ptr)->Opt); }
+extern size_t offsetof_gm_kernel_set_t_Opt(void){ return offsetof(gm_kernel_set_t, Opt); }
 extern /* pointer to `gm_xnd_kernel_t` */ void * get_gm_kernel_set_t_C(void* ptr){ return &(((gm_kernel_set_t*)ptr)->C); }
 extern size_t offsetof_gm_kernel_set_t_C(void){ return offsetof(gm_kernel_set_t, C); }
 extern /* pointer to `gm_xnd_kernel_t` */ void * get_gm_kernel_set_t_Fortran(void* ptr){ return &(((gm_kernel_set_t*)ptr)->Fortran); }
@@ -335,6 +344,8 @@ extern /* pointer to `const char*` */ void * get_gm_kernel_init_t_sig(void* ptr)
 extern size_t offsetof_gm_kernel_init_t_sig(void){ return offsetof(gm_kernel_init_t, sig); }
 extern /* pointer to `const ndt_constraint_t*` */ void * get_gm_kernel_init_t_constraint(void* ptr){ return &(((gm_kernel_init_t*)ptr)->constraint); }
 extern size_t offsetof_gm_kernel_init_t_constraint(void){ return offsetof(gm_kernel_init_t, constraint); }
+extern /* pointer to `gm_xnd_kernel_t` */ void * get_gm_kernel_init_t_Opt(void* ptr){ return &(((gm_kernel_init_t*)ptr)->Opt); }
+extern size_t offsetof_gm_kernel_init_t_Opt(void){ return offsetof(gm_kernel_init_t, Opt); }
 extern /* pointer to `gm_xnd_kernel_t` */ void * get_gm_kernel_init_t_C(void* ptr){ return &(((gm_kernel_init_t*)ptr)->C); }
 extern size_t offsetof_gm_kernel_init_t_C(void){ return offsetof(gm_kernel_init_t, C); }
 extern /* pointer to `gm_xnd_kernel_t` */ void * get_gm_kernel_init_t_Fortran(void* ptr){ return &(((gm_kernel_init_t*)ptr)->Fortran); }
@@ -357,6 +368,11 @@ extern /* pointer to `int` */ void * get_gm_func_t_nkernels(void* ptr){ return &
 extern size_t offsetof_gm_func_t_nkernels(void){ return offsetof(gm_func_t, nkernels); }
 extern /* pointer to `gm_kernel_set_t*` */ void * get_gm_func_t_kernels(void* ptr){ return &(((gm_func_t*)ptr)->kernels); }
 extern size_t offsetof_gm_func_t_kernels(void){ return offsetof(gm_func_t, kernels); }
+extern size_t sizeof_GufuncObject(void){ return sizeof(GufuncObject); }
+extern /* pointer to `const gm_tbl_t*` */ void * get_GufuncObject_tbl(void* ptr){ return &(((GufuncObject*)ptr)->tbl); }
+extern size_t offsetof_GufuncObject_tbl(void){ return offsetof(GufuncObject, tbl); }
+extern /* pointer to `char*` */ void * get_GufuncObject_name(void* ptr){ return &(((GufuncObject*)ptr)->name); }
+extern size_t offsetof_GufuncObject_name(void){ return offsetof(GufuncObject, name); }
 #ifdef PYTHON_MODULE
 #include "Python.h"
 
@@ -800,6 +816,17 @@ static PyObject *pyc_get_ndt_t_Module_type(PyObject *self, PyObject *args) {
   return NULL;
 }
 static PyObject *pyc_offsetof_ndt_t_Module_type(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(offsetof_ndt_t_Module_type())); }
+static PyObject *pyc_get_ndt_t_Function_elemwise(PyObject *self, PyObject *args) {
+  PyObject* ptr=NULL;
+  if (!PyArg_UnpackTuple(args, "ndt_t", 0, 1, &ptr))
+    return NULL;
+  if (PyCapsule_CheckExact(ptr)) {
+    return PyCapsule_New( get_ndt_t_Function_elemwise(PyCapsule_GetPointer(ptr, "ndt_t*")), "bool", NULL);
+  }
+  PyErr_SetString(PyExc_TypeError, "expected capsuleted ndt_t");
+  return NULL;
+}
+static PyObject *pyc_offsetof_ndt_t_Function_elemwise(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(offsetof_ndt_t_Function_elemwise())); }
 static PyObject *pyc_get_ndt_t_Function_nin(PyObject *self, PyObject *args) {
   PyObject* ptr=NULL;
   if (!PyArg_UnpackTuple(args, "ndt_t", 0, 1, &ptr))
@@ -1734,6 +1761,40 @@ static PyObject *pyc_get_xnd_index_t_Slice(PyObject *self, PyObject *args) {
   return NULL;
 }
 static PyObject *pyc_offsetof_xnd_index_t_Slice(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(offsetof_xnd_index_t_Slice())); }
+static PyObject *pyc_sizeof_xnd_view_t(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(sizeof_xnd_view_t())); }
+static PyObject *pyc_get_xnd_view_t_flags(PyObject *self, PyObject *args) {
+  PyObject* ptr=NULL;
+  if (!PyArg_UnpackTuple(args, "xnd_view_t", 0, 1, &ptr))
+    return NULL;
+  if (PyCapsule_CheckExact(ptr)) {
+    return PyCapsule_New( get_xnd_view_t_flags(PyCapsule_GetPointer(ptr, "xnd_view_t*")), "uint32_t", NULL);
+  }
+  PyErr_SetString(PyExc_TypeError, "expected capsuleted xnd_view_t");
+  return NULL;
+}
+static PyObject *pyc_offsetof_xnd_view_t_flags(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(offsetof_xnd_view_t_flags())); }
+static PyObject *pyc_get_xnd_view_t_obj(PyObject *self, PyObject *args) {
+  PyObject* ptr=NULL;
+  if (!PyArg_UnpackTuple(args, "xnd_view_t", 0, 1, &ptr))
+    return NULL;
+  if (PyCapsule_CheckExact(ptr)) {
+    return PyCapsule_New( get_xnd_view_t_obj(PyCapsule_GetPointer(ptr, "xnd_view_t*")), "const void*", NULL);
+  }
+  PyErr_SetString(PyExc_TypeError, "expected capsuleted xnd_view_t");
+  return NULL;
+}
+static PyObject *pyc_offsetof_xnd_view_t_obj(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(offsetof_xnd_view_t_obj())); }
+static PyObject *pyc_get_xnd_view_t_view(PyObject *self, PyObject *args) {
+  PyObject* ptr=NULL;
+  if (!PyArg_UnpackTuple(args, "xnd_view_t", 0, 1, &ptr))
+    return NULL;
+  if (PyCapsule_CheckExact(ptr)) {
+    return PyCapsule_New( get_xnd_view_t_view(PyCapsule_GetPointer(ptr, "xnd_view_t*")), "xnd_t", NULL);
+  }
+  PyErr_SetString(PyExc_TypeError, "expected capsuleted xnd_view_t");
+  return NULL;
+}
+static PyObject *pyc_offsetof_xnd_view_t_view(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(offsetof_xnd_view_t_view())); }
 static PyObject *pyc_sizeof_MemoryBlockObject(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(sizeof_MemoryBlockObject())); }
 static PyObject *pyc_get_MemoryBlockObject_type(PyObject *self, PyObject *args) {
   PyObject* ptr=NULL;
@@ -1836,6 +1897,17 @@ static PyObject *pyc_get_gm_kernel_set_t_constraint(PyObject *self, PyObject *ar
   return NULL;
 }
 static PyObject *pyc_offsetof_gm_kernel_set_t_constraint(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(offsetof_gm_kernel_set_t_constraint())); }
+static PyObject *pyc_get_gm_kernel_set_t_Opt(PyObject *self, PyObject *args) {
+  PyObject* ptr=NULL;
+  if (!PyArg_UnpackTuple(args, "gm_kernel_set_t", 0, 1, &ptr))
+    return NULL;
+  if (PyCapsule_CheckExact(ptr)) {
+    return PyCapsule_New( get_gm_kernel_set_t_Opt(PyCapsule_GetPointer(ptr, "gm_kernel_set_t*")), "gm_xnd_kernel_t", NULL);
+  }
+  PyErr_SetString(PyExc_TypeError, "expected capsuleted gm_kernel_set_t");
+  return NULL;
+}
+static PyObject *pyc_offsetof_gm_kernel_set_t_Opt(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(offsetof_gm_kernel_set_t_Opt())); }
 static PyObject *pyc_get_gm_kernel_set_t_C(PyObject *self, PyObject *args) {
   PyObject* ptr=NULL;
   if (!PyArg_UnpackTuple(args, "gm_kernel_set_t", 0, 1, &ptr))
@@ -1948,6 +2020,17 @@ static PyObject *pyc_get_gm_kernel_init_t_constraint(PyObject *self, PyObject *a
   return NULL;
 }
 static PyObject *pyc_offsetof_gm_kernel_init_t_constraint(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(offsetof_gm_kernel_init_t_constraint())); }
+static PyObject *pyc_get_gm_kernel_init_t_Opt(PyObject *self, PyObject *args) {
+  PyObject* ptr=NULL;
+  if (!PyArg_UnpackTuple(args, "gm_kernel_init_t", 0, 1, &ptr))
+    return NULL;
+  if (PyCapsule_CheckExact(ptr)) {
+    return PyCapsule_New( get_gm_kernel_init_t_Opt(PyCapsule_GetPointer(ptr, "gm_kernel_init_t*")), "gm_xnd_kernel_t", NULL);
+  }
+  PyErr_SetString(PyExc_TypeError, "expected capsuleted gm_kernel_init_t");
+  return NULL;
+}
+static PyObject *pyc_offsetof_gm_kernel_init_t_Opt(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(offsetof_gm_kernel_init_t_Opt())); }
 static PyObject *pyc_get_gm_kernel_init_t_C(PyObject *self, PyObject *args) {
   PyObject* ptr=NULL;
   if (!PyArg_UnpackTuple(args, "gm_kernel_init_t", 0, 1, &ptr))
@@ -2060,6 +2143,29 @@ static PyObject *pyc_get_gm_func_t_kernels(PyObject *self, PyObject *args) {
   return NULL;
 }
 static PyObject *pyc_offsetof_gm_func_t_kernels(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(offsetof_gm_func_t_kernels())); }
+static PyObject *pyc_sizeof_GufuncObject(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(sizeof_GufuncObject())); }
+static PyObject *pyc_get_GufuncObject_tbl(PyObject *self, PyObject *args) {
+  PyObject* ptr=NULL;
+  if (!PyArg_UnpackTuple(args, "GufuncObject", 0, 1, &ptr))
+    return NULL;
+  if (PyCapsule_CheckExact(ptr)) {
+    return PyCapsule_New( get_GufuncObject_tbl(PyCapsule_GetPointer(ptr, "GufuncObject*")), "const gm_tbl_t*", NULL);
+  }
+  PyErr_SetString(PyExc_TypeError, "expected capsuleted GufuncObject");
+  return NULL;
+}
+static PyObject *pyc_offsetof_GufuncObject_tbl(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(offsetof_GufuncObject_tbl())); }
+static PyObject *pyc_get_GufuncObject_name(PyObject *self, PyObject *args) {
+  PyObject* ptr=NULL;
+  if (!PyArg_UnpackTuple(args, "GufuncObject", 0, 1, &ptr))
+    return NULL;
+  if (PyCapsule_CheckExact(ptr)) {
+    return PyCapsule_New( get_GufuncObject_name(PyCapsule_GetPointer(ptr, "GufuncObject*")), "char*", NULL);
+  }
+  PyErr_SetString(PyExc_TypeError, "expected capsuleted GufuncObject");
+  return NULL;
+}
+static PyObject *pyc_offsetof_GufuncObject_name(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(offsetof_GufuncObject_name())); }
 
 static PyObject *pyc_capsule_to_int32(PyObject *self, PyObject *args) {
   PyObject* ptr=NULL;
@@ -2197,6 +2303,8 @@ static PyMethodDef xnd_structinfo_methods[] = {
   {"offsetof_ndt_t_Module_name", (PyCFunction)pyc_offsetof_ndt_t_Module_name, METH_VARARGS, "offsetof_ndt_t_Module_name() -> int"},
   {"get_ndt_t_Module_type", (PyCFunction)pyc_get_ndt_t_Module_type, METH_VARARGS, "get_ndt_t_Module_type(< capsule(ndt_t) >) -> < capsule( &ndt_t->Module.type ) >"},
   {"offsetof_ndt_t_Module_type", (PyCFunction)pyc_offsetof_ndt_t_Module_type, METH_VARARGS, "offsetof_ndt_t_Module_type() -> int"},
+  {"get_ndt_t_Function_elemwise", (PyCFunction)pyc_get_ndt_t_Function_elemwise, METH_VARARGS, "get_ndt_t_Function_elemwise(< capsule(ndt_t) >) -> < capsule( &ndt_t->Function.elemwise ) >"},
+  {"offsetof_ndt_t_Function_elemwise", (PyCFunction)pyc_offsetof_ndt_t_Function_elemwise, METH_VARARGS, "offsetof_ndt_t_Function_elemwise() -> int"},
   {"get_ndt_t_Function_nin", (PyCFunction)pyc_get_ndt_t_Function_nin, METH_VARARGS, "get_ndt_t_Function_nin(< capsule(ndt_t) >) -> < capsule( &ndt_t->Function.nin ) >"},
   {"offsetof_ndt_t_Function_nin", (PyCFunction)pyc_offsetof_ndt_t_Function_nin, METH_VARARGS, "offsetof_ndt_t_Function_nin() -> int"},
   {"get_ndt_t_Function_nout", (PyCFunction)pyc_get_ndt_t_Function_nout, METH_VARARGS, "get_ndt_t_Function_nout(< capsule(ndt_t) >) -> < capsule( &ndt_t->Function.nout ) >"},
@@ -2374,6 +2482,13 @@ static PyMethodDef xnd_structinfo_methods[] = {
   {"offsetof_xnd_index_t_FieldName", (PyCFunction)pyc_offsetof_xnd_index_t_FieldName, METH_VARARGS, "offsetof_xnd_index_t_FieldName() -> int"},
   {"get_xnd_index_t_Slice", (PyCFunction)pyc_get_xnd_index_t_Slice, METH_VARARGS, "get_xnd_index_t_Slice(< capsule(xnd_index_t) >) -> < capsule( &xnd_index_t->Slice ) >"},
   {"offsetof_xnd_index_t_Slice", (PyCFunction)pyc_offsetof_xnd_index_t_Slice, METH_VARARGS, "offsetof_xnd_index_t_Slice() -> int"},
+  {"sizeof_xnd_view_t", (PyCFunction)pyc_sizeof_xnd_view_t, METH_VARARGS, "sizeof_xnd_view_t() -> int"},
+  {"get_xnd_view_t_flags", (PyCFunction)pyc_get_xnd_view_t_flags, METH_VARARGS, "get_xnd_view_t_flags(< capsule(xnd_view_t) >) -> < capsule( &xnd_view_t->flags ) >"},
+  {"offsetof_xnd_view_t_flags", (PyCFunction)pyc_offsetof_xnd_view_t_flags, METH_VARARGS, "offsetof_xnd_view_t_flags() -> int"},
+  {"get_xnd_view_t_obj", (PyCFunction)pyc_get_xnd_view_t_obj, METH_VARARGS, "get_xnd_view_t_obj(< capsule(xnd_view_t) >) -> < capsule( &xnd_view_t->obj ) >"},
+  {"offsetof_xnd_view_t_obj", (PyCFunction)pyc_offsetof_xnd_view_t_obj, METH_VARARGS, "offsetof_xnd_view_t_obj() -> int"},
+  {"get_xnd_view_t_view", (PyCFunction)pyc_get_xnd_view_t_view, METH_VARARGS, "get_xnd_view_t_view(< capsule(xnd_view_t) >) -> < capsule( &xnd_view_t->view ) >"},
+  {"offsetof_xnd_view_t_view", (PyCFunction)pyc_offsetof_xnd_view_t_view, METH_VARARGS, "offsetof_xnd_view_t_view() -> int"},
   {"sizeof_MemoryBlockObject", (PyCFunction)pyc_sizeof_MemoryBlockObject, METH_VARARGS, "sizeof_MemoryBlockObject() -> int"},
   {"get_MemoryBlockObject_type", (PyCFunction)pyc_get_MemoryBlockObject_type, METH_VARARGS, "get_MemoryBlockObject_type(< capsule(MemoryBlockObject) >) -> < capsule( &MemoryBlockObject->type ) >"},
   {"offsetof_MemoryBlockObject_type", (PyCFunction)pyc_offsetof_MemoryBlockObject_type, METH_VARARGS, "offsetof_MemoryBlockObject_type() -> int"},
@@ -2394,6 +2509,8 @@ static PyMethodDef xnd_structinfo_methods[] = {
   {"offsetof_gm_kernel_set_t_sig", (PyCFunction)pyc_offsetof_gm_kernel_set_t_sig, METH_VARARGS, "offsetof_gm_kernel_set_t_sig() -> int"},
   {"get_gm_kernel_set_t_constraint", (PyCFunction)pyc_get_gm_kernel_set_t_constraint, METH_VARARGS, "get_gm_kernel_set_t_constraint(< capsule(gm_kernel_set_t) >) -> < capsule( &gm_kernel_set_t->constraint ) >"},
   {"offsetof_gm_kernel_set_t_constraint", (PyCFunction)pyc_offsetof_gm_kernel_set_t_constraint, METH_VARARGS, "offsetof_gm_kernel_set_t_constraint() -> int"},
+  {"get_gm_kernel_set_t_Opt", (PyCFunction)pyc_get_gm_kernel_set_t_Opt, METH_VARARGS, "get_gm_kernel_set_t_Opt(< capsule(gm_kernel_set_t) >) -> < capsule( &gm_kernel_set_t->Opt ) >"},
+  {"offsetof_gm_kernel_set_t_Opt", (PyCFunction)pyc_offsetof_gm_kernel_set_t_Opt, METH_VARARGS, "offsetof_gm_kernel_set_t_Opt() -> int"},
   {"get_gm_kernel_set_t_C", (PyCFunction)pyc_get_gm_kernel_set_t_C, METH_VARARGS, "get_gm_kernel_set_t_C(< capsule(gm_kernel_set_t) >) -> < capsule( &gm_kernel_set_t->C ) >"},
   {"offsetof_gm_kernel_set_t_C", (PyCFunction)pyc_offsetof_gm_kernel_set_t_C, METH_VARARGS, "offsetof_gm_kernel_set_t_C() -> int"},
   {"get_gm_kernel_set_t_Fortran", (PyCFunction)pyc_get_gm_kernel_set_t_Fortran, METH_VARARGS, "get_gm_kernel_set_t_Fortran(< capsule(gm_kernel_set_t) >) -> < capsule( &gm_kernel_set_t->Fortran ) >"},
@@ -2416,6 +2533,8 @@ static PyMethodDef xnd_structinfo_methods[] = {
   {"offsetof_gm_kernel_init_t_sig", (PyCFunction)pyc_offsetof_gm_kernel_init_t_sig, METH_VARARGS, "offsetof_gm_kernel_init_t_sig() -> int"},
   {"get_gm_kernel_init_t_constraint", (PyCFunction)pyc_get_gm_kernel_init_t_constraint, METH_VARARGS, "get_gm_kernel_init_t_constraint(< capsule(gm_kernel_init_t) >) -> < capsule( &gm_kernel_init_t->constraint ) >"},
   {"offsetof_gm_kernel_init_t_constraint", (PyCFunction)pyc_offsetof_gm_kernel_init_t_constraint, METH_VARARGS, "offsetof_gm_kernel_init_t_constraint() -> int"},
+  {"get_gm_kernel_init_t_Opt", (PyCFunction)pyc_get_gm_kernel_init_t_Opt, METH_VARARGS, "get_gm_kernel_init_t_Opt(< capsule(gm_kernel_init_t) >) -> < capsule( &gm_kernel_init_t->Opt ) >"},
+  {"offsetof_gm_kernel_init_t_Opt", (PyCFunction)pyc_offsetof_gm_kernel_init_t_Opt, METH_VARARGS, "offsetof_gm_kernel_init_t_Opt() -> int"},
   {"get_gm_kernel_init_t_C", (PyCFunction)pyc_get_gm_kernel_init_t_C, METH_VARARGS, "get_gm_kernel_init_t_C(< capsule(gm_kernel_init_t) >) -> < capsule( &gm_kernel_init_t->C ) >"},
   {"offsetof_gm_kernel_init_t_C", (PyCFunction)pyc_offsetof_gm_kernel_init_t_C, METH_VARARGS, "offsetof_gm_kernel_init_t_C() -> int"},
   {"get_gm_kernel_init_t_Fortran", (PyCFunction)pyc_get_gm_kernel_init_t_Fortran, METH_VARARGS, "get_gm_kernel_init_t_Fortran(< capsule(gm_kernel_init_t) >) -> < capsule( &gm_kernel_init_t->Fortran ) >"},
@@ -2438,6 +2557,11 @@ static PyMethodDef xnd_structinfo_methods[] = {
   {"offsetof_gm_func_t_nkernels", (PyCFunction)pyc_offsetof_gm_func_t_nkernels, METH_VARARGS, "offsetof_gm_func_t_nkernels() -> int"},
   {"get_gm_func_t_kernels", (PyCFunction)pyc_get_gm_func_t_kernels, METH_VARARGS, "get_gm_func_t_kernels(< capsule(gm_func_t) >) -> < capsule( &gm_func_t->kernels ) >"},
   {"offsetof_gm_func_t_kernels", (PyCFunction)pyc_offsetof_gm_func_t_kernels, METH_VARARGS, "offsetof_gm_func_t_kernels() -> int"},
+  {"sizeof_GufuncObject", (PyCFunction)pyc_sizeof_GufuncObject, METH_VARARGS, "sizeof_GufuncObject() -> int"},
+  {"get_GufuncObject_tbl", (PyCFunction)pyc_get_GufuncObject_tbl, METH_VARARGS, "get_GufuncObject_tbl(< capsule(GufuncObject) >) -> < capsule( &GufuncObject->tbl ) >"},
+  {"offsetof_GufuncObject_tbl", (PyCFunction)pyc_offsetof_GufuncObject_tbl, METH_VARARGS, "offsetof_GufuncObject_tbl() -> int"},
+  {"get_GufuncObject_name", (PyCFunction)pyc_get_GufuncObject_name, METH_VARARGS, "get_GufuncObject_name(< capsule(GufuncObject) >) -> < capsule( &GufuncObject->name ) >"},
+  {"offsetof_GufuncObject_name", (PyCFunction)pyc_offsetof_GufuncObject_name, METH_VARARGS, "offsetof_GufuncObject_name() -> int"},
   {"value_int32", (PyCFunction)pyc_capsule_to_int32, METH_VARARGS, "(capsule) -> <capsule int32 value>"},
   {"value_int64", (PyCFunction)pyc_capsule_to_int64, METH_VARARGS, "(capsule) -> <capsule int64 value>"},
   {"value_bytes", (PyCFunction)pyc_capsule_to_bytes, METH_VARARGS, "(capsule[, size]) -> <capsule content as bytes>"},
