@@ -16,7 +16,9 @@ llvmlite.binding.load_library_permanently(ndtypes._ndtypes.__file__)
 NDT_MAX_DIM = 128
 
 
-ndt_t = shared.WrappedCStruct("ndt_t", {"ndim": numba.types.int32}, create_wrapper=True)
+ndt_t = shared.WrappedCStruct(
+    "ndt_t", {"ndim": numba.types.int32, "tag": numba.types.int64}, create_wrapper=True
+)
 wrap_ndt, unwrap_ndt = ndt_t.wrap, ndt_t.unwrap
 
 

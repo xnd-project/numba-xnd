@@ -45,9 +45,8 @@ class WrappedCStruct:
         """
         self.name, self.attrs, self.embedded = name, attrs, embedded
 
-        self.llvm_type = llvmlite.ir.ArrayType(
-            char, getattr(xnd_structinfo, f"sizeof_{name}")()
-        )
+        self.n_bytes = getattr(xnd_structinfo, f"sizeof_{name}")()
+        self.llvm_type = llvmlite.ir.ArrayType(char, self.n_bytes)
 
         self.llvm_ptr_type = ptr(self.llvm_type)
 

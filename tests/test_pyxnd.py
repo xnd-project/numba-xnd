@@ -29,7 +29,7 @@ class TestXndObjectWrapper(unittest.TestCase):
 
     def test_type(self):
         x = xnd([[1, 2, 3], [4, 5, 6]])
-        self.assertEqual(njit(lambda x: x.type)(x), x.type)
+        self.assertEqual(njit(lambda x: x.type.ndim)(x), x.type.ndim)
 
     def test_ndim(self):
         x = xnd([[1, 2, 3], [4, 5, 6]])
