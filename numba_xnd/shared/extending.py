@@ -28,145 +28,175 @@ def create_numba_type(name, llvm_type):
     return InnerType()
 
 
-# TODO: Convert to class to be able to accesss functions/types as attributes instead of unpacking return arguments
-def create_opaque_struct(
-    c_struct_name, attrs, embedded=tuple(), create_wrapper=False, is_python_object=False
-):
-    """
-    Creates a Numba type and model for the c struct `c_struct_name`
+class WrappedCStruct:
+    def __init__(self, name, attrs, embedded=tuple(), create_wrapper=False):
+        """
+        Creates a Numba type and model for the c struct `name`
 
-    Returns numba type, llvm type, and a create function.
+        It also registers typing and lowering for it's attributes.
+        `attrs` should be a dictionary mapping attribute names to the numba type of that attribute.
 
-    It also registers typing and lowering for it's attributes.
-    `attrs` should be a dictionary mapping attribute names to the numba type of that attribute.
+        `embedded` is a set of attribute names that actually are embedded in the struct instead of referenced.
+        So if `hi` is an attribute that has a numba type with a data model of `some_other_thing*`, then if `hi`
+        is in `embedded`, this struct has `some_other_thing` embedded in it, instead of a pointer to it.
 
-    `embedded` is a set of attribute names that actually are embedded in the struct instead of referenced.
-    So if `hi` is an attribute that has a numba type with a data model of `some_other_thing*`, then if `hi`
-    is in `embedded`, this struct has `some_other_thing` embedded in it, instead of a pointer to it.
+        If `create_wrapper` is true, then this also creates a wrapper type that has same datamodel, but requires a
+        `ndt_type` attribute that holds a ndtypes.ndt instance.
+        """
+        self.name, self.attrs, self.embedded = name, attrs, embedded
 
-    If `create_wrapper` is true, then this also creates a wrapper type that has same datamodel, but requires a
-    `ndt_type` attribute that holds a ndtypes.ndt instance. In this case, it also returns a wrapper type, wrap function,
-    and unwrap function.
+        self.llvm_type = llvmlite.ir.ArrayType(
+            char, getattr(xnd_structinfo, f"sizeof_{name}")()
+        )
 
-    If `is_python_object` is true, then adds incrementing reference to boxing.
-    """
-    struct_llvm_type = llvmlite.ir.ArrayType(
-        char, getattr(xnd_structinfo, f"sizeof_{c_struct_name}")()
-    )
+        self.llvm_ptr_type = ptr(self.llvm_type)
 
-    llvm_repr = ptr(struct_llvm_type)
+        self.NumbaType = self._create_numba_type()
+        self.numba_type = self.NumbaType()
 
-    class InnerType(numba.types.Type):
-        def __init__(self):
-            super().__init__(name=c_struct_name)
+        self.NumbaModel = numba.extending.register_model(self.NumbaType)(
+            self._create_numba_model()
+        )
 
-    @numba.extending.register_model(InnerType)
-    class InnerModel(numba.extending.models.PrimitiveModel):
-        def __init__(self, dmm, fe_type):
-            super().__init__(dmm, fe_type, llvm_repr)
+        numba.extending.infer_getattr(self._create_getattr_template())
 
-    inner_type = InnerType()
+        numba.extending.lower_getattr_generic(self.NumbaType)(self.getattr_impl)
+        numba.extending.lower_setattr_generic(self.NumbaType)(self.settattr_impl)
+        self.create = numba.extending.intrinsic(support_literals=True)(self.create_impl)
 
-    @numba.extending.infer_getattr
-    class _InnerTemplate(numba.typing.templates.AttributeTemplate):
-        key = InnerType
+        numba.extending.type_callable("getitem")(self.type_getitem)
+        numba.targets.imputils.lower_builtin(
+            "getitem", self.NumbaType, numba.types.Integer
+        )(self.lower_getitem)
 
-        def generic_resolve(self, val, attr):
-            if attr in attrs:
-                return attrs[attr]
+        if not create_wrapper:
+            return
 
-    def _get_attr(builder, value, attr, is_embedded):
-        attr_llvm_type = llvm_type_from_numba_type(attrs[attr])
+        self.WrapperNumbaType = self.create_wrapper_numba_type()
+        numba.extending.register_model(self.WrapperNumbaType)(self.NumbaModel)
+        numba.extending.lower_cast(self.NumbaType, self.WrapperNumbaType)(
+            lambda context, builder, fromty, toty, val: val
+        )
+
+        self.wrap = numba.extending.intrinsic(support_literals=True)(self.wrap_impl)
+        self.unwrap = numba.extending.intrinsic(self.unwrap_impl)
+
+    def __str__(self):
+        return f"{self.name}({self.llvm_type})"
+
+    def _create_numba_type(self):
+        name = self.name
+
+        class NumbaType(numba.types.Type):
+            def __init__(self):
+                super().__init__(name=name)
+
+        return NumbaType
+
+    def _create_numba_model(self):
+        be_type = self.llvm_ptr_type
+        llvm_type = self.llvm_type
+
+        class NumbaModel(numba.extending.models.PrimitiveModel):
+            def __init__(self, dmm, fe_type):
+                super().__init__(dmm, fe_type, be_type)
+
+            def get_return_type(self):
+                return llvm_type
+
+            def get_data_type(self):
+                return llvm_type
+
+            def as_return(self, builder, value):
+                return builder.load(value)
+
+            def from_return(self, builder, value):
+                return numba.cgutils.alloca_once_value(builder, value)
+
+            def as_data(self, builder, value):
+                return builder.load(value)
+
+            def from_data(self, builder, value):
+                return numba.cgutils.alloca_once_value(builder, value)
+
+        return NumbaModel
+
+    def _create_getattr_template(self):
+        attrs = self.attrs
+
+        class GetattrTemplate(numba.typing.templates.AttributeTemplate):
+            key = self.NumbaType
+
+            def generic_resolve(self, val, attr):
+                if attr in attrs:
+                    return attrs[attr]
+
+        return GetattrTemplate
+
+    def _call_get_function(self, builder, value, attr, is_embedded):
+        attr_llvm_type = llvm_type_from_numba_type(self.attrs[attr])
         ret_type = attr_llvm_type if is_embedded else ptr(attr_llvm_type)
         fn = builder.module.get_or_insert_function(
-            llvmlite.ir.FunctionType(ret_type, [llvm_repr]),
-            name=f"get_{c_struct_name}_{attr}",
+            llvmlite.ir.FunctionType(ret_type, [self.llvm_ptr_type]),
+            name=f"get_{self.name}_{attr}",
         )
         return_value = builder.call(fn, [value])
         return return_value
 
-    @numba.extending.lower_getattr_generic(InnerType)
-    def _inner_getattr_impl(context, builder, typ, value, attr):
-        is_embedded = attr in embedded
-        ret = _get_attr(builder, value, attr, is_embedded)
+    def getattr_impl(self, context, builder, typ, value, attr):
+        is_embedded = attr in self.embedded
+        ret = self._call_get_function(builder, value, attr, is_embedded)
         return ret if is_embedded else builder.load(ret)
 
-    @numba.extending.lower_setattr_generic(InnerType)
-    def _inner_settattr_impl(context, builder, sig, args, attr):
+    def settattr_impl(self, context, builder, sig, args, attr):
         target, value = args
-        is_embedded = attr in embedded
+        is_embedded = attr in self.embedded
         builder.store(
             value=builder.load(value) if is_embedded else value,
-            ptr=_get_attr(builder, target, attr, is_embedded),
+            ptr=self._call_get_function(builder, target, attr, is_embedded),
         )
 
-    @numba.extending.intrinsic(support_literals=True)
-    def create_inner(typingctx, n_t=numba.types.Const(1)):
+    def create_impl(self, typingctx, n_t=numba.types.Const(1)):
         if not isinstance(n_t, numba.types.Const):
             return
 
         def codegen(context, builder, sig, args):
-            return numba.cgutils.alloca_once(builder, struct_llvm_type, n_t.value)
+            return numba.cgutils.alloca_once(builder, self.llvm_type, n_t.value)
 
-        return inner_type(numba.types.int64), codegen
+        return self.numba_type(numba.types.int64), codegen
 
-    # Add default unboxing as just itself, so that creating a gumath kernel with xnd_t and ndt_context_t
-    # works.
-    @numba.extending.unbox(InnerType)
-    def unbox_inner(typ, obj, c):
-        return numba.extending.NativeValue(c.builder.bitcast(obj, llvm_repr))
-
-    @numba.extending.box(InnerType)
-    def box_inner(typ, val, c):
-        ret = c.builder.bitcast(val, ptr(char))
-        if is_python_object:
-            c.pyapi.incref(ret)
-        return ret
-
-    # add support for indexing that moves pointer over if multiple are allocated
-    @numba.extending.type_callable("getitem")
-    def type_array_wrap(context):
+    def type_getitem(self, context):
         def typer(val_t, i_t):
-            if val_t == inner_type and isinstance(i_t, numba.types.Integer):
-                return inner_type
+            if val_t == self.numba_type and isinstance(i_t, numba.types.Integer):
+                return self.numba_type
 
         return typer
 
-    @numba.targets.imputils.lower_builtin("getitem", InnerType, numba.types.Integer)
-    def getitem_inner(context, builder, sig, args):
+    def lower_getitem(self, context, builder, sig, args):
         x, i = args
         return builder.gep(x, [i])
 
-    return_vals = inner_type, struct_llvm_type, create_inner
-    if not create_wrapper:
-        return return_vals
+    def create_wrapper_numba_type(self):
+        name = self.name
+        numba_type = self.numba_type
 
-    class WrapperType(numba.types.Type):
-        def __init__(self, n):
-            assert isinstance(n, ndtypes.ndt)
-            self.ndt_value = n
-            super().__init__(f"{c_struct_name}Wrapper({n})")
+        class WrapperNumbaType(numba.types.Type):
+            def __init__(self, n):
+                assert isinstance(n, ndtypes.ndt)
+                self.ndt_value = n
+                super().__init__(f"{name}Wrapper({n})")
 
-        def can_convert_from(self, typingctx, other):
-            """
-            Support conversions from unwrapped to wrapped types implicitly.
-            """
-            if other == inner_type:
-                return numba.typeconv.Conversion.promote
+            def can_convert_from(self, typingctx, other):
+                """
+                Support conversions from unwrapped to wrapped types implicitly.
+                """
+                if other == numba_type:
+                    return numba.typeconv.Conversion.promote
 
-    numba.extending.register_model(WrapperType)(InnerModel)
+        return WrapperNumbaType
 
-    @numba.extending.lower_cast(InnerType, WrapperType)
-    def inner_to_wrapper(context, builder, fromty, toty, val):
-        return val
-
-    # Need boxing/unboxing for intrinsics to work
-    numba.extending.unbox(WrapperType)(unbox_inner)
-    numba.extending.box(WrapperType)(box_inner)
-
-    @numba.extending.intrinsic(support_literals=True)
-    def wrap_inner(typingctx, inner_t, ndt_type_t):
-        if inner_t != inner_type:
+    def wrap_impl(self, typingctx, inner_t, ndt_type_t):
+        if inner_t != self.numba_type:
             return
         # supports passing in strings as ndt's
         if isinstance(ndt_type_t, numba.types.Const):
@@ -178,31 +208,40 @@ def create_opaque_struct(
         else:
             return
 
-        sig = WrapperType(n)(inner_type, arg_type)
+        sig = self.WrapperNumbaType(n)(self.numba_type, arg_type)
 
         def codegen(context, builder, sig, args):
             return args[0]
 
         return sig, codegen
 
-    @numba.extending.intrinsic
-    def unwrap_inner(typingctx, wrapper_t):
-        if not isinstance(wrapper_t, WrapperType):
+    def unwrap_impl(self, typingctx, wrapper_t):
+        if not isinstance(wrapper_t, self.WrapperNumbaType):
             return
 
-        sig = inner_type(wrapper_t)
+        sig = self.numba_type(wrapper_t)
 
         def codegen(context, builder, sig, args):
             return args[0]
 
         return sig, codegen
-
-    return return_vals + (WrapperType, wrap_inner, unwrap_inner)
 
 
 def llvm_type_from_numba_type(numba_type):
     datamodel = numba.datamodel.registry.default_manager.lookup(numba_type)
     return datamodel.get_value_type()
+
+
+def dispatcher_cres(dispatcher, sig):
+    """
+    Compiles the dispatcher for `sig` and return the resulting compilation result.
+    """
+    entry_point = dispatcher.compile(sig)
+    return [
+        cres
+        for cres in dispatcher.overloads.values()
+        if cres.entry_point == entry_point
+    ][0]
 
 
 def overload_any(func):
@@ -228,14 +267,9 @@ def overload_any(func):
             # need to pass in `dispatcher` or get "underlying object has vanished"
             def typer(*args, dispatcher=dispatcher):
                 try:
-                    entry_point = dispatcher.compile(args)
+                    cres = dispatcher_cres(dispatcher, args)
                 except TypeError:  # None returned by overloaded function
                     return
-                cres = [
-                    cres
-                    for cres in dispatcher.overloads.values()
-                    if cres.entry_point == entry_point
-                ][0]
                 dispatcher.targetctx.insert_user_function(
                     func, cres.fndesc, [cres.library]
                 )
@@ -246,39 +280,58 @@ def overload_any(func):
     return inner
 
 
-def wrap_c_func(func_name, numba_ret_type, numba_arg_types):
-    def intrinsic_inner(typingctx, *numba_arg_types_):
-        if numba_arg_types_ != numba_arg_types:
-            return
+class WrappedCFunction(numba.extending._Intrinsic):
+    """
+    Creates an intrinsic for a C function. Also exposes the underlying codegen, if you want
+    to use that from a low level.
+    """
 
-        sig = numba_ret_type(*numba_arg_types)
+    def __init__(self, func_name, numba_ret_type, numba_arg_types):
+        self.func_name = func_name
+        self.numba_ret_type = numba_ret_type
+        self.numba_arg_types = numba_arg_types
 
-        def codegen(context, builder, sig, args):
-            return builder.call(
-                builder.module.get_or_insert_function(
-                    llvmlite.ir.FunctionType(
-                        llvm_type_from_numba_type(numba_ret_type),
-                        [llvm_type_from_numba_type(t) for t in numba_arg_types],
-                    ),
-                    name=func_name,
-                ),
-                args,
+        self.sig = self.numba_ret_type(*self.numba_arg_types)
+
+        self.ret_type = llvm_type_from_numba_type(self.numba_ret_type)
+        self.arg_types = [llvm_type_from_numba_type(t) for t in self.numba_arg_types]
+
+        super().__init__(func_name, self.create_impl())
+        self._register()
+
+    def __str__(self):
+        return f"{self.func_name}"
+
+    def codegen(self, builder, args):
+        return builder.call(
+            builder.module.get_or_insert_function(
+                llvmlite.ir.FunctionType(self.ret_type, self.arg_types),
+                name=self.func_name,
+            ),
+            args,
+        )
+
+    def create_impl(self):
+        def impl(typingctx, *numba_arg_types_):
+            if numba_arg_types_ != self.numba_arg_types:
+                return
+
+            return (
+                self.sig,
+                lambda context, builder, sig, args: self.codegen(builder, args),
             )
 
-        return sig, codegen
-
-    intrinsic_inner.__name__ = func_name
-    # change the function signature to take positional instead of variadic arguments
-    # so that numba type inference will work on it properly
-    # This should be like if you defined the intrinsic function explicitly with all the arguments
-    intrinsic_inner.__signature__ = inspect.signature(intrinsic_inner).replace(
-        parameters=[
-            inspect.Parameter(
-                f"_p{i}",  # arg name doesn't matter
-                inspect.Parameter.POSITIONAL_OR_KEYWORD,
-            )
-            for i in range(len(numba_arg_types) + 1)
-        ]
-    )
-
-    return numba.extending.intrinsic(intrinsic_inner)
+        impl.__name__ = self.func_name
+        # change the function signature to take positional instead of variadic arguments
+        # so that numba type inference will work on it properly
+        # This should be like if you defined the intrinsic function explicitly with all the arguments
+        impl.__signature__ = inspect.signature(impl).replace(
+            parameters=[
+                inspect.Parameter(
+                    f"_p{i}",  # arg name doesn't matter
+                    inspect.Parameter.POSITIONAL_OR_KEYWORD,
+                )
+                for i in range(len(self.numba_arg_types) + 1)
+            ]
+        )
+        return impl

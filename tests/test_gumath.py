@@ -138,8 +138,8 @@ class TestWrapKernelDispatcher(unittest.TestCase):
         @numba_xnd.gumath.wrap_kernel_dispatcher(2)
         @numba.njit(
             (
-                numba_xnd.libxnd.XndWrapperType(ndt("int64")),
-                numba_xnd.libxnd.XndWrapperType(ndt("int64")),
+                numba_xnd.libxnd.xnd_t.WrapperNumbaType(ndt("int64")),
+                numba_xnd.libxnd.xnd_t.WrapperNumbaType(ndt("int64")),
             )
         )
         def something(a, ret):

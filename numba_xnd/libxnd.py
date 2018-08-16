@@ -11,34 +11,35 @@ from . import libndtypes, shared
 llvmlite.binding.load_library_permanently(xnd._xnd.__file__)
 
 
-xnd_type, xnd_t, create_xnd, XndWrapperType, wrap_xnd, unwrap_xnd = shared.create_opaque_struct(
+xnd_t = shared.WrappedCStruct(
     "xnd_t",
-    {"type": libndtypes.ndt_type, "ptr": shared.c_string_type},
+    {"type": libndtypes.ndt_t.numba_type, "ptr": shared.c_string_type},
     create_wrapper=True,
 )
+create_xnd, wrap_xnd, unwrap_xnd = xnd_t.create, xnd_t.wrap, xnd_t.unwrap
+
+
+# for gumath kernel
+@numba.extending.unbox(xnd_t.NumbaType)
+def unbox_xnd(typ, val, c):
+    return numba.extending.NativeValue(c.builder.bitcast(val, xnd_t.llvm_ptr_type))
 
 
 # xnd_key enums for tag property
 XND_KEY_INDEX = 0
 XND_KEY_FIELD_NAME = 1
 XND_KEY_SLICE = 2
-
-xnd_index_type, xnd_index_t, create_xnd_index = shared.create_opaque_struct(
+xnd_index_t = shared.WrappedCStruct(
     "xnd_index_t",
     {
         "tag": numba.types.int64,
         "Index": numba.types.int64,
         "FieldName": shared.c_string_type,
-        "Slice": libndtypes.ndt_slice_type,
+        "Slice": libndtypes.ndt_slice_t.numba_type,
     },
     embedded={"Slice"},
 )
-
-xnd_master_type, xnd_master_t, create_xnd_master = shared.create_opaque_struct(
-    "xnd_master_t",
-    {"flags": numba.types.int32, "master": xnd_type},
-    embedded={"master"},
-)
+create_xnd_index = xnd_index_t.create
 
 
 # Apply zero or more indices to the input *x* and return a typed view. Valid
@@ -47,15 +48,15 @@ xnd_master_type, xnd_master_t, create_xnd_master = shared.create_opaque_struct(
 # This function is more general than pure array indexing, hence the name. For
 # example, it is possible to index into nested records that in turn contain
 # arrays.
-xnd_subtree = shared.wrap_c_func(
+xnd_subtree = shared.WrappedCFunction(
     "xnd_subtree",
     numba.types.void,
     (
-        xnd_type,
-        xnd_type,  # this is the return value, but is passed in at LLVM level
-        xnd_index_type,
+        xnd_t.numba_type,
+        xnd_t.numba_type,  # this is the return value, but is passed in at LLVM level
+        xnd_index_t.numba_type,
         numba.types.intc,
-        libndtypes.ndt_context_type,
+        libndtypes.ndt_context_t.numba_type,
     ),
 )
 
@@ -68,30 +69,32 @@ xnd_subtree = shared.wrap_c_func(
 
 # Variable dimensions can be sliced, but do not support mixed indexing
 # and slicing.
-xnd_multikey = shared.wrap_c_func(
+xnd_multikey = shared.WrappedCFunction(
     "xnd_multikey",
     numba.types.void,
     (
-        xnd_type,  # this is the return value, but is passed in at LLVM level
-        xnd_type,
-        xnd_index_type,
+        xnd_t.numba_type,  # this is the return value, but is passed in at LLVM level
+        xnd_t.numba_type,
+        xnd_index_t.numba_type,
         numba.types.intc,
-        libndtypes.ndt_context_type,
+        libndtypes.ndt_context_t.numba_type,
     ),
 )
 
-xnd_equal = shared.wrap_c_func(
-    "xnd_equal", numba.types.intc, (xnd_type, xnd_type, libndtypes.ndt_context_type)
+xnd_equal = shared.WrappedCFunction(
+    "xnd_equal",
+    numba.types.intc,
+    (xnd_t.numba_type, xnd_t.numba_type, libndtypes.ndt_context_t.numba_type),
 )
 
-xnd_strict_equal = shared.wrap_c_func(
+xnd_strict_equal = shared.WrappedCFunction(
     "xnd_strict_equal",
     numba.types.intc,
-    (xnd_type, xnd_type, libndtypes.ndt_context_type),
+    (xnd_t.numba_type, xnd_t.numba_type, libndtypes.ndt_context_t.numba_type),
 )
 
 
-@numba.extending.overload_attribute(XndWrapperType, "type")
+@numba.extending.overload_attribute(xnd_t.WrapperNumbaType, "type")
 def xnd_wrapper_type(x_wrapper_t):
     def get(x_wrapper):
         x = unwrap_xnd(x_wrapper)
@@ -100,7 +103,7 @@ def xnd_wrapper_type(x_wrapper_t):
     return get
 
 
-@numba.extending.overload_attribute(XndWrapperType, "ndim")
+@numba.extending.overload_attribute(xnd_t.WrapperNumbaType, "ndim")
 def xnd_wrapper_ndim(x_wrapped):
     def get(x_wrapped):
         return x_wrapped.type.ndim
@@ -108,7 +111,7 @@ def xnd_wrapper_ndim(x_wrapped):
     return get
 
 
-@numba.extending.overload_attribute(XndWrapperType, "value")
+@numba.extending.overload_attribute(xnd_t.WrapperNumbaType, "value")
 def xnd_wrapper_value(x_wrapper):
     n = x_wrapper.ndt_value
 
@@ -139,7 +142,7 @@ def ndtypes_index(t):
 
 @shared.overload_any("getitem")
 def xnd_wrapper_getitem(x_wrapper, index):
-    if not isinstance(x_wrapper, XndWrapperType):
+    if not isinstance(x_wrapper, xnd_t.WrapperNumbaType):
         return
 
     if isinstance(index, numba.types.Integer):
@@ -189,7 +192,7 @@ def xnd_wrapper_getitem(x_wrapper, index):
 
 @shared.overload_any("setitem")
 def xnd_wrapper_setitem(x_wrapper, index, value):
-    if not isinstance(x_wrapper, XndWrapperType):
+    if not isinstance(x_wrapper, xnd_t.WrapperNumbaType):
         return
     if value == numba.types.int64:
 

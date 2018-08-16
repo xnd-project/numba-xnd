@@ -1,7 +1,6 @@
+
 """
 Configuration file to structinfo_generator.
-
-
 """
 from distutils.sysconfig import get_python_lib
 
@@ -28,14 +27,12 @@ extern void print_bytes(const void *object, size_t size)
     // This is for C++; in C just drop the static_cast<>() and assign.
     const unsigned char *const bytes = object;
     size_t i;
-
     printf("Bytes: [ ");
     for (i = 0; i < size; i++)
     {
         printf("%lld ", (int64_t)bytes[i]);
     }
     printf("]\\n");
-
     const int64_t *bytes2 = object;
     size_t i2;
     printf("Ints: [ ");

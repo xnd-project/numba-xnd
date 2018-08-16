@@ -16,22 +16,23 @@ llvmlite.binding.load_library_permanently(ndtypes._ndtypes.__file__)
 NDT_MAX_DIM = 128
 
 
-ndt_type, ndt_t, create_ndt, NdtWrapperType, wrap_ndt, unwrap_ndt = shared.create_opaque_struct(
-    "ndt_t", {"ndim": numba.types.int32}, create_wrapper=True
-)
+ndt_t = shared.WrappedCStruct("ndt_t", {"ndim": numba.types.int32}, create_wrapper=True)
+wrap_ndt, unwrap_ndt = ndt_t.wrap, ndt_t.unwrap
 
-ndt_ndarray_type, ndt_ndarray_t, create_ndt_ndarray = shared.create_opaque_struct(
+
+ndt_ndarray_t = shared.WrappedCStruct(
     "ndt_ndarray_t",
     {
         "ndim": numba.types.int32,
         "shape": numba.types.UniTuple(numba.types.int64, NDT_MAX_DIM),
     },
 )
-ndt_slice_type, ndt_slice_t, create_ndt_slice = shared.create_opaque_struct(
+create_ndt_ndarray = ndt_ndarray_t.create
+ndt_slice_t = shared.WrappedCStruct(
     "ndt_slice_t",
     {"start": numba.types.int64, "stop": numba.types.int64, "step": numba.types.int64},
 )
-ndt_context_type, ndt_context_t, create_ndt_context = shared.create_opaque_struct(
+ndt_context_t = shared.WrappedCStruct(
     "ndt_context_t",
     {
         "flags": numba.types.uint32,
@@ -41,20 +42,32 @@ ndt_context_type, ndt_context_t, create_ndt_context = shared.create_opaque_struc
         "DynamicMsg": shared.c_string_type,
     },
 )
+create_ndt_context = ndt_context_t.create
+
+# for gumath kernel
+@numba.extending.unbox(ndt_context_t.NumbaType)
+def unbox_ndt_context(typ, val, c):
+    return numba.extending.NativeValue(
+        c.builder.bitcast(val, ndt_context_t.llvm_ptr_type)
+    )
 
 
-ndt_as_ndarray = shared.wrap_c_func(
-    "ndt_as_ndarray", numba.types.int32, (ndt_ndarray_type, ndt_type, ndt_context_type)
+ndt_as_ndarray = shared.WrappedCFunction(
+    "ndt_as_ndarray",
+    numba.types.int32,
+    (ndt_ndarray_t.numba_type, ndt_t.numba_type, ndt_context_t.numba_type),
 )
 
-ndt_is_concrete = shared.wrap_c_func("ndt_is_concrete", numba.types.int32, (ndt_type,))
-
-ndt_err_occurred = shared.wrap_c_func(
-    "ndt_err_occurred", numba.types.boolean, (ndt_context_type,)
+ndt_is_concrete = shared.WrappedCFunction(
+    "ndt_is_concrete", numba.types.int32, (ndt_t.numba_type,)
 )
 
-ndt_context_msg = shared.wrap_c_func(
-    "ndt_context_msg", shared.c_string_type, (ndt_context_type,)
+ndt_err_occurred = shared.WrappedCFunction(
+    "ndt_err_occurred", numba.types.boolean, (ndt_context_t.numba_type,)
+)
+
+ndt_context_msg = shared.WrappedCFunction(
+    "ndt_context_msg", shared.c_string_type, (ndt_context_t.numba_type,)
 )
 
 
@@ -68,7 +81,7 @@ def ndt_static_context():
     return ctx
 
 
-@numba.extending.overload_attribute(NdtWrapperType, "shape")
+@numba.extending.overload_attribute(ndt_t.WrapperNumbaType, "shape")
 def ndt_wrapper_shape(t):
     ndim = shared.get_ndim(t.ndt_value)
 
@@ -84,7 +97,7 @@ def ndt_wrapper_shape(t):
     return get
 
 
-@numba.extending.overload_attribute(NdtWrapperType, "ndim")
+@numba.extending.overload_attribute(ndt_t.WrapperNumbaType, "ndim")
 def ndt_wrapper_ndim(t):
     ndim = shared.get_ndim(t.ndt_value)
 

@@ -10,25 +10,21 @@ n = ndt("10 * 4 * 4 * int64")
 
 @njit
 def get_ndim(x):
-    return numba_xnd.pyndtypes.unwrap_ndt_object(x).ndt.ndim
+    return numba_xnd.libndtypes.unwrap_ndt(x).ndim
 
 
 @njit
 def get_shape(x):
     a = numba_xnd.libndtypes.create_ndt_ndarray()
     numba_xnd.libndtypes.ndt_as_ndarray(
-        a,
-        numba_xnd.pyndtypes.unwrap_ndt_object(x).ndt,
-        numba_xnd.libndtypes.create_ndt_context(),
+        a, numba_xnd.libndtypes.unwrap_ndt(x), numba_xnd.libndtypes.create_ndt_context()
     )
     return (a.shape[0], a.shape[1], a.shape[2])
 
 
 @njit
 def is_concrete(x):
-    return numba_xnd.libndtypes.ndt_is_concrete(
-        numba_xnd.pyndtypes.unwrap_ndt_object(x).ndt
-    )
+    return numba_xnd.libndtypes.ndt_is_concrete(numba_xnd.libndtypes.unwrap_ndt(x))
 
 
 class TestNdt(unittest.TestCase):
@@ -54,8 +50,7 @@ class TestNdtWrapper(unittest.TestCase):
     def test_ndim(self):
         @njit
         def get_ndim(t_object_wrapper):
-            t_object = numba_xnd.pyndtypes.unwrap_ndt_object(t_object_wrapper)
-            t = t_object.ndt
+            t = numba_xnd.libndtypes.unwrap_ndt(t_object_wrapper)
             t_wrapper = numba_xnd.libndtypes.wrap_ndt(t, t_object_wrapper)
             return t_wrapper.ndim
 
@@ -64,8 +59,7 @@ class TestNdtWrapper(unittest.TestCase):
     def test_shape(self):
         @njit
         def get_shape(t_object_wrapper):
-            t_object = numba_xnd.pyndtypes.unwrap_ndt_object(t_object_wrapper)
-            t = t_object.ndt
+            t = numba_xnd.libndtypes.unwrap_ndt(t_object_wrapper)
             t_wrapper = numba_xnd.libndtypes.wrap_ndt(t, t_object_wrapper)
             return t_wrapper.shape
 

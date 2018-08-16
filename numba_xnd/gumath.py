@@ -32,7 +32,9 @@ def jit_and_wrap(signature):
     xnd(3, type='int64')
     """
 
-    stack_types = tuple(map(libxnd.XndWrapperType, shared.sig_to_stack(signature)))
+    stack_types = tuple(
+        map(libxnd.xnd_t.WrapperNumbaType, shared.sig_to_stack(signature))
+    )
 
     def inner(fn):
         dispatcher = numba.njit(stack_types)(fn)
@@ -111,7 +113,9 @@ def register_kernel_direct(name, signature):
     """
 
     def inner(dispatcher):
-        numba_sig = numba.types.int32(libxnd.xnd_type, libndtypes.ndt_context_type)
+        numba_sig = numba.types.int32(
+            libxnd.xnd_t.numba_type, libndtypes.ndt_context_t.numba_type
+        )
         entry_point = dispatcher.compile(numba_sig)
         cres = [
             cres
@@ -129,6 +133,7 @@ def register_kernel_direct(name, signature):
 # based on
 # https://github.com/Quansight/numba/blob/da7669f34a356d6b0468edcab604ce24be7f7ce8/numba/plures/llvm.py#L51
 # TODO: Maybe this can made shorter? Reuse some existing numba functions?
+# TODO: Maybe use CFunc?
 def build_kernel_wrapper(cres):
     """
     Returns a pointer to a llvm function that can be used as an xnd kernel.
@@ -150,7 +155,8 @@ def build_kernel_wrapper(cres):
     # we will return a pointer to this function
     wrapper = wrapper_module.add_function(
         llvmlite.ir.FunctionType(
-            shared.i32, (shared.ptr(libxnd.xnd_t), shared.ptr(libndtypes.ndt_context_t))
+            shared.i32,
+            (libxnd.xnd_t.llvm_ptr_type, libndtypes.ndt_context_t.llvm_ptr_type),
         ),
         "__gumath__." + func.name,
     )

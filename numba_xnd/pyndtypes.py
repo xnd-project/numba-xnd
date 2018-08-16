@@ -1,45 +1,36 @@
 import ndtypes
 
-import numba.datamodel
-import numba.extending
+import numba
 
 from . import libndtypes, shared
 
-ndt_object_type, ndt_object, create_ndt_object, NdtObjectWrapperType, wrap_ndt_object, unwrap_ndt_object = shared.create_opaque_struct(
-    "NdtObject",
-    {"ndt": libndtypes.ndt_type},
-    create_wrapper=True,
-    is_python_object=True,
-)
+ndt_object = shared.WrappedCStruct("NdtObject", {"ndt": libndtypes.ndt_t.numba_type})
 
 
-ndt_from_type = shared.wrap_c_func(
-    "ndt_from_type", ndt_object_type, (libndtypes.ndt_type,)
+ndt_from_type = shared.WrappedCFunction(
+    "ndt_from_type", ndt_object.numba_type, (libndtypes.ndt_t.numba_type,)
 )
 
 
 @numba.extending.typeof_impl.register(ndtypes.ndt)
 def typeof_ndt(val, c):
-    return NdtObjectWrapperType(val)
+    return libndtypes.ndt_t.WrapperNumbaType(val)
 
 
-@numba.njit
-def to_wrapped_ndt(ndt_object_wrapped):
-    ndt_object = unwrap_ndt_object(ndt_object_wrapped)
-    return libndtypes.wrap_ndt(ndt_object.ndt, ndt_object_wrapped)
+@numba.extending.unbox(libndtypes.ndt_t.WrapperNumbaType)
+def unbox_ndt_wrapper(typ, o, c):
+    n_o = c.builder.bitcast(o, ndt_object.llvm_ptr_type)
+    n = ndt_object.getattr_impl(None, c.builder, None, n_o, "ndt")
+    return numba.extending.NativeValue(n)
 
 
-@numba.extending.overload_attribute(NdtObjectWrapperType, "shape")
-def ndt_wrapper_shape(t):
-    def get(t):
-        return to_wrapped_ndt(t).shape
-
-    return get
-
-
-@numba.extending.overload_attribute(NdtObjectWrapperType, "ndim")
-def ndt_wrapper_ndim(t):
-    def get(t):
-        return to_wrapped_ndt(t).ndim
-
-    return get
+@numba.extending.box(libndtypes.ndt_t.WrapperNumbaType)
+def box_ndt_wrapper(typ, n, c):
+    # val = c.builder.load(n)
+    # new_n = c.builder.alloca(val.type)
+    # c.builder.store(val, new_n)
+    # new_n = numba.cgutils.alloca_once_value(c.builder, c.builder.load(n))
+    n_o = ndt_from_type.codegen(c.builder, (n,))
+    o = c.builder.bitcast(n_o, shared.ptr(shared.char))
+    c.pyapi.incref(o)
+    return o

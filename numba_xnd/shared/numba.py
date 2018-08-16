@@ -154,3 +154,17 @@ def ptr_store_type(typingctx, numba_type_t, ptr_t, value_t):
         return value
 
     return sig, codegen
+
+
+@numba.extending.intrinsic
+def pyobject_incref(typingctx, pyobject_t):
+    if pyobject_t != numba.types.pyobject:
+        return
+    sig = pyobject_t(pyobject_t)
+
+    def codegen(context, builder, sig, args):
+        py_object = args[0]
+        context.pyapi.incref(py_object)
+        return py_object
+
+    return sig, codegen

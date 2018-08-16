@@ -2,7 +2,6 @@ import llvmlite
 
 import xnd_structinfo
 
-from . import gumath as _  # NOQA
 from . import libndtypes as _  # NOQA
 from . import libxnd as _  # NOQA
 from . import pyndtypes as _  # NOQA
