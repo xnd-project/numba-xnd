@@ -17,13 +17,25 @@ from xnd import xnd
 import numba_xnd
 
 
-@jit(nopython=True)
-def shape_and_ndim(x):
-    return x.type.shape, x.type.ndim
+@numba_xnd.gumath.register_kernel(
+    [
+        "... * N * M * int64, ... * M * K * int64 -> ... * N * K * int64",
+        "... * N * M * float64, ... * M * K * float64 -> ... * N * K * float64",
+    ]
+)
+def simple_matrix_multiply(a, b, c):
+    n, m = a.type.shape
+    m_, p = b.type.shape
+    for i in range(n):
+        for j in range(p):
+            c[i, j] = 0
+            for k in range(m):
+                c[i, j] = c[i, j].value + a[i, k].value * b[k, j].value
 
-
-x = xnd([[1, 2], [4, 5]])
-assert shape_and_ndim(x) == ([3, 4], 2)
+a = xnd([[1, 2, 3], [4, 5, 6]])
+b = xnd([[7, 8], [9, 10], [11, 12]])
+c = xnd([[58, 64], [139, 154]])
+assert simple_matrix_multiply(a, b) == c
 ```
 
 ## Development
@@ -49,6 +61,7 @@ Updating `xnd_structinfo.c`:
 ```bash
 pip install git+https://github.com/plures/xndtools.git
 structinfo_generator structinfo_config.py
+python setup.py develop
 ```
 
 ## Project Structure
