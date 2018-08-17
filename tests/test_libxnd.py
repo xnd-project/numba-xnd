@@ -10,59 +10,79 @@ x = xnd([[1, 2, 3], [4, 5, 6]])
 
 
 @njit
-def subtree_single_index(x_wrapped, i):
-    x = numba_xnd.libxnd.unwrap_xnd(x_wrapped)
+def subscript_single_index(x_wrapped, i):
+    x = numba_xnd.libxnd.unwrap_xnd_view(x_wrapped)
     index = numba_xnd.libxnd.create_xnd_index()
     index.tag = numba_xnd.libxnd.XND_KEY_INDEX
     index.Index = i
-    ret_xnd = numba_xnd.libxnd.create_xnd()
     ctx = numba_xnd.libndtypes.ndt_static_context()
-    numba_xnd.libxnd.xnd_subtree(ret_xnd, x, index, numba_xnd.shared.i64_to_i32(1), ctx)
-    assert not numba_xnd.shared.ptr_is_none(ret_xnd.ptr)
+    ret_xnd = numba_xnd.libxnd.xnd_view_subscript(
+        x, index, numba_xnd.shared.i64_to_i32(1), ctx
+    )
+    assert not numba_xnd.shared.ptr_is_none(ret_xnd.view.ptr)
     assert not numba_xnd.libndtypes.ndt_err_occurred(ctx)
-    return numba_xnd.libxnd.wrap_xnd(ret_xnd, x_wrapped)
+    return numba_xnd.libxnd.wrap_xnd_view(ret_xnd, x_wrapped)
 
 
 @njit
-def subtree_two_ints(x_wrapped, i, j):
-    x = numba_xnd.libxnd.unwrap_xnd(x_wrapped)
+def subscript_two_ints(x_wrapped, i, j):
+    x = numba_xnd.libxnd.unwrap_xnd_view(x_wrapped)
     index = numba_xnd.libxnd.create_xnd_index(2)
     index.tag = numba_xnd.libxnd.XND_KEY_INDEX
     index.Index = i
     second_index = index[1]
     second_index.tag = numba_xnd.libxnd.XND_KEY_INDEX
     second_index.Index = j
-    ret_xnd = numba_xnd.libxnd.create_xnd()
     ctx = numba_xnd.libndtypes.ndt_static_context()
-    numba_xnd.libxnd.xnd_subtree(ret_xnd, x, index, numba_xnd.shared.i64_to_i32(2), ctx)
-    assert not numba_xnd.shared.ptr_is_none(ret_xnd.ptr)
+    ret_xnd = numba_xnd.libxnd.xnd_view_subscript(
+        x, index, numba_xnd.shared.i64_to_i32(2), ctx
+    )
+    assert not numba_xnd.shared.ptr_is_none(ret_xnd.view.ptr)
     assert not numba_xnd.libndtypes.ndt_err_occurred(ctx)
 
-    return numba_xnd.libxnd.wrap_xnd(ret_xnd, x_wrapped)
+    return numba_xnd.libxnd.wrap_xnd_view(ret_xnd, x_wrapped)
 
 
 @njit
-def subtree_field(x_wrapped):
-    x = numba_xnd.libxnd.unwrap_xnd(x_wrapped)
+def subscript_field(x_wrapped):
+    x = numba_xnd.libxnd.unwrap_xnd_view(x_wrapped)
     index = numba_xnd.libxnd.create_xnd_index()
     index.tag = numba_xnd.libxnd.XND_KEY_FIELD_NAME
     index.FieldName = numba_xnd.shared.c_string_const("there")
-    ret_xnd = numba_xnd.libxnd.create_xnd()
     ctx = numba_xnd.libndtypes.ndt_static_context()
-    numba_xnd.libxnd.xnd_subtree(ret_xnd, x, index, numba_xnd.shared.i64_to_i32(1), ctx)
-    assert not numba_xnd.shared.ptr_is_none(ret_xnd.ptr), "ptr is not null"
+    ret_xnd = numba_xnd.libxnd.xnd_view_subscript(
+        x, index, numba_xnd.shared.i64_to_i32(1), ctx
+    )
+    assert not numba_xnd.shared.ptr_is_none(ret_xnd.view.ptr), "ptr is not null"
     assert not numba_xnd.libndtypes.ndt_err_occurred(ctx), "ndt error"
 
-    return numba_xnd.libxnd.wrap_xnd(ret_xnd, x_wrapped)
+    return numba_xnd.libxnd.wrap_xnd_view(ret_xnd, x_wrapped)
 
 
-class TestSubtree(unittest.TestCase):
+@njit
+def subscript_slice(x_wrapped, start, stop, step):
+    x = numba_xnd.libxnd.unwrap_xnd_view(x_wrapped)
+    index = numba_xnd.libxnd.create_xnd_index()
+    index.tag = numba_xnd.libxnd.XND_KEY_SLICE
+    index.Slice.start = start
+    index.Slice.stop = stop
+    index.Slice.step = step
+    ctx = numba_xnd.libndtypes.ndt_static_context()
+    ret_xnd = numba_xnd.libxnd.xnd_view_subscript(
+        x, index, numba_xnd.shared.i64_to_i32(1), ctx
+    )
+    assert not numba_xnd.shared.ptr_is_none(ret_xnd.view.ptr)
+    assert not numba_xnd.libndtypes.ndt_err_occurred(ctx)
+    return numba_xnd.libxnd.wrap_xnd_view(ret_xnd, x_wrapped)
+
+
+class TestViewSubscript(unittest.TestCase):
     def test_single_int(self):
-        self.assertEqual(subtree_single_index(x, 1), x[1])
+        self.assertEqual(subscript_single_index(x, 1), x[1])
         self.assertEqual(x, xnd([[1, 2, 3], [4, 5, 6]]))
 
     def test_two_ints(self):
-        self.assertEqual(subtree_two_ints(x, 1, 1), xnd(5))
+        self.assertEqual(subscript_two_ints(x, 1, 1), xnd(5))
         self.assertEqual(x, xnd([[1, 2, 3], [4, 5, 6]]))
 
     def test_field(self):
@@ -70,41 +90,21 @@ class TestSubtree(unittest.TestCase):
             return xnd({"hi": [1, 2], "there": [[3, 4]]})
 
         orig_value = make_x()
-        self.assertEqual(subtree_field(orig_value), xnd([[3, 4]]))
+        self.assertEqual(subscript_field(orig_value), xnd([[3, 4]]))
         self.assertEqual(orig_value, make_x())
 
-
-@njit
-def multikey_slice(x_wrapped, start, stop, step):
-    x = numba_xnd.libxnd.unwrap_xnd(x_wrapped)
-    index = numba_xnd.libxnd.create_xnd_index()
-    index.tag = numba_xnd.libxnd.XND_KEY_SLICE
-    index.Slice.start = start
-    index.Slice.stop = stop
-    index.Slice.step = step
-    ret_xnd = numba_xnd.libxnd.create_xnd()
-    ctx = numba_xnd.libndtypes.ndt_static_context()
-    numba_xnd.libxnd.xnd_multikey(
-        ret_xnd, x, index, numba_xnd.shared.i64_to_i32(1), ctx
-    )
-    assert not numba_xnd.shared.ptr_is_none(ret_xnd.ptr)
-    assert not numba_xnd.libndtypes.ndt_err_occurred(ctx)
-    return numba_xnd.libxnd.wrap_xnd(ret_xnd, x_wrapped)
-
-
-class TestMultikey(unittest.TestCase):
     def test_slice(self):
         x = xnd([1, 2, 3, 4, 5])
-        self.assertEqual(multikey_slice(x, 0, 4, 2), x[0:4:2])
+        self.assertEqual(subscript_slice(x, 0, 4, 2), x[0:4:2])
         self.assertEqual(x, xnd([1, 2, 3, 4, 5]))
-        self.assertEqual(multikey_slice(xnd(list(range(10))), 2, 5, 2), xnd([2, 4]))
+        self.assertEqual(subscript_slice(xnd(list(range(10))), 2, 5, 2), xnd([2, 4]))
 
 
 @njit
 def is_equal(x, y):
     return numba_xnd.libxnd.xnd_equal(
-        numba_xnd.libxnd.unwrap_xnd(x),
-        numba_xnd.libxnd.unwrap_xnd(y),
+        numba_xnd.libxnd.unwrap_xnd_view(x).view,
+        numba_xnd.libxnd.unwrap_xnd_view(y).view,
         numba_xnd.libndtypes.create_ndt_context(),
     )
 
@@ -122,7 +122,7 @@ class TestLoadPtr(unittest.TestCase):
         @njit
         def get_bool(x):
             return numba_xnd.shared.ptr_load_type(
-                numba.types.boolean, numba_xnd.libxnd.unwrap_xnd(x).ptr
+                numba.types.boolean, numba_xnd.libxnd.unwrap_xnd_view(x).view.ptr
             )
 
         self.assertTrue(get_bool(xnd(True)))
@@ -132,7 +132,7 @@ class TestLoadPtr(unittest.TestCase):
         @njit
         def get_int8(x):
             return numba_xnd.shared.ptr_load_type(
-                numba.types.int8, numba_xnd.libxnd.unwrap_xnd(x).ptr
+                numba.types.int8, numba_xnd.libxnd.unwrap_xnd_view(x).view.ptr
             )
 
         self.assertEqual(get_int8(xnd(10, type="int8")), 10)
@@ -141,7 +141,7 @@ class TestLoadPtr(unittest.TestCase):
         @njit
         def get_int16(x):
             return numba_xnd.shared.ptr_load_type(
-                numba.types.int16, numba_xnd.libxnd.unwrap_xnd(x).ptr
+                numba.types.int16, numba_xnd.libxnd.unwrap_xnd_view(x).view.ptr
             )
 
         self.assertEqual(get_int16(xnd(10, type="int16")), 10)
@@ -150,7 +150,7 @@ class TestLoadPtr(unittest.TestCase):
         @njit
         def get_int32(x):
             return numba_xnd.shared.ptr_load_type(
-                numba.types.int32, numba_xnd.libxnd.unwrap_xnd(x).ptr
+                numba.types.int32, numba_xnd.libxnd.unwrap_xnd_view(x).view.ptr
             )
 
         self.assertEqual(get_int32(xnd(10, type="int32")), 10)
@@ -159,7 +159,7 @@ class TestLoadPtr(unittest.TestCase):
         @njit
         def get_int64(x):
             return numba_xnd.shared.ptr_load_type(
-                numba.types.int64, numba_xnd.libxnd.unwrap_xnd(x).ptr
+                numba.types.int64, numba_xnd.libxnd.unwrap_xnd_view(x).view.ptr
             )
 
         self.assertEqual(get_int64(xnd(10, type="int64")), 10)
@@ -168,7 +168,7 @@ class TestLoadPtr(unittest.TestCase):
         @njit
         def get_uint8(x):
             return numba_xnd.shared.ptr_load_type(
-                numba.types.uint8, numba_xnd.libxnd.unwrap_xnd(x).ptr
+                numba.types.uint8, numba_xnd.libxnd.unwrap_xnd_view(x).view.ptr
             )
 
         self.assertEqual(get_uint8(xnd(10, type="uint8")), 10)
@@ -177,7 +177,7 @@ class TestLoadPtr(unittest.TestCase):
         @njit
         def get_float32(x):
             return numba_xnd.shared.ptr_load_type(
-                numba.types.float32, numba_xnd.libxnd.unwrap_xnd(x).ptr
+                numba.types.float32, numba_xnd.libxnd.unwrap_xnd_view(x).view.ptr
             )
 
         self.assertEqual(get_float32(xnd(10.0, type="float32")), 10.0)
@@ -188,7 +188,7 @@ class TestStorePtr(unittest.TestCase):
         @njit
         def set_bool(x, y):
             numba_xnd.shared.ptr_store_type(
-                numba.types.boolean, numba_xnd.libxnd.unwrap_xnd(x).ptr, y
+                numba.types.boolean, numba_xnd.libxnd.unwrap_xnd_view(x).view.ptr, y
             )
 
         x = xnd(True)
@@ -201,7 +201,7 @@ class TestStorePtr(unittest.TestCase):
         @njit
         def set_int8(x, y):
             numba_xnd.shared.ptr_store_type(
-                numba.types.int8, numba_xnd.libxnd.unwrap_xnd(x).ptr, y
+                numba.types.int8, numba_xnd.libxnd.unwrap_xnd_view(x).view.ptr, y
             )
 
         x = xnd(123, type="int8")
@@ -212,7 +212,7 @@ class TestStorePtr(unittest.TestCase):
         @njit
         def set_int16(x, y):
             numba_xnd.shared.ptr_store_type(
-                numba.types.int16, numba_xnd.libxnd.unwrap_xnd(x).ptr, y
+                numba.types.int16, numba_xnd.libxnd.unwrap_xnd_view(x).view.ptr, y
             )
 
         x = xnd(123, type="int16")
@@ -223,7 +223,7 @@ class TestStorePtr(unittest.TestCase):
         @njit
         def set_int32(x, y):
             numba_xnd.shared.ptr_store_type(
-                numba.types.int32, numba_xnd.libxnd.unwrap_xnd(x).ptr, y
+                numba.types.int32, numba_xnd.libxnd.unwrap_xnd_view(x).view.ptr, y
             )
 
         x = xnd(123, type="int32")
@@ -234,7 +234,7 @@ class TestStorePtr(unittest.TestCase):
         @njit
         def set_uint8(x, y):
             numba_xnd.shared.ptr_store_type(
-                numba.types.uint8, numba_xnd.libxnd.unwrap_xnd(x).ptr, y
+                numba.types.uint8, numba_xnd.libxnd.unwrap_xnd_view(x).view.ptr, y
             )
 
         x = xnd(123, type="uint8")
@@ -245,7 +245,7 @@ class TestStorePtr(unittest.TestCase):
         @njit
         def set_float32(x, y):
             numba_xnd.shared.ptr_store_type(
-                numba.types.float32, numba_xnd.libxnd.unwrap_xnd(x).ptr, y
+                numba.types.float32, numba_xnd.libxnd.unwrap_xnd_view(x).view.ptr, y
             )
 
         x = xnd(123.123, type="float32")
@@ -253,7 +253,7 @@ class TestStorePtr(unittest.TestCase):
         self.assertEqual(x, xnd(10.0, type="float32"))
 
 
-class TestXndWrapper(unittest.TestCase):
+class TestXndViewWrapper(unittest.TestCase):
     def test_type(self):
         x = xnd([1, 2, 3])
 
@@ -280,16 +280,16 @@ class TestXndWrapper(unittest.TestCase):
 
         self.assertEqual(index_thing(xnd([10, 1]), xnd(1)), xnd(1))
 
-    # def test_index_tuple(self):
-    #     @numba_xnd.register_kernel("A * B * int64, int64, int64 -> int64")
-    #     def index_tuple(a, i, j, res):
-    #         res[()] = a[1, 0].value
+    def test_index_tuple(self):
+        @numba_xnd.register_kernel("A * B * int64 -> int64")
+        def index_tuple(a, res):
+            res[()] = a[1, 0].value
 
-    #     self.assertEqual(index_tuple(xnd([[1, 2], [3, 4]]), xnd(1), xnd(0)), xnd(3))
+        self.assertEqual(index_tuple(xnd([[1, 2], [3, 4]])), xnd(3))
 
-    # def test_index_tuple_empty(self):
-    #     @numba_xnd.register_kernel("int64 -> int64")
-    #     def index_tuple_empty(a, res):
-    #         res[()] = a[()].value
+    def test_index_tuple_empty(self):
+        @numba_xnd.register_kernel("int64 -> int64")
+        def index_tuple_empty(a, res):
+            res[()] = a[()].value
 
-    #     self.assertEqual(index_tuple_empty(xnd(20)), xnd(20))
+        self.assertEqual(index_tuple_empty(xnd(20)), xnd(20))

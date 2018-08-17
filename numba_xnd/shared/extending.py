@@ -28,6 +28,8 @@ def create_numba_type(name, llvm_type):
     return InnerType()
 
 
+# TODO: Make this a subclass of numba type, however each instance of it should have
+# be a different singleton type
 class WrappedCStruct:
     def __init__(self, name, attrs, embedded=tuple(), create_wrapper=False):
         """
@@ -43,6 +45,9 @@ class WrappedCStruct:
         If `create_wrapper` is true, then this also creates a wrapper type that has same datamodel, but requires a
         `ndt_type` attribute that holds a ndtypes.ndt instance.
         """
+        for t in attrs.values():
+            assert isinstance(t, numba.types.Type)
+
         self.name, self.attrs, self.embedded = name, attrs, embedded
 
         self.n_bytes = getattr(xnd_structinfo, f"sizeof_{name}")()
@@ -285,15 +290,26 @@ class WrappedCFunction(numba.extending._Intrinsic):
     to use that from a low level.
     """
 
-    def __init__(self, func_name, numba_ret_type, numba_arg_types):
+    def __init__(
+        self, func_name, numba_ret_type, numba_arg_types, accepts_return=False
+    ):
+        assert isinstance(numba_arg_types, tuple)
+        for t in (numba_ret_type, *numba_arg_types):
+            assert isinstance(t, numba.types.Type)
+
         self.func_name = func_name
         self.numba_ret_type = numba_ret_type
         self.numba_arg_types = numba_arg_types
-
+        self.accepts_return = accepts_return
         self.sig = self.numba_ret_type(*self.numba_arg_types)
 
         self.ret_type = llvm_type_from_numba_type(self.numba_ret_type)
         self.arg_types = [llvm_type_from_numba_type(t) for t in self.numba_arg_types]
+
+        # c functions that return struct values sometimes actually take in a pointer to that struct as the first argument
+        if accepts_return:
+            self.arg_types = (self.ret_type, *self.arg_types)
+            self.ret_type = llvmlite.ir.VoidType()
 
         super().__init__(func_name, self.create_impl())
         self._register()
@@ -302,13 +318,19 @@ class WrappedCFunction(numba.extending._Intrinsic):
         return f"{self.func_name}"
 
     def codegen(self, builder, args):
-        return builder.call(
+        if self.accepts_return:
+            ret_ptr = builder.alloca(self.arg_types[0].pointee)
+            args = (ret_ptr, *args)
+        res = builder.call(
             builder.module.get_or_insert_function(
                 llvmlite.ir.FunctionType(self.ret_type, self.arg_types),
                 name=self.func_name,
             ),
             args,
         )
+        if self.accepts_return:
+            return ret_ptr
+        return res
 
     def create_impl(self):
         def impl(typingctx, *numba_arg_types_):

@@ -15,7 +15,7 @@ creators = [
 ]
 
 
-class TestXndObjectWrapper(unittest.TestCase):
+class TestBoxingUnboxing(unittest.TestCase):
     def test_boxes_unboxes(self):
         @njit
         def identity(x):

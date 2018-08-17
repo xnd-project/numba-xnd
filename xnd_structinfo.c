@@ -6,6 +6,7 @@
 extern PyObject* ndt_from_type(ndt_t* val) { return Ndt_FromType(val); }
 extern PyObject* xnd_from_type_xnd(PyTypeObject* t, xnd_t* val) { return Xnd_FromXnd(t, val); };
 extern PyObject* xnd_view_move_ndt(const PyObject *v, ndt_t *t) { return Xnd_ViewMoveNdt(v, t); };
+extern PyObject* xnd_from_xnd_view(xnd_view_t *v) {return Xnd_FromXndView(v); };
 //extern PyObject* xnd_from_xndonly(xnd_t *val) { return Xnd_FromXndOnly(val); };
 extern void print_bytes(const void *object, size_t size)
 {

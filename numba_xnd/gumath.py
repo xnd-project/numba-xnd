@@ -7,8 +7,12 @@ from . import libndtypes, libxnd, shared
 
 
 def register_kernel(signatures):
+    """
+    Register a gumath kernel for the provided signature(s), generating a random name for it.
+    """
     name = shared.random_kernel_name()
     signatures = (signatures,) if isinstance(signatures, str) else signatures
+    assert signatures
 
     def inner(fn):
         for signature in signatures:
@@ -33,7 +37,7 @@ def jit_and_wrap(signature):
     """
 
     stack_types = tuple(
-        map(libxnd.xnd_t.WrapperNumbaType, shared.sig_to_stack(signature))
+        map(libxnd.xnd_view_t.WrapperNumbaType, shared.sig_to_stack(signature))
     )
 
     def inner(fn):
@@ -42,6 +46,11 @@ def jit_and_wrap(signature):
         return wrap_kernel_dispatcher(len(stack_types))(dispatcher)
 
     return inner
+
+
+@numba.njit
+def create_xnd_view(x):
+    return libxnd.xnd_view_from_xnd(shared.null_char_ptr(), x)
 
 
 def wrap_kernel_dispatcher(n_args):
@@ -54,12 +63,13 @@ def wrap_kernel_dispatcher(n_args):
 
         @register_kernel_direct("some name", "int64, 10 * int64 -> int64")
         @wrap_kernel_dispatcher(3)
-        @njit(XndWrapperType(ndt("int64"))(...))
+        @njit((libxnd.xnd_view_t.WrapperNumbaType(...), libxnd.xnd_view_t.WrapperNumbaType(...)))
         def something(a, b, ret):
             ret[()] = a + b[0]
     """
 
     # TODO: Catch exceptions and return -1
+    # TODO: Switch from hard coded # args, try to avoid eval and recursive calls (both confusing)
     def inner(dispatcher):
         if n_args == 0:
 
@@ -70,29 +80,40 @@ def wrap_kernel_dispatcher(n_args):
         elif n_args == 1:
 
             def fn(stack, ctx):
-                dispatcher(stack[0])
+                dispatcher(create_xnd_view(stack[0]))
                 return 0
 
         elif n_args == 2:
 
             def fn(stack, ctx):
-                dispatcher(stack[0], stack[1])
+                dispatcher(create_xnd_view(stack[0]), create_xnd_view(stack[1]))
                 return 0
 
         elif n_args == 3:
 
             def fn(stack, ctx):
-                dispatcher(stack[0], stack[1], stack[2])
+                dispatcher(
+                    create_xnd_view(stack[0]),
+                    create_xnd_view(stack[1]),
+                    create_xnd_view(stack[2]),
+                )
                 return 0
 
         elif n_args == 4:
 
             def fn(stack, ctx):
-                dispatcher(stack[0], stack[1], stack[2], stack[3])
+                dispatcher(
+                    create_xnd_view(stack[0]),
+                    create_xnd_view(stack[1]),
+                    create_xnd_view(stack[2]),
+                    create_xnd_view(stack[3]),
+                )
                 return 0
 
         else:
-            raise NotImplementedError("Too many args")
+            raise NotImplementedError(
+                "Gumath kernel generation is limited at four args currently."
+            )
 
         return numba.njit(fn)
 

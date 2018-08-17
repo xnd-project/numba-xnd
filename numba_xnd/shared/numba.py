@@ -168,3 +168,13 @@ def pyobject_incref(typingctx, pyobject_t):
         return py_object
 
     return sig, codegen
+
+
+@numba.extending.intrinsic
+def null_char_ptr(typingctx):
+    sig = c_string_type()
+
+    def codegen(context, builder, sig, args):
+        return llvmlite.ir.Constant(c_string, None)
+
+    return sig, codegen
