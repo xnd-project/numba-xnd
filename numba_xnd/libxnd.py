@@ -212,7 +212,7 @@ def xnd_wrapper_getitem(x_wrapper, index):
                 x_index_cur.tag = XND_KEY_INDEX
                 x_index_cur.Index = index[i]
             ctx = libndtypes.ndt_static_context()
-            ret_x_v = xnd_view_subscript(x_v, x_index, shared.i64_to_i32(1), ctx)
+            ret_x_v = xnd_view_subscript(x_v, x_index, shared.i64_to_i32(n_items), ctx)
             assert not shared.ptr_is_none(ret_x_v.view.ptr)
             assert not libndtypes.ndt_err_occurred(ctx)
             return wrap_xnd_view(ret_x_v, resulting_type)

@@ -279,6 +279,7 @@ class TestXndViewWrapper(unittest.TestCase):
             res[()] = a[i.value].value
 
         self.assertEqual(index_thing(xnd([10, 1]), xnd(1)), xnd(1))
+        self.assertEqual(index_thing(xnd([10, 1]), xnd(0)), xnd(10))
 
     def test_index_tuple(self):
         @numba_xnd.register_kernel("A * B * int64 -> int64")
