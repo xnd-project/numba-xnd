@@ -81,6 +81,7 @@ class TestViewSubscript(unittest.TestCase):
         self.assertEqual(subscript_single_index(x, 1), x[1])
         self.assertEqual(x, xnd([[1, 2, 3], [4, 5, 6]]))
 
+    @unittest.skip
     def test_two_ints(self):
         self.assertEqual(subscript_two_ints(x, 1, 1), xnd(5))
         self.assertEqual(x, xnd([[1, 2, 3], [4, 5, 6]]))
@@ -281,6 +282,7 @@ class TestXndViewWrapper(unittest.TestCase):
         self.assertEqual(index_thing(xnd([10, 1]), xnd(1)), xnd(1))
         self.assertEqual(index_thing(xnd([10, 1]), xnd(0)), xnd(10))
 
+    @unittest.skip
     def test_index_tuple(self):
         @numba_xnd.register_kernel("A * B * int64 -> int64")
         def index_tuple(a, res):

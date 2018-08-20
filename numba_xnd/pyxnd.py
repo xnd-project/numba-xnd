@@ -36,7 +36,25 @@ def unbox_xnd_wrapper(typ, o, c):
 
 @numba.extending.box(libxnd.xnd_view_t.WrapperNumbaType)
 def box_xnd_wrapper(typ, x, c):
-    x_o = xnd_from_xnd_view.codegen(c.builder, (x,))
-    o = c.builder.bitcast(x_o, shared.ptr(shared.char))
+    builder = c.builder
+    # This means the view is from `xnd_view_from_xnd` and we have access to
+    # the python object. We can just return the existing python object
+    flags = libxnd.xnd_view_t.getattr_impl(None, builder, None, x, "flags")
+    flags_is_0 = builder.icmp_unsigned("==", flags, flags.type(0))
+
+    o = libxnd.xnd_view_t.getattr_impl(None, builder, None, x, "obj")
+    o_is_not_null = builder.icmp_unsigned("!=", o, o.type(None))
+
+    has_original_object = builder.and_(flags_is_0, o_is_not_null)
+
+    o_ptr = builder.alloca(o.type)
+    with builder.if_else(has_original_object) as (then, otherwise):
+        with then:
+            builder.store(o, o_ptr)
+        with otherwise:
+            x_o = xnd_from_xnd_view.codegen(builder, (x,))
+            o = builder.bitcast(x_o, shared.ptr(shared.char))
+            builder.store(o, o_ptr)
+    o = builder.load(o_ptr)
     c.pyapi.incref(o)
     return o
