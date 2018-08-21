@@ -73,6 +73,9 @@ class WrappedCStruct:
             "getitem", self.NumbaType, numba.types.Integer
         )(self.lower_getitem)
 
+        numba.extending.lower_cast(self.NumbaType, self.NumbaType)(
+            lambda context, builder, fromty, toty, val: val
+        )
         if not create_wrapper:
             return
 
@@ -92,8 +95,13 @@ class WrappedCStruct:
         name = self.name
 
         class NumbaType(numba.types.Type):
-            def __init__(self):
-                super().__init__(name=name)
+            def __init__(self, n=1):
+                self.n = n
+                super().__init__(name=f"{name}(n={n})")
+
+            def can_convert_to(self, typingctx, other):
+                if isinstance(other, NumbaType):
+                    return numba.typeconv.Conversion.safe
 
         return NumbaType
 
@@ -103,25 +111,44 @@ class WrappedCStruct:
 
         class NumbaModel(numba.extending.models.PrimitiveModel):
             def __init__(self, dmm, fe_type):
+                # wrapper types have no "n"
+                self.n = getattr(fe_type, "n", 1)
+
+                # we save it as an array of values on returning and when putting in data
+                # this is so that if you stack allocae in function and return, you will re-allocate
+                # and copy in calling function
+                # this can all be removed if we move to numba ref counting
+                self.value_type = llvmlite.ir.ArrayType(llvm_type, self.n)
                 super().__init__(dmm, fe_type, be_type)
 
             def get_return_type(self):
-                return llvm_type
+                return self.value_type
 
             def get_data_type(self):
-                return llvm_type
+                return self.value_type
 
             def as_return(self, builder, value):
-                return builder.load(value)
+                val = builder.load(numba.cgutils.alloca_once(builder, self.value_type))
+                for i in range(self.n):
+                    val = builder.insert_value(
+                        val, builder.load(builder.gep(value, [index(i)], True)), i
+                    )
+                return val
 
             def from_return(self, builder, value):
-                return numba.cgutils.alloca_once_value(builder, value)
+                p = numba.cgutils.alloca_once(builder, llvm_type, self.n)
+                for i in range(self.n):
+                    builder.store(
+                        builder.extract_value(value, i),
+                        ptr=builder.gep(p, [index(i)], True),
+                    )
+                return p
 
             def as_data(self, builder, value):
-                return builder.load(value)
+                return self.as_return(builder, value)
 
             def from_data(self, builder, value):
-                return numba.cgutils.alloca_once_value(builder, value)
+                return self.from_return(builder, value)
 
         return NumbaModel
 
@@ -164,14 +191,20 @@ class WrappedCStruct:
         if not isinstance(n_t, numba.types.Const):
             return
 
-        def codegen(context, builder, sig, args):
-            return numba.cgutils.alloca_once(builder, self.llvm_type, n_t.value)
+        n = n_t.value
 
-        return self.numba_type(numba.types.int64), codegen
+        sig = self.NumbaType(n)(numba.types.int64)
+
+        def codegen(context, builder, sig, args):
+            return numba.cgutils.alloca_once(builder, self.llvm_type, n)
+
+        return sig, codegen
 
     def type_getitem(self, context):
         def typer(val_t, i_t):
-            if val_t == self.numba_type and isinstance(i_t, numba.types.Integer):
+            if isinstance(val_t, self.NumbaType) and isinstance(
+                i_t, numba.types.Integer
+            ):
                 return self.numba_type
 
         return typer
@@ -334,9 +367,6 @@ class WrappedCFunction(numba.extending._Intrinsic):
 
     def create_impl(self):
         def impl(typingctx, *numba_arg_types_):
-            if numba_arg_types_ != self.numba_arg_types:
-                return
-
             return (
                 self.sig,
                 lambda context, builder, sig, args: self.codegen(builder, args),
