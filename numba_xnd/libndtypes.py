@@ -46,13 +46,6 @@ ndt_context_t = shared.WrappedCStruct(
 )
 create_ndt_context = ndt_context_t.create
 
-# for gumath kernel
-@numba.extending.unbox(ndt_context_t.NumbaType)
-def unbox_ndt_context(typ, val, c):
-    return numba.extending.NativeValue(
-        c.builder.bitcast(val, ndt_context_t.llvm_ptr_type)
-    )
-
 
 ndt_as_ndarray = shared.WrappedCFunction(
     "ndt_as_ndarray",
