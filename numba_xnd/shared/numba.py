@@ -5,8 +5,8 @@ import numba.targets.imputils
 import numba.targets.listobj
 import numba.types
 
-from .extending import create_numba_type, llvm_type_from_numba_type
-from .llvm import char, i32, i64, ptr
+from .extending import llvm_type_from_numba_type
+from .llvm import char, char_ptr, i32, i64, ptr
 
 
 @numba.extending.intrinsic
@@ -22,8 +22,7 @@ def i64_to_i32(typingctx, i64_t):
     return sig, codegen
 
 
-c_string = ptr(char)
-c_string_type = create_numba_type("CString", c_string)
+c_string_type = numba.types.Opaque("c_string")
 
 
 @numba.extending.intrinsic(support_literals=True)
@@ -46,7 +45,7 @@ def print_c_string(typingctx, c_str_t):
     def codegen(context, builder, sig, args):
         return builder.call(
             builder.module.get_or_insert_function(
-                llvmlite.ir.FunctionType(i32, [c_string]), name="puts"
+                llvmlite.ir.FunctionType(i32, [char_ptr]), name="puts"
             ),
             args,
         )
@@ -175,6 +174,6 @@ def null_char_ptr(typingctx):
     sig = c_string_type()
 
     def codegen(context, builder, sig, args):
-        return llvmlite.ir.Constant(c_string, None)
+        return llvmlite.ir.Constant(char_ptr, None)
 
     return sig, codegen

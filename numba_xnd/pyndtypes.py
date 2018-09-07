@@ -4,23 +4,30 @@ import numba
 
 from . import libndtypes, shared
 
-ndt_object = shared.WrappedCStruct("NdtObject", {"ndt": libndtypes.ndt_t.numba_type})
+
+class NdtObjectType(
+    shared.CStructType,
+    c_name="NdtObject",
+    attrs={"ndt": libndtypes.NdtType(nrt_allocated=False)},
+):
+    pass
 
 
-ndt_from_type = shared.WrappedCFunction(
-    "ndt_from_type", ndt_object.numba_type, (libndtypes.ndt_t.numba_type,)
-)
+# ndt_from_type = shared.CFunctionIntrinsic(
+#     "ndt_from_type", NdtObjectType(), (libndtypes.NdtType(),)
+# )
 
 
 @numba.extending.typeof_impl.register(ndtypes.ndt)
 def typeof_ndt(val, c):
-    return libndtypes.ndt_t.WrapperNumbaType(val)
+    return libndtypes.NdtWrapperType(False, val)
 
 
-@numba.extending.unbox(libndtypes.ndt_t.WrapperNumbaType)
+@numba.extending.unbox(libndtypes.NdtWrapperType)
 def unbox_ndt_wrapper(typ, o, c):
-    n_o = c.builder.bitcast(o, ndt_object.llvm_ptr_type)
-    n = ndt_object.getattr_impl(None, c.builder, None, n_o, "ndt")
+    n = NdtObjectType.getattr_impl(
+        builder=c.builder, attr="ndt", struct=o, i=shared.index(0)
+    )
     return numba.extending.NativeValue(n)
 
 
