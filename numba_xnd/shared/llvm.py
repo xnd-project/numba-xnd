@@ -1,3 +1,4 @@
+import llvmlite
 from llvmlite import ir
 from llvmlite.ir import PointerType as ptr
 
@@ -28,4 +29,14 @@ def pycapsule_import(c, path, i: int, fntype, name=None):
     return builder.load(
         builder.bitcast(builder.gep(xnd_api, [index(i * 8)], True), ptr(ptr(fntype))),
         name=name,
+    )
+
+
+def print_pointer(builder, ptr_):
+    builder.call(
+        builder.module.get_or_insert_function(
+            llvmlite.ir.FunctionType(llvmlite.ir.VoidType(), [ptr(char)]),
+            name="print_pointer",
+        ),
+        [ptr_],
     )

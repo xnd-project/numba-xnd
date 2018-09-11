@@ -8,6 +8,7 @@ extern PyObject* ndt_from_type(ndt_t* val) { return Ndt_FromType(val); }
 extern PyObject* xnd_from_type_xnd(PyTypeObject* t, xnd_t* val) { return Xnd_FromXnd(t, val); };
 extern PyObject* xnd_view_move_ndt(const PyObject *v, ndt_t *t) { return Xnd_ViewMoveNdt(v, t); };
 extern PyObject* xnd_from_xnd_view(xnd_view_t *v) {return Xnd_FromXndView(v); };
+extern void print_pointer(void* ptr){printf("%p\n", ptr);}
 //extern PyObject* xnd_from_xndonly(xnd_t *val) { return Xnd_FromXndOnly(val); };
 extern void print_bytes(const void *object, size_t size)
 {
@@ -128,16 +129,22 @@ extern /* pointer to `int64_t` */ void * get_ndt_t_Function_nargs(void* ptr){ re
 extern size_t offsetof_ndt_t_Function_nargs(void){ return offsetof(ndt_t, Function.nargs); }
 extern /* pointer to `ndt_t**` */ void * get_ndt_t_Function_types(void* ptr){ return &(((ndt_t*)ptr)->Function.types); }
 extern size_t offsetof_ndt_t_Function_types(void){ return offsetof(ndt_t, Function.types); }
+extern /* pointer to `enum ndt_contig` */ void * get_ndt_t_FixedDim_tag(void* ptr){ return &(((ndt_t*)ptr)->FixedDim.tag); }
+extern size_t offsetof_ndt_t_FixedDim_tag(void){ return offsetof(ndt_t, FixedDim.tag); }
 extern /* pointer to `int64_t` */ void * get_ndt_t_FixedDim_shape(void* ptr){ return &(((ndt_t*)ptr)->FixedDim.shape); }
 extern size_t offsetof_ndt_t_FixedDim_shape(void){ return offsetof(ndt_t, FixedDim.shape); }
 extern /* pointer to `ndt_t*` */ void * get_ndt_t_FixedDim_type(void* ptr){ return &(((ndt_t*)ptr)->FixedDim.type); }
 extern size_t offsetof_ndt_t_FixedDim_type(void){ return offsetof(ndt_t, FixedDim.type); }
 extern /* pointer to `ndt_t*` */ void * get_ndt_t_VarDim_type(void* ptr){ return &(((ndt_t*)ptr)->VarDim.type); }
 extern size_t offsetof_ndt_t_VarDim_type(void){ return offsetof(ndt_t, VarDim.type); }
+extern /* pointer to `enum ndt_contig` */ void * get_ndt_t_SymbolicDim_tag(void* ptr){ return &(((ndt_t*)ptr)->SymbolicDim.tag); }
+extern size_t offsetof_ndt_t_SymbolicDim_tag(void){ return offsetof(ndt_t, SymbolicDim.tag); }
 extern /* pointer to `char*` */ void * get_ndt_t_SymbolicDim_name(void* ptr){ return &(((ndt_t*)ptr)->SymbolicDim.name); }
 extern size_t offsetof_ndt_t_SymbolicDim_name(void){ return offsetof(ndt_t, SymbolicDim.name); }
 extern /* pointer to `ndt_t*` */ void * get_ndt_t_SymbolicDim_type(void* ptr){ return &(((ndt_t*)ptr)->SymbolicDim.type); }
 extern size_t offsetof_ndt_t_SymbolicDim_type(void){ return offsetof(ndt_t, SymbolicDim.type); }
+extern /* pointer to `enum ndt_contig` */ void * get_ndt_t_EllipsisDim_tag(void* ptr){ return &(((ndt_t*)ptr)->EllipsisDim.tag); }
+extern size_t offsetof_ndt_t_EllipsisDim_tag(void){ return offsetof(ndt_t, EllipsisDim.tag); }
 extern /* pointer to `char*` */ void * get_ndt_t_EllipsisDim_name(void* ptr){ return &(((ndt_t*)ptr)->EllipsisDim.name); }
 extern size_t offsetof_ndt_t_EllipsisDim_name(void){ return offsetof(ndt_t, EllipsisDim.name); }
 extern /* pointer to `ndt_t*` */ void * get_ndt_t_EllipsisDim_type(void* ptr){ return &(((ndt_t*)ptr)->EllipsisDim.type); }
@@ -899,6 +906,17 @@ static PyObject *pyc_get_ndt_t_Function_types(PyObject *self, PyObject *args) {
   return NULL;
 }
 static PyObject *pyc_offsetof_ndt_t_Function_types(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(offsetof_ndt_t_Function_types())); }
+static PyObject *pyc_get_ndt_t_FixedDim_tag(PyObject *self, PyObject *args) {
+  PyObject* ptr=NULL;
+  if (!PyArg_UnpackTuple(args, "ndt_t", 0, 1, &ptr))
+    return NULL;
+  if (PyCapsule_CheckExact(ptr)) {
+    return PyCapsule_New( get_ndt_t_FixedDim_tag(PyCapsule_GetPointer(ptr, "ndt_t*")), "enum ndt_contig", NULL);
+  }
+  PyErr_SetString(PyExc_TypeError, "expected capsuleted ndt_t");
+  return NULL;
+}
+static PyObject *pyc_offsetof_ndt_t_FixedDim_tag(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(offsetof_ndt_t_FixedDim_tag())); }
 static PyObject *pyc_get_ndt_t_FixedDim_shape(PyObject *self, PyObject *args) {
   PyObject* ptr=NULL;
   if (!PyArg_UnpackTuple(args, "ndt_t", 0, 1, &ptr))
@@ -932,6 +950,17 @@ static PyObject *pyc_get_ndt_t_VarDim_type(PyObject *self, PyObject *args) {
   return NULL;
 }
 static PyObject *pyc_offsetof_ndt_t_VarDim_type(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(offsetof_ndt_t_VarDim_type())); }
+static PyObject *pyc_get_ndt_t_SymbolicDim_tag(PyObject *self, PyObject *args) {
+  PyObject* ptr=NULL;
+  if (!PyArg_UnpackTuple(args, "ndt_t", 0, 1, &ptr))
+    return NULL;
+  if (PyCapsule_CheckExact(ptr)) {
+    return PyCapsule_New( get_ndt_t_SymbolicDim_tag(PyCapsule_GetPointer(ptr, "ndt_t*")), "enum ndt_contig", NULL);
+  }
+  PyErr_SetString(PyExc_TypeError, "expected capsuleted ndt_t");
+  return NULL;
+}
+static PyObject *pyc_offsetof_ndt_t_SymbolicDim_tag(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(offsetof_ndt_t_SymbolicDim_tag())); }
 static PyObject *pyc_get_ndt_t_SymbolicDim_name(PyObject *self, PyObject *args) {
   PyObject* ptr=NULL;
   if (!PyArg_UnpackTuple(args, "ndt_t", 0, 1, &ptr))
@@ -954,6 +983,17 @@ static PyObject *pyc_get_ndt_t_SymbolicDim_type(PyObject *self, PyObject *args) 
   return NULL;
 }
 static PyObject *pyc_offsetof_ndt_t_SymbolicDim_type(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(offsetof_ndt_t_SymbolicDim_type())); }
+static PyObject *pyc_get_ndt_t_EllipsisDim_tag(PyObject *self, PyObject *args) {
+  PyObject* ptr=NULL;
+  if (!PyArg_UnpackTuple(args, "ndt_t", 0, 1, &ptr))
+    return NULL;
+  if (PyCapsule_CheckExact(ptr)) {
+    return PyCapsule_New( get_ndt_t_EllipsisDim_tag(PyCapsule_GetPointer(ptr, "ndt_t*")), "enum ndt_contig", NULL);
+  }
+  PyErr_SetString(PyExc_TypeError, "expected capsuleted ndt_t");
+  return NULL;
+}
+static PyObject *pyc_offsetof_ndt_t_EllipsisDim_tag(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(offsetof_ndt_t_EllipsisDim_tag())); }
 static PyObject *pyc_get_ndt_t_EllipsisDim_name(PyObject *self, PyObject *args) {
   PyObject* ptr=NULL;
   if (!PyArg_UnpackTuple(args, "ndt_t", 0, 1, &ptr))
@@ -2475,16 +2515,22 @@ static PyMethodDef xnd_structinfo_methods[] = {
   {"offsetof_ndt_t_Function_nargs", (PyCFunction)pyc_offsetof_ndt_t_Function_nargs, METH_VARARGS, "offsetof_ndt_t_Function_nargs() -> int"},
   {"get_ndt_t_Function_types", (PyCFunction)pyc_get_ndt_t_Function_types, METH_VARARGS, "get_ndt_t_Function_types(< capsule(ndt_t) >) -> < capsule( &ndt_t->Function.types ) >"},
   {"offsetof_ndt_t_Function_types", (PyCFunction)pyc_offsetof_ndt_t_Function_types, METH_VARARGS, "offsetof_ndt_t_Function_types() -> int"},
+  {"get_ndt_t_FixedDim_tag", (PyCFunction)pyc_get_ndt_t_FixedDim_tag, METH_VARARGS, "get_ndt_t_FixedDim_tag(< capsule(ndt_t) >) -> < capsule( &ndt_t->FixedDim.tag ) >"},
+  {"offsetof_ndt_t_FixedDim_tag", (PyCFunction)pyc_offsetof_ndt_t_FixedDim_tag, METH_VARARGS, "offsetof_ndt_t_FixedDim_tag() -> int"},
   {"get_ndt_t_FixedDim_shape", (PyCFunction)pyc_get_ndt_t_FixedDim_shape, METH_VARARGS, "get_ndt_t_FixedDim_shape(< capsule(ndt_t) >) -> < capsule( &ndt_t->FixedDim.shape ) >"},
   {"offsetof_ndt_t_FixedDim_shape", (PyCFunction)pyc_offsetof_ndt_t_FixedDim_shape, METH_VARARGS, "offsetof_ndt_t_FixedDim_shape() -> int"},
   {"get_ndt_t_FixedDim_type", (PyCFunction)pyc_get_ndt_t_FixedDim_type, METH_VARARGS, "get_ndt_t_FixedDim_type(< capsule(ndt_t) >) -> < capsule( &ndt_t->FixedDim.type ) >"},
   {"offsetof_ndt_t_FixedDim_type", (PyCFunction)pyc_offsetof_ndt_t_FixedDim_type, METH_VARARGS, "offsetof_ndt_t_FixedDim_type() -> int"},
   {"get_ndt_t_VarDim_type", (PyCFunction)pyc_get_ndt_t_VarDim_type, METH_VARARGS, "get_ndt_t_VarDim_type(< capsule(ndt_t) >) -> < capsule( &ndt_t->VarDim.type ) >"},
   {"offsetof_ndt_t_VarDim_type", (PyCFunction)pyc_offsetof_ndt_t_VarDim_type, METH_VARARGS, "offsetof_ndt_t_VarDim_type() -> int"},
+  {"get_ndt_t_SymbolicDim_tag", (PyCFunction)pyc_get_ndt_t_SymbolicDim_tag, METH_VARARGS, "get_ndt_t_SymbolicDim_tag(< capsule(ndt_t) >) -> < capsule( &ndt_t->SymbolicDim.tag ) >"},
+  {"offsetof_ndt_t_SymbolicDim_tag", (PyCFunction)pyc_offsetof_ndt_t_SymbolicDim_tag, METH_VARARGS, "offsetof_ndt_t_SymbolicDim_tag() -> int"},
   {"get_ndt_t_SymbolicDim_name", (PyCFunction)pyc_get_ndt_t_SymbolicDim_name, METH_VARARGS, "get_ndt_t_SymbolicDim_name(< capsule(ndt_t) >) -> < capsule( &ndt_t->SymbolicDim.name ) >"},
   {"offsetof_ndt_t_SymbolicDim_name", (PyCFunction)pyc_offsetof_ndt_t_SymbolicDim_name, METH_VARARGS, "offsetof_ndt_t_SymbolicDim_name() -> int"},
   {"get_ndt_t_SymbolicDim_type", (PyCFunction)pyc_get_ndt_t_SymbolicDim_type, METH_VARARGS, "get_ndt_t_SymbolicDim_type(< capsule(ndt_t) >) -> < capsule( &ndt_t->SymbolicDim.type ) >"},
   {"offsetof_ndt_t_SymbolicDim_type", (PyCFunction)pyc_offsetof_ndt_t_SymbolicDim_type, METH_VARARGS, "offsetof_ndt_t_SymbolicDim_type() -> int"},
+  {"get_ndt_t_EllipsisDim_tag", (PyCFunction)pyc_get_ndt_t_EllipsisDim_tag, METH_VARARGS, "get_ndt_t_EllipsisDim_tag(< capsule(ndt_t) >) -> < capsule( &ndt_t->EllipsisDim.tag ) >"},
+  {"offsetof_ndt_t_EllipsisDim_tag", (PyCFunction)pyc_offsetof_ndt_t_EllipsisDim_tag, METH_VARARGS, "offsetof_ndt_t_EllipsisDim_tag() -> int"},
   {"get_ndt_t_EllipsisDim_name", (PyCFunction)pyc_get_ndt_t_EllipsisDim_name, METH_VARARGS, "get_ndt_t_EllipsisDim_name(< capsule(ndt_t) >) -> < capsule( &ndt_t->EllipsisDim.name ) >"},
   {"offsetof_ndt_t_EllipsisDim_name", (PyCFunction)pyc_offsetof_ndt_t_EllipsisDim_name, METH_VARARGS, "offsetof_ndt_t_EllipsisDim_name() -> int"},
   {"get_ndt_t_EllipsisDim_type", (PyCFunction)pyc_get_ndt_t_EllipsisDim_type, METH_VARARGS, "get_ndt_t_EllipsisDim_type(< capsule(ndt_t) >) -> < capsule( &ndt_t->EllipsisDim.type ) >"},
@@ -2771,6 +2817,6 @@ PyInit_xnd_structinfo(void) {
   import_xnd();
   import_gumath();
 
-  return PyModule_Create(&xnd_structinfomodule);
+  return PyModule_Create(&xnd_structinfomodule); 
 }
 #endif

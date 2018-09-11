@@ -8,7 +8,7 @@ import numba.typing.templates
 import xnd_structinfo
 
 from .extending import llvm_type_from_numba_type
-from .llvm import char_ptr, i64, index, ptr
+from .llvm import char_ptr, i64, index, print_pointer, ptr
 
 SIZEOF_MEMINFO = xnd_structinfo.sizeof_NRT_MemInfo()
 
@@ -25,7 +25,9 @@ class CStructModel(numba.datamodel.models.OpaqueModel):
         nrt meminfo pointer begins before the allocated data pointer. So we subtract size of meminfo to get to this pointer
         """
         # move back `SIZEOF_MEMINFO` bytes (since this is ptr(char))
-        return builder.gep(value, [index(-SIZEOF_MEMINFO)])
+        # print()
+        return builder.gep(value, [index(-SIZEOF_MEMINFO)], inbounds=True)
+        # return value
 
 
 class CStructType(numba.types.Type):
@@ -133,8 +135,12 @@ class CStructType(numba.types.Type):
             mi = context.nrt.meminfo_alloc(
                 builder, size=builder.mul(n, i64(cls.n_bytes))
             )
+            print_pointer(builder, mi)
+            print_pointer(builder, context.nrt.meminfo_data(builder, mi))
             # move forward to data which is allocated after meminfo
-            return builder.gep(mi, [index(SIZEOF_MEMINFO)])
+            calculated_data = builder.gep(mi, [index(SIZEOF_MEMINFO)])
+            print_pointer(builder, calculated_data)
+            return calculated_data
 
         return sig, codegen
 
