@@ -11,9 +11,9 @@ include_dir = site_packages[: site_packages.find("lib")] + "include"
 output_filename = "xnd_structinfo.c"
 modulename = "xnd_structinfo"
 
-include_dirs = lib_dirs + [include_dir]
+include_dirs = lib_dirs + [include_dir, "./numba/numba/runtime"]
 library_dirs = [site_packages[: site_packages.find("/python")]]
-includes = ["pyndtypes.h", "pyxnd.h", "pygumath.h"]
+includes = ["pyndtypes.h", "pyxnd.h", "pygumath.h", "nrt.c"]
 libraries = []
 
 # Additional C code to be added to output

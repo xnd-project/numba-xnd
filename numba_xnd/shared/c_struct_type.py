@@ -10,7 +10,7 @@ import xnd_structinfo
 from .extending import llvm_type_from_numba_type
 from .llvm import char_ptr, i64, index, ptr
 
-SIZEOF_MEMINFO = 20  # in bytes
+SIZEOF_MEMINFO = xnd_structinfo.sizeof_NRT_MemInfo()
 
 
 class CStructModel(numba.datamodel.models.OpaqueModel):
