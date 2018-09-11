@@ -4,7 +4,7 @@ channels:
   - xnd/label/dev
   - conda-forge
 dependencies:
-  - python=3.6
+  - python=3.7
   - llvmlite
   - numpy
   - gumath
