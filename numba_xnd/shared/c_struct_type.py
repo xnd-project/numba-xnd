@@ -84,20 +84,16 @@ class CStructType(numba.types.Type):
 
         @numba.typing.templates.bound_function(fn_key)
         def resolve(self, ty, args, kws):
-            print("Trying", fn_key, ty, args, kws)
             if kws or not args or not isinstance(args[0], numba.types.Integer):
                 return
-            print("Resolved!")
             # getting value
             if len(args) == 1:
                 return numba.typing.templates.signature(numba_type, *args)
             # setting value
             if len(args) == 2:  # and args[1] == numba_type:
-                print(args)
                 return numba.typing.templates.signature(
                     numba.types.none, args[0], numba_type
                 )
-            print("no resolved", len(args), args[1], numba_type)
 
         # Lower function
         @numba.targets.imputils.lower_builtin(fn_key, cls, numba.types.Integer)
@@ -108,7 +104,8 @@ class CStructType(numba.types.Type):
             fn_key, cls, numba.types.Integer, type(numba_type)
         )
         def lower_set(context, builder, sig, args):
-            return cls.setattr_impl(builder, field, *args)
+            cls.setattr_impl(builder, field, *args)
+            return context.get_dummy_value()
 
         return resolve
 
