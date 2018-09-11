@@ -11,3 +11,4 @@ dependencies:
   - xnd
   - coverage
   - codecov
+  - pyyaml # for numba config parsing
