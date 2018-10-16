@@ -1,7 +1,6 @@
 import llvmlite
 import llvmlite.ir
 import ndtypes
-
 import numba
 import numba.extending
 import numba.targets.imputils
@@ -90,6 +89,10 @@ ndt_context_msg = shared.CFunctionIntrinsic(
     "ndt_context_msg", shared.c_string_type, (NdtContextType,)
 )
 
+ndt_err_fprint_stdout = shared.CFunctionIntrinsic(
+    "ndt_err_fprint_stdout", numba.types.void, (NdtContextType,)
+)
+
 
 @numba.njit
 def ndt_static_context():
@@ -100,6 +103,18 @@ def ndt_static_context():
     ctx.msg(0, 0)
     ctx.ConstMsg(0, shared.c_string_const("Success"))
     return ctx
+
+
+@numba.njit
+def set_error(ctx):
+    ndt_err_fprint_stdout(ctx)
+    raise RuntimeError("Error in ndt context")
+
+
+@numba.njit
+def check_error(ctx, ptr_):
+    if shared.ptr_is_none(ptr_):
+        set_error(ctx)
 
 
 @numba.extending.overload_attribute(NdtWrapperType, "shape")

@@ -1,8 +1,5 @@
 import llvmlite.ir
-
 import numba
-import numba.targets.imputils
-import numba.targets.listobj
 import numba.types
 
 from .extending import llvm_type_from_numba_type
@@ -97,8 +94,22 @@ def ptr_is_none(typingctx, ptr_t):
     sig = numba.types.boolean(ptr_t)
 
     def codegen(context, builder, sig, args):
-        ptr_ = args[0]
-        return builder.icmp_unsigned("==", ptr_, llvmlite.ir.Constant(ptr_.type, None))
+        return numba.cgutils.is_null(builder, args[0])
+
+    return sig, codegen
+
+
+@numba.extending.intrinsic
+def get_stdout(typingctx):
+    sig = c_string_type()
+
+    def codegen(context, builder, sig, args):
+        return builder.call(
+            builder.module.get_or_insert_function(
+                llvmlite.ir.FunctionType(ptr(char), []), name="get_stdout"
+            ),
+            [],
+        )
 
     return sig, codegen
 
@@ -118,41 +129,42 @@ def literal_pyobject(typingctx, pyobject_t):
     return sig, codegen
 
 
-@numba.extending.intrinsic(support_literals=True)
-def ptr_load_type(typingctx, numba_type_t, ptr_t):
-    """
-    Called with a numba type and a char*, it will load the value at the pointer as the numba type.
-    """
-    if ptr_t != c_string_type:
-        return
-    return_type = numba_type_t.instance_type
-    sig = return_type(numba_type_t, ptr_t)
+def create_ptr_load_type(numba_type):
+    @numba.extending.intrinsic
+    def ptr_load_type(typingctx, ptr_t):
+        """
+        Called with a a char* it will load the value at the pointer as the numba type.
+        """
+        if ptr_t != c_string_type:
+            return
+        sig = numba_type(ptr_t)
 
-    def codegen(context, builder, sig, args):
-        return builder.load(
-            builder.bitcast(args[1], ptr(llvm_type_from_numba_type(return_type)))
-        )
+        def codegen(context, builder, sig, args):
+            return builder.load(
+                builder.bitcast(args[0], ptr(llvm_type_from_numba_type(numba_type)))
+            )
 
-    return sig, codegen
+        return sig, codegen
+
+    return ptr_load_type
 
 
-@numba.extending.intrinsic(support_literals=True)
-def ptr_store_type(typingctx, numba_type_t, ptr_t, value_t):
-    """
-    Called with a char* and a numba type, it will load the value at the pointer as the numba type.
-    """
-    if ptr_t != c_string_type:
-        return
-    return_type = numba_type_t.instance_type
-    sig = return_type(numba_type_t, ptr_t, return_type)
+def create_ptr_store_type(numba_type):
+    @numba.extending.intrinsic
+    def ptr_store_type(typingctx, ptr_t, value_t):
+        if ptr_t != c_string_type:
+            return
+        sig = numba_type(ptr_t, return_type)
 
-    def codegen(context, builder, sig, args):
-        _, ptr_, value = args
-        ptr_cast = builder.bitcast(ptr_, ptr(llvm_type_from_numba_type(return_type)))
-        builder.store(value, ptr_cast)
-        return value
+        def codegen(context, builder, sig, args):
+            ptr_, value = args
+            ptr_cast = builder.bitcast(ptr_, ptr(llvm_type_from_numba_type(numba_type)))
+            builder.store(value, ptr_cast)
+            return value
 
-    return sig, codegen
+        return sig, codegen
+
+    return ptr_store_type
 
 
 @numba.extending.intrinsic

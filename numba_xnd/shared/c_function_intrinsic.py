@@ -1,7 +1,6 @@
 import inspect
 
 import llvmlite
-
 import numba
 
 from .c_struct_type import CStructType
@@ -56,7 +55,7 @@ class CFunctionIntrinsic(numba.extending._Intrinsic):
                     return
 
             return (
-                self.ret_type(*numba_arg_types),
+                self.numba_ret_type(*numba_arg_types),
                 lambda context, builder, sig, args: self.codegen(builder, args),
             )
 

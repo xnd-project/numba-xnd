@@ -1,5 +1,4 @@
 import ndtypes
-
 import numba
 
 from . import libndtypes, shared
@@ -11,11 +10,6 @@ class NdtObjectType(
     attrs={"ndt": libndtypes.NdtType(nrt_allocated=False)},
 ):
     pass
-
-
-# ndt_from_type = shared.CFunctionIntrinsic(
-#     "ndt_from_type", NdtObjectType(), (libndtypes.NdtType(),)
-# )
 
 
 @numba.extending.typeof_impl.register(ndtypes.ndt)
@@ -32,6 +26,11 @@ def unbox_ndt_wrapper(typ, o, c):
 
 
 # Disable boxing for now since it isn't working right.
+
+# ndt_from_type = shared.CFunctionIntrinsic(
+#     "ndt_from_type", NdtObjectType(), (libndtypes.NdtType(),)
+# )
+
 # @numba.extending.box(libndtypes.ndt_t.WrapperNumbaType)
 # def box_ndt_wrapper(typ, n, c):
 # numba.cgutils.printf(

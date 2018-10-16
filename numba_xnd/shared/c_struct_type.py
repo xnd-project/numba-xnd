@@ -1,10 +1,10 @@
 import types
 
 import llvmlite.ir
-
 import numba.extending
 import numba.types
 import numba.typing.templates
+
 import xnd_structinfo
 
 from .extending import llvm_type_from_numba_type
@@ -24,10 +24,9 @@ class CStructModel(numba.datamodel.models.OpaqueModel):
         """
         nrt meminfo pointer begins before the allocated data pointer. So we subtract size of meminfo to get to this pointer
         """
-        # move back `SIZEOF_MEMINFO` bytes (since this is ptr(char))
-        # print()
-        return builder.gep(value, [index(-SIZEOF_MEMINFO)], inbounds=True)
-        # return value
+        loaded = builder.gep(value, [index(-SIZEOF_MEMINFO)], inbounds=True)
+        is_null = numba.cgutils.is_null(builder, value)
+        return builder.select(is_null, value, loaded)
 
 
 class CStructType(numba.types.Type):
@@ -131,18 +130,14 @@ class CStructType(numba.types.Type):
         sig = cls(nrt_allocated=True)(n_t)
 
         def codegen(context, builder, sig, args):
-            n, = args
-            mi = context.nrt.meminfo_alloc(
-                builder, size=builder.mul(n, i64(cls.n_bytes))
-            )
-            print_pointer(builder, mi)
-            print_pointer(builder, context.nrt.meminfo_data(builder, mi))
-            # move forward to data which is allocated after meminfo
-            calculated_data = builder.gep(mi, [index(SIZEOF_MEMINFO)])
-            print_pointer(builder, calculated_data)
-            return calculated_data
+            return cls._alloc_codegen(context, builder, args[0])
 
         return sig, codegen
+
+    @classmethod
+    def _alloc_codegen(cls, context, builder, n):
+        mi = context.nrt.meminfo_alloc(builder, size=builder.mul(n, i64(cls.n_bytes)))
+        return builder.gep(mi, [index(SIZEOF_MEMINFO)])
 
     @classmethod
     def getattr_impl(cls, builder, attr, struct, i):

@@ -1,9 +1,9 @@
 import unittest
 
 from ndtypes import ndt
+from numba import njit
 
 import numba_xnd  # NOQA pylint: disable=W0611
-from numba import njit
 
 n = ndt("10 * 4 * 4 * 5 * 10 * int64")
 

@@ -1,7 +1,6 @@
 import typing
 
 import ndtypes
-
 import numba.extending
 import numba.types
 import numba.typing.templates
@@ -14,9 +13,7 @@ class WrapperType(numba.types.Type):
         assert isinstance(ndt_value, ndtypes.ndt)
         self.ndt_value = ndt_value
         self.nrt_allocated = nrt_allocated
-        super().__init__(
-            name=f"Wrapper({self.inner_type.c_name}, {nrt_allocated}, {ndt_value})"
-        )
+        super().__init__(name=f"{type(self).__name__}({nrt_allocated}, {ndt_value})")
 
     @property
     def key(self):

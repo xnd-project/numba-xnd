@@ -2,7 +2,6 @@ import functools
 import inspect
 
 import llvmlite.ir
-
 import numba.extending
 import numba.types
 import numba.typing.templates

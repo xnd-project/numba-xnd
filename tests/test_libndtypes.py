@@ -1,9 +1,9 @@
 import unittest
 
 from ndtypes import ndt
+from numba import njit
 
 import numba_xnd
-from numba import njit
 
 
 @njit
@@ -16,7 +16,7 @@ def is_concrete(x):
 def static_context_err():
     # pylint: disable=E
     ctx = numba_xnd.libndtypes.ndt_static_context()
-    return ctx.err
+    return ctx.err(0)
 
 
 @njit

@@ -5,13 +5,15 @@ Configuration file to structinfo_generator.
 from distutils.sysconfig import get_python_lib
 
 site_packages = get_python_lib()
-lib_dirs = [f"{site_packages}/{i}" for i in ["ndtypes", "gumath", "xnd"]]
+lib_dirs = [
+    f"{site_packages}/{i}" for i in ["ndtypes", "gumath", "xnd", "numba/runtime"]
+]
 include_dir = site_packages[: site_packages.find("lib")] + "include"
 
 output_filename = "xnd_structinfo.c"
 modulename = "xnd_structinfo"
 
-include_dirs = lib_dirs + [include_dir, "./numba/numba/runtime"]
+include_dirs = lib_dirs + [include_dir]
 library_dirs = [site_packages[: site_packages.find("/python")]]
 includes = ["pyndtypes.h", "pyxnd.h", "pygumath.h", "nrt.c"]
 libraries = []
@@ -23,6 +25,7 @@ extern PyObject* xnd_from_type_xnd(PyTypeObject* t, xnd_t* val) { return Xnd_Fro
 extern PyObject* xnd_view_move_ndt(const PyObject *v, ndt_t *t) { return Xnd_ViewMoveNdt(v, t); };
 extern PyObject* xnd_from_xnd_view(xnd_view_t *v) {return Xnd_FromXndView(v); };
 extern void print_pointer(void* ptr){printf("%p\\n", ptr);}
+extern void ndt_err_fprint_stdout(void* ctx) {ndt_err_fprint(stdout, ctx);}
 //extern PyObject* xnd_from_xndonly(xnd_t *val) { return Xnd_FromXndOnly(val); };
 extern void print_bytes(const void *object, size_t size)
 {
