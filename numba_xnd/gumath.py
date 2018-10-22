@@ -48,11 +48,6 @@ def jit_and_wrap(signature):
     return inner
 
 
-@numba.njit
-def create_xnd_view(x):
-    return libxnd.xnd_view_from_xnd(shared.null_char_ptr(), x)
-
-
 def wrap_kernel_dispatcher(n_args):
     """
     Returns a new dispatcher that is suitable to be registered with `register_kernel_direct`.
@@ -68,54 +63,22 @@ def wrap_kernel_dispatcher(n_args):
             ret[()] = a + b[0]
     """
 
-    # TODO: Catch exceptions and return -1
-    # TODO: Switch from hard coded # args, try to avoid eval and recursive calls (both confusing)
+    get_args = shared.create_tuple_creator(lambda i, v: v[i], n_args)
+
+    # TODO: use global context and see if we hit error
     def inner(dispatcher):
-        if n_args == 0:
-
-            def fn(stack, ctx):
-                dispatcher()
-                return 0
-
-        elif n_args == 1:
-
-            def fn(stack, ctx):
-                dispatcher(create_xnd_view(stack[0]))
-                return 0
-
-        elif n_args == 2:
-
-            def fn(stack, ctx):
-                dispatcher(create_xnd_view(stack[0]), create_xnd_view(stack[1]))
-                return 0
-
-        elif n_args == 3:
-
-            def fn(stack, ctx):
-                dispatcher(
-                    create_xnd_view(stack[0]),
-                    create_xnd_view(stack[1]),
-                    create_xnd_view(stack[2]),
+        @numba.njit
+        def fn(stack, ctx):
+            # allocate all views at once here, otherwise allocation won't work
+            views = libxnd.create_xnd_view(n_args)
+            for i in range(n_args):
+                libxnd.xnd_view_from_xnd_no_alloc(
+                    views[i], shared.null_char_ptr(), stack[i]
                 )
-                return 0
+            dispatcher(*get_args(views))
+            return 0
 
-        elif n_args == 4:
-
-            def fn(stack, ctx):
-                dispatcher(
-                    create_xnd_view(stack[0]),
-                    create_xnd_view(stack[1]),
-                    create_xnd_view(stack[2]),
-                    create_xnd_view(stack[3]),
-                )
-                return 0
-
-        else:
-            raise NotImplementedError(
-                "Gumath kernel generation is limited at four args currently."
-            )
-
-        return numba.njit(fn)
+        return fn
 
     return inner
 

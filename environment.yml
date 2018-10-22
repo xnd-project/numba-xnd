@@ -11,3 +11,9 @@ dependencies:
   - xnd
   - coverage
   - codecov
+  - pyyaml # for numba config parsing
+  - ipython # for developing
+  - numba
+  - pytest
+  - pytest-xdist
+  - colorama

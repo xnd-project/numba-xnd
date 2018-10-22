@@ -2,11 +2,14 @@
 #include "pyndtypes.h"
 #include "pyxnd.h"
 #include "pygumath.h"
+#include "nrt.c"
 
 extern PyObject* ndt_from_type(ndt_t* val) { return Ndt_FromType(val); }
 extern PyObject* xnd_from_type_xnd(PyTypeObject* t, xnd_t* val) { return Xnd_FromXnd(t, val); };
 extern PyObject* xnd_view_move_ndt(const PyObject *v, ndt_t *t) { return Xnd_ViewMoveNdt(v, t); };
 extern PyObject* xnd_from_xnd_view(xnd_view_t *v) {return Xnd_FromXndView(v); };
+extern void print_pointer(void* ptr){printf("%p\n", ptr);}
+extern void ndt_err_fprint_stdout(void* ctx) {ndt_err_fprint(stdout, ctx);}
 //extern PyObject* xnd_from_xndonly(xnd_t *val) { return Xnd_FromXndOnly(val); };
 extern void print_bytes(const void *object, size_t size)
 {
@@ -127,16 +130,22 @@ extern /* pointer to `int64_t` */ void * get_ndt_t_Function_nargs(void* ptr){ re
 extern size_t offsetof_ndt_t_Function_nargs(void){ return offsetof(ndt_t, Function.nargs); }
 extern /* pointer to `ndt_t**` */ void * get_ndt_t_Function_types(void* ptr){ return &(((ndt_t*)ptr)->Function.types); }
 extern size_t offsetof_ndt_t_Function_types(void){ return offsetof(ndt_t, Function.types); }
+extern /* pointer to `enum ndt_contig` */ void * get_ndt_t_FixedDim_tag(void* ptr){ return &(((ndt_t*)ptr)->FixedDim.tag); }
+extern size_t offsetof_ndt_t_FixedDim_tag(void){ return offsetof(ndt_t, FixedDim.tag); }
 extern /* pointer to `int64_t` */ void * get_ndt_t_FixedDim_shape(void* ptr){ return &(((ndt_t*)ptr)->FixedDim.shape); }
 extern size_t offsetof_ndt_t_FixedDim_shape(void){ return offsetof(ndt_t, FixedDim.shape); }
 extern /* pointer to `ndt_t*` */ void * get_ndt_t_FixedDim_type(void* ptr){ return &(((ndt_t*)ptr)->FixedDim.type); }
 extern size_t offsetof_ndt_t_FixedDim_type(void){ return offsetof(ndt_t, FixedDim.type); }
 extern /* pointer to `ndt_t*` */ void * get_ndt_t_VarDim_type(void* ptr){ return &(((ndt_t*)ptr)->VarDim.type); }
 extern size_t offsetof_ndt_t_VarDim_type(void){ return offsetof(ndt_t, VarDim.type); }
+extern /* pointer to `enum ndt_contig` */ void * get_ndt_t_SymbolicDim_tag(void* ptr){ return &(((ndt_t*)ptr)->SymbolicDim.tag); }
+extern size_t offsetof_ndt_t_SymbolicDim_tag(void){ return offsetof(ndt_t, SymbolicDim.tag); }
 extern /* pointer to `char*` */ void * get_ndt_t_SymbolicDim_name(void* ptr){ return &(((ndt_t*)ptr)->SymbolicDim.name); }
 extern size_t offsetof_ndt_t_SymbolicDim_name(void){ return offsetof(ndt_t, SymbolicDim.name); }
 extern /* pointer to `ndt_t*` */ void * get_ndt_t_SymbolicDim_type(void* ptr){ return &(((ndt_t*)ptr)->SymbolicDim.type); }
 extern size_t offsetof_ndt_t_SymbolicDim_type(void){ return offsetof(ndt_t, SymbolicDim.type); }
+extern /* pointer to `enum ndt_contig` */ void * get_ndt_t_EllipsisDim_tag(void* ptr){ return &(((ndt_t*)ptr)->EllipsisDim.tag); }
+extern size_t offsetof_ndt_t_EllipsisDim_tag(void){ return offsetof(ndt_t, EllipsisDim.tag); }
 extern /* pointer to `char*` */ void * get_ndt_t_EllipsisDim_name(void* ptr){ return &(((ndt_t*)ptr)->EllipsisDim.name); }
 extern size_t offsetof_ndt_t_EllipsisDim_name(void){ return offsetof(ndt_t, EllipsisDim.name); }
 extern /* pointer to `ndt_t*` */ void * get_ndt_t_EllipsisDim_type(void* ptr){ return &(((ndt_t*)ptr)->EllipsisDim.type); }
@@ -374,6 +383,32 @@ extern /* pointer to `const gm_tbl_t*` */ void * get_GufuncObject_tbl(void* ptr)
 extern size_t offsetof_GufuncObject_tbl(void){ return offsetof(GufuncObject, tbl); }
 extern /* pointer to `char*` */ void * get_GufuncObject_name(void* ptr){ return &(((GufuncObject*)ptr)->name); }
 extern size_t offsetof_GufuncObject_name(void){ return offsetof(GufuncObject, name); }
+extern size_t sizeof_NRT_MemInfo(void){ return sizeof(NRT_MemInfo); }
+extern /* pointer to `size_t` */ void * get_NRT_MemInfo_refct(void* ptr){ return &(((NRT_MemInfo*)ptr)->refct); }
+extern size_t offsetof_NRT_MemInfo_refct(void){ return offsetof(NRT_MemInfo, refct); }
+extern /* pointer to `NRT_dtor_function` */ void * get_NRT_MemInfo_dtor(void* ptr){ return &(((NRT_MemInfo*)ptr)->dtor); }
+extern size_t offsetof_NRT_MemInfo_dtor(void){ return offsetof(NRT_MemInfo, dtor); }
+extern /* pointer to `void*` */ void * get_NRT_MemInfo_dtor_info(void* ptr){ return &(((NRT_MemInfo*)ptr)->dtor_info); }
+extern size_t offsetof_NRT_MemInfo_dtor_info(void){ return offsetof(NRT_MemInfo, dtor_info); }
+extern /* pointer to `void*` */ void * get_NRT_MemInfo_data(void* ptr){ return &(((NRT_MemInfo*)ptr)->data); }
+extern size_t offsetof_NRT_MemInfo_data(void){ return offsetof(NRT_MemInfo, data); }
+extern /* pointer to `size_t` */ void * get_NRT_MemInfo_size(void* ptr){ return &(((NRT_MemInfo*)ptr)->size); }
+extern size_t offsetof_NRT_MemInfo_size(void){ return offsetof(NRT_MemInfo, size); }
+extern size_t sizeof_NRT_MemSys(void){ return sizeof(NRT_MemSys); }
+extern /* pointer to `NRT_atomic_inc_dec_func atomic_inc,` */ void * get_NRT_MemSys_atomic_dec(void* ptr){ return &(((NRT_MemSys*)ptr)->atomic_dec); }
+extern size_t offsetof_NRT_MemSys_atomic_dec(void){ return offsetof(NRT_MemSys, atomic_dec); }
+extern /* pointer to `atomic_meminfo_cas_func` */ void * get_NRT_MemSys_atomic_cas(void* ptr){ return &(((NRT_MemSys*)ptr)->atomic_cas); }
+extern size_t offsetof_NRT_MemSys_atomic_cas(void){ return offsetof(NRT_MemSys, atomic_cas); }
+extern /* pointer to `int` */ void * get_NRT_MemSys_shutting(void* ptr){ return &(((NRT_MemSys*)ptr)->shutting); }
+extern size_t offsetof_NRT_MemSys_shutting(void){ return offsetof(NRT_MemSys, shutting); }
+extern /* pointer to `size_t stats_alloc,stats_free,stats_mi_alloc,` */ void * get_NRT_MemSys_stats_mi_free(void* ptr){ return &(((NRT_MemSys*)ptr)->stats_mi_free); }
+extern size_t offsetof_NRT_MemSys_stats_mi_free(void){ return offsetof(NRT_MemSys, stats_mi_free); }
+extern /* pointer to `NRT_malloc_func` */ void * get_NRT_MemSys_allocator_malloc(void* ptr){ return &(((NRT_MemSys*)ptr)->allocator.malloc); }
+extern size_t offsetof_NRT_MemSys_allocator_malloc(void){ return offsetof(NRT_MemSys, allocator.malloc); }
+extern /* pointer to `NRT_realloc_func` */ void * get_NRT_MemSys_allocator_realloc(void* ptr){ return &(((NRT_MemSys*)ptr)->allocator.realloc); }
+extern size_t offsetof_NRT_MemSys_allocator_realloc(void){ return offsetof(NRT_MemSys, allocator.realloc); }
+extern /* pointer to `NRT_free_func` */ void * get_NRT_MemSys_allocator_free(void* ptr){ return &(((NRT_MemSys*)ptr)->allocator.free); }
+extern size_t offsetof_NRT_MemSys_allocator_free(void){ return offsetof(NRT_MemSys, allocator.free); }
 #ifdef PYTHON_MODULE
 #include "Python.h"
 
@@ -872,6 +907,17 @@ static PyObject *pyc_get_ndt_t_Function_types(PyObject *self, PyObject *args) {
   return NULL;
 }
 static PyObject *pyc_offsetof_ndt_t_Function_types(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(offsetof_ndt_t_Function_types())); }
+static PyObject *pyc_get_ndt_t_FixedDim_tag(PyObject *self, PyObject *args) {
+  PyObject* ptr=NULL;
+  if (!PyArg_UnpackTuple(args, "ndt_t", 0, 1, &ptr))
+    return NULL;
+  if (PyCapsule_CheckExact(ptr)) {
+    return PyCapsule_New( get_ndt_t_FixedDim_tag(PyCapsule_GetPointer(ptr, "ndt_t*")), "enum ndt_contig", NULL);
+  }
+  PyErr_SetString(PyExc_TypeError, "expected capsuleted ndt_t");
+  return NULL;
+}
+static PyObject *pyc_offsetof_ndt_t_FixedDim_tag(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(offsetof_ndt_t_FixedDim_tag())); }
 static PyObject *pyc_get_ndt_t_FixedDim_shape(PyObject *self, PyObject *args) {
   PyObject* ptr=NULL;
   if (!PyArg_UnpackTuple(args, "ndt_t", 0, 1, &ptr))
@@ -905,6 +951,17 @@ static PyObject *pyc_get_ndt_t_VarDim_type(PyObject *self, PyObject *args) {
   return NULL;
 }
 static PyObject *pyc_offsetof_ndt_t_VarDim_type(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(offsetof_ndt_t_VarDim_type())); }
+static PyObject *pyc_get_ndt_t_SymbolicDim_tag(PyObject *self, PyObject *args) {
+  PyObject* ptr=NULL;
+  if (!PyArg_UnpackTuple(args, "ndt_t", 0, 1, &ptr))
+    return NULL;
+  if (PyCapsule_CheckExact(ptr)) {
+    return PyCapsule_New( get_ndt_t_SymbolicDim_tag(PyCapsule_GetPointer(ptr, "ndt_t*")), "enum ndt_contig", NULL);
+  }
+  PyErr_SetString(PyExc_TypeError, "expected capsuleted ndt_t");
+  return NULL;
+}
+static PyObject *pyc_offsetof_ndt_t_SymbolicDim_tag(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(offsetof_ndt_t_SymbolicDim_tag())); }
 static PyObject *pyc_get_ndt_t_SymbolicDim_name(PyObject *self, PyObject *args) {
   PyObject* ptr=NULL;
   if (!PyArg_UnpackTuple(args, "ndt_t", 0, 1, &ptr))
@@ -927,6 +984,17 @@ static PyObject *pyc_get_ndt_t_SymbolicDim_type(PyObject *self, PyObject *args) 
   return NULL;
 }
 static PyObject *pyc_offsetof_ndt_t_SymbolicDim_type(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(offsetof_ndt_t_SymbolicDim_type())); }
+static PyObject *pyc_get_ndt_t_EllipsisDim_tag(PyObject *self, PyObject *args) {
+  PyObject* ptr=NULL;
+  if (!PyArg_UnpackTuple(args, "ndt_t", 0, 1, &ptr))
+    return NULL;
+  if (PyCapsule_CheckExact(ptr)) {
+    return PyCapsule_New( get_ndt_t_EllipsisDim_tag(PyCapsule_GetPointer(ptr, "ndt_t*")), "enum ndt_contig", NULL);
+  }
+  PyErr_SetString(PyExc_TypeError, "expected capsuleted ndt_t");
+  return NULL;
+}
+static PyObject *pyc_offsetof_ndt_t_EllipsisDim_tag(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(offsetof_ndt_t_EllipsisDim_tag())); }
 static PyObject *pyc_get_ndt_t_EllipsisDim_name(PyObject *self, PyObject *args) {
   PyObject* ptr=NULL;
   if (!PyArg_UnpackTuple(args, "ndt_t", 0, 1, &ptr))
@@ -2167,6 +2235,140 @@ static PyObject *pyc_get_GufuncObject_name(PyObject *self, PyObject *args) {
   return NULL;
 }
 static PyObject *pyc_offsetof_GufuncObject_name(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(offsetof_GufuncObject_name())); }
+static PyObject *pyc_sizeof_NRT_MemInfo(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(sizeof_NRT_MemInfo())); }
+static PyObject *pyc_get_NRT_MemInfo_refct(PyObject *self, PyObject *args) {
+  PyObject* ptr=NULL;
+  if (!PyArg_UnpackTuple(args, "NRT_MemInfo", 0, 1, &ptr))
+    return NULL;
+  if (PyCapsule_CheckExact(ptr)) {
+    return PyCapsule_New( get_NRT_MemInfo_refct(PyCapsule_GetPointer(ptr, "NRT_MemInfo*")), "size_t", NULL);
+  }
+  PyErr_SetString(PyExc_TypeError, "expected capsuleted NRT_MemInfo");
+  return NULL;
+}
+static PyObject *pyc_offsetof_NRT_MemInfo_refct(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(offsetof_NRT_MemInfo_refct())); }
+static PyObject *pyc_get_NRT_MemInfo_dtor(PyObject *self, PyObject *args) {
+  PyObject* ptr=NULL;
+  if (!PyArg_UnpackTuple(args, "NRT_MemInfo", 0, 1, &ptr))
+    return NULL;
+  if (PyCapsule_CheckExact(ptr)) {
+    return PyCapsule_New( get_NRT_MemInfo_dtor(PyCapsule_GetPointer(ptr, "NRT_MemInfo*")), "NRT_dtor_function", NULL);
+  }
+  PyErr_SetString(PyExc_TypeError, "expected capsuleted NRT_MemInfo");
+  return NULL;
+}
+static PyObject *pyc_offsetof_NRT_MemInfo_dtor(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(offsetof_NRT_MemInfo_dtor())); }
+static PyObject *pyc_get_NRT_MemInfo_dtor_info(PyObject *self, PyObject *args) {
+  PyObject* ptr=NULL;
+  if (!PyArg_UnpackTuple(args, "NRT_MemInfo", 0, 1, &ptr))
+    return NULL;
+  if (PyCapsule_CheckExact(ptr)) {
+    return PyCapsule_New( get_NRT_MemInfo_dtor_info(PyCapsule_GetPointer(ptr, "NRT_MemInfo*")), "void*", NULL);
+  }
+  PyErr_SetString(PyExc_TypeError, "expected capsuleted NRT_MemInfo");
+  return NULL;
+}
+static PyObject *pyc_offsetof_NRT_MemInfo_dtor_info(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(offsetof_NRT_MemInfo_dtor_info())); }
+static PyObject *pyc_get_NRT_MemInfo_data(PyObject *self, PyObject *args) {
+  PyObject* ptr=NULL;
+  if (!PyArg_UnpackTuple(args, "NRT_MemInfo", 0, 1, &ptr))
+    return NULL;
+  if (PyCapsule_CheckExact(ptr)) {
+    return PyCapsule_New( get_NRT_MemInfo_data(PyCapsule_GetPointer(ptr, "NRT_MemInfo*")), "void*", NULL);
+  }
+  PyErr_SetString(PyExc_TypeError, "expected capsuleted NRT_MemInfo");
+  return NULL;
+}
+static PyObject *pyc_offsetof_NRT_MemInfo_data(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(offsetof_NRT_MemInfo_data())); }
+static PyObject *pyc_get_NRT_MemInfo_size(PyObject *self, PyObject *args) {
+  PyObject* ptr=NULL;
+  if (!PyArg_UnpackTuple(args, "NRT_MemInfo", 0, 1, &ptr))
+    return NULL;
+  if (PyCapsule_CheckExact(ptr)) {
+    return PyCapsule_New( get_NRT_MemInfo_size(PyCapsule_GetPointer(ptr, "NRT_MemInfo*")), "size_t", NULL);
+  }
+  PyErr_SetString(PyExc_TypeError, "expected capsuleted NRT_MemInfo");
+  return NULL;
+}
+static PyObject *pyc_offsetof_NRT_MemInfo_size(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(offsetof_NRT_MemInfo_size())); }
+static PyObject *pyc_sizeof_NRT_MemSys(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(sizeof_NRT_MemSys())); }
+static PyObject *pyc_get_NRT_MemSys_atomic_dec(PyObject *self, PyObject *args) {
+  PyObject* ptr=NULL;
+  if (!PyArg_UnpackTuple(args, "NRT_MemSys", 0, 1, &ptr))
+    return NULL;
+  if (PyCapsule_CheckExact(ptr)) {
+    return PyCapsule_New( get_NRT_MemSys_atomic_dec(PyCapsule_GetPointer(ptr, "NRT_MemSys*")), "NRT_atomic_inc_dec_func atomic_inc,", NULL);
+  }
+  PyErr_SetString(PyExc_TypeError, "expected capsuleted NRT_MemSys");
+  return NULL;
+}
+static PyObject *pyc_offsetof_NRT_MemSys_atomic_dec(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(offsetof_NRT_MemSys_atomic_dec())); }
+static PyObject *pyc_get_NRT_MemSys_atomic_cas(PyObject *self, PyObject *args) {
+  PyObject* ptr=NULL;
+  if (!PyArg_UnpackTuple(args, "NRT_MemSys", 0, 1, &ptr))
+    return NULL;
+  if (PyCapsule_CheckExact(ptr)) {
+    return PyCapsule_New( get_NRT_MemSys_atomic_cas(PyCapsule_GetPointer(ptr, "NRT_MemSys*")), "atomic_meminfo_cas_func", NULL);
+  }
+  PyErr_SetString(PyExc_TypeError, "expected capsuleted NRT_MemSys");
+  return NULL;
+}
+static PyObject *pyc_offsetof_NRT_MemSys_atomic_cas(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(offsetof_NRT_MemSys_atomic_cas())); }
+static PyObject *pyc_get_NRT_MemSys_shutting(PyObject *self, PyObject *args) {
+  PyObject* ptr=NULL;
+  if (!PyArg_UnpackTuple(args, "NRT_MemSys", 0, 1, &ptr))
+    return NULL;
+  if (PyCapsule_CheckExact(ptr)) {
+    return PyCapsule_New( get_NRT_MemSys_shutting(PyCapsule_GetPointer(ptr, "NRT_MemSys*")), "int", NULL);
+  }
+  PyErr_SetString(PyExc_TypeError, "expected capsuleted NRT_MemSys");
+  return NULL;
+}
+static PyObject *pyc_offsetof_NRT_MemSys_shutting(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(offsetof_NRT_MemSys_shutting())); }
+static PyObject *pyc_get_NRT_MemSys_stats_mi_free(PyObject *self, PyObject *args) {
+  PyObject* ptr=NULL;
+  if (!PyArg_UnpackTuple(args, "NRT_MemSys", 0, 1, &ptr))
+    return NULL;
+  if (PyCapsule_CheckExact(ptr)) {
+    return PyCapsule_New( get_NRT_MemSys_stats_mi_free(PyCapsule_GetPointer(ptr, "NRT_MemSys*")), "size_t stats_alloc,stats_free,stats_mi_alloc,", NULL);
+  }
+  PyErr_SetString(PyExc_TypeError, "expected capsuleted NRT_MemSys");
+  return NULL;
+}
+static PyObject *pyc_offsetof_NRT_MemSys_stats_mi_free(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(offsetof_NRT_MemSys_stats_mi_free())); }
+static PyObject *pyc_get_NRT_MemSys_allocator_malloc(PyObject *self, PyObject *args) {
+  PyObject* ptr=NULL;
+  if (!PyArg_UnpackTuple(args, "NRT_MemSys", 0, 1, &ptr))
+    return NULL;
+  if (PyCapsule_CheckExact(ptr)) {
+    return PyCapsule_New( get_NRT_MemSys_allocator_malloc(PyCapsule_GetPointer(ptr, "NRT_MemSys*")), "NRT_malloc_func", NULL);
+  }
+  PyErr_SetString(PyExc_TypeError, "expected capsuleted NRT_MemSys");
+  return NULL;
+}
+static PyObject *pyc_offsetof_NRT_MemSys_allocator_malloc(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(offsetof_NRT_MemSys_allocator_malloc())); }
+static PyObject *pyc_get_NRT_MemSys_allocator_realloc(PyObject *self, PyObject *args) {
+  PyObject* ptr=NULL;
+  if (!PyArg_UnpackTuple(args, "NRT_MemSys", 0, 1, &ptr))
+    return NULL;
+  if (PyCapsule_CheckExact(ptr)) {
+    return PyCapsule_New( get_NRT_MemSys_allocator_realloc(PyCapsule_GetPointer(ptr, "NRT_MemSys*")), "NRT_realloc_func", NULL);
+  }
+  PyErr_SetString(PyExc_TypeError, "expected capsuleted NRT_MemSys");
+  return NULL;
+}
+static PyObject *pyc_offsetof_NRT_MemSys_allocator_realloc(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(offsetof_NRT_MemSys_allocator_realloc())); }
+static PyObject *pyc_get_NRT_MemSys_allocator_free(PyObject *self, PyObject *args) {
+  PyObject* ptr=NULL;
+  if (!PyArg_UnpackTuple(args, "NRT_MemSys", 0, 1, &ptr))
+    return NULL;
+  if (PyCapsule_CheckExact(ptr)) {
+    return PyCapsule_New( get_NRT_MemSys_allocator_free(PyCapsule_GetPointer(ptr, "NRT_MemSys*")), "NRT_free_func", NULL);
+  }
+  PyErr_SetString(PyExc_TypeError, "expected capsuleted NRT_MemSys");
+  return NULL;
+}
+static PyObject *pyc_offsetof_NRT_MemSys_allocator_free(PyObject *self, PyObject *args) { return PyLong_FromLong((long)(offsetof_NRT_MemSys_allocator_free())); }
 
 static PyObject *pyc_capsule_to_int32(PyObject *self, PyObject *args) {
   PyObject* ptr=NULL;
@@ -2314,16 +2516,22 @@ static PyMethodDef xnd_structinfo_methods[] = {
   {"offsetof_ndt_t_Function_nargs", (PyCFunction)pyc_offsetof_ndt_t_Function_nargs, METH_VARARGS, "offsetof_ndt_t_Function_nargs() -> int"},
   {"get_ndt_t_Function_types", (PyCFunction)pyc_get_ndt_t_Function_types, METH_VARARGS, "get_ndt_t_Function_types(< capsule(ndt_t) >) -> < capsule( &ndt_t->Function.types ) >"},
   {"offsetof_ndt_t_Function_types", (PyCFunction)pyc_offsetof_ndt_t_Function_types, METH_VARARGS, "offsetof_ndt_t_Function_types() -> int"},
+  {"get_ndt_t_FixedDim_tag", (PyCFunction)pyc_get_ndt_t_FixedDim_tag, METH_VARARGS, "get_ndt_t_FixedDim_tag(< capsule(ndt_t) >) -> < capsule( &ndt_t->FixedDim.tag ) >"},
+  {"offsetof_ndt_t_FixedDim_tag", (PyCFunction)pyc_offsetof_ndt_t_FixedDim_tag, METH_VARARGS, "offsetof_ndt_t_FixedDim_tag() -> int"},
   {"get_ndt_t_FixedDim_shape", (PyCFunction)pyc_get_ndt_t_FixedDim_shape, METH_VARARGS, "get_ndt_t_FixedDim_shape(< capsule(ndt_t) >) -> < capsule( &ndt_t->FixedDim.shape ) >"},
   {"offsetof_ndt_t_FixedDim_shape", (PyCFunction)pyc_offsetof_ndt_t_FixedDim_shape, METH_VARARGS, "offsetof_ndt_t_FixedDim_shape() -> int"},
   {"get_ndt_t_FixedDim_type", (PyCFunction)pyc_get_ndt_t_FixedDim_type, METH_VARARGS, "get_ndt_t_FixedDim_type(< capsule(ndt_t) >) -> < capsule( &ndt_t->FixedDim.type ) >"},
   {"offsetof_ndt_t_FixedDim_type", (PyCFunction)pyc_offsetof_ndt_t_FixedDim_type, METH_VARARGS, "offsetof_ndt_t_FixedDim_type() -> int"},
   {"get_ndt_t_VarDim_type", (PyCFunction)pyc_get_ndt_t_VarDim_type, METH_VARARGS, "get_ndt_t_VarDim_type(< capsule(ndt_t) >) -> < capsule( &ndt_t->VarDim.type ) >"},
   {"offsetof_ndt_t_VarDim_type", (PyCFunction)pyc_offsetof_ndt_t_VarDim_type, METH_VARARGS, "offsetof_ndt_t_VarDim_type() -> int"},
+  {"get_ndt_t_SymbolicDim_tag", (PyCFunction)pyc_get_ndt_t_SymbolicDim_tag, METH_VARARGS, "get_ndt_t_SymbolicDim_tag(< capsule(ndt_t) >) -> < capsule( &ndt_t->SymbolicDim.tag ) >"},
+  {"offsetof_ndt_t_SymbolicDim_tag", (PyCFunction)pyc_offsetof_ndt_t_SymbolicDim_tag, METH_VARARGS, "offsetof_ndt_t_SymbolicDim_tag() -> int"},
   {"get_ndt_t_SymbolicDim_name", (PyCFunction)pyc_get_ndt_t_SymbolicDim_name, METH_VARARGS, "get_ndt_t_SymbolicDim_name(< capsule(ndt_t) >) -> < capsule( &ndt_t->SymbolicDim.name ) >"},
   {"offsetof_ndt_t_SymbolicDim_name", (PyCFunction)pyc_offsetof_ndt_t_SymbolicDim_name, METH_VARARGS, "offsetof_ndt_t_SymbolicDim_name() -> int"},
   {"get_ndt_t_SymbolicDim_type", (PyCFunction)pyc_get_ndt_t_SymbolicDim_type, METH_VARARGS, "get_ndt_t_SymbolicDim_type(< capsule(ndt_t) >) -> < capsule( &ndt_t->SymbolicDim.type ) >"},
   {"offsetof_ndt_t_SymbolicDim_type", (PyCFunction)pyc_offsetof_ndt_t_SymbolicDim_type, METH_VARARGS, "offsetof_ndt_t_SymbolicDim_type() -> int"},
+  {"get_ndt_t_EllipsisDim_tag", (PyCFunction)pyc_get_ndt_t_EllipsisDim_tag, METH_VARARGS, "get_ndt_t_EllipsisDim_tag(< capsule(ndt_t) >) -> < capsule( &ndt_t->EllipsisDim.tag ) >"},
+  {"offsetof_ndt_t_EllipsisDim_tag", (PyCFunction)pyc_offsetof_ndt_t_EllipsisDim_tag, METH_VARARGS, "offsetof_ndt_t_EllipsisDim_tag() -> int"},
   {"get_ndt_t_EllipsisDim_name", (PyCFunction)pyc_get_ndt_t_EllipsisDim_name, METH_VARARGS, "get_ndt_t_EllipsisDim_name(< capsule(ndt_t) >) -> < capsule( &ndt_t->EllipsisDim.name ) >"},
   {"offsetof_ndt_t_EllipsisDim_name", (PyCFunction)pyc_offsetof_ndt_t_EllipsisDim_name, METH_VARARGS, "offsetof_ndt_t_EllipsisDim_name() -> int"},
   {"get_ndt_t_EllipsisDim_type", (PyCFunction)pyc_get_ndt_t_EllipsisDim_type, METH_VARARGS, "get_ndt_t_EllipsisDim_type(< capsule(ndt_t) >) -> < capsule( &ndt_t->EllipsisDim.type ) >"},
@@ -2563,6 +2771,32 @@ static PyMethodDef xnd_structinfo_methods[] = {
   {"offsetof_GufuncObject_tbl", (PyCFunction)pyc_offsetof_GufuncObject_tbl, METH_VARARGS, "offsetof_GufuncObject_tbl() -> int"},
   {"get_GufuncObject_name", (PyCFunction)pyc_get_GufuncObject_name, METH_VARARGS, "get_GufuncObject_name(< capsule(GufuncObject) >) -> < capsule( &GufuncObject->name ) >"},
   {"offsetof_GufuncObject_name", (PyCFunction)pyc_offsetof_GufuncObject_name, METH_VARARGS, "offsetof_GufuncObject_name() -> int"},
+  {"sizeof_NRT_MemInfo", (PyCFunction)pyc_sizeof_NRT_MemInfo, METH_VARARGS, "sizeof_NRT_MemInfo() -> int"},
+  {"get_NRT_MemInfo_refct", (PyCFunction)pyc_get_NRT_MemInfo_refct, METH_VARARGS, "get_NRT_MemInfo_refct(< capsule(NRT_MemInfo) >) -> < capsule( &NRT_MemInfo->refct ) >"},
+  {"offsetof_NRT_MemInfo_refct", (PyCFunction)pyc_offsetof_NRT_MemInfo_refct, METH_VARARGS, "offsetof_NRT_MemInfo_refct() -> int"},
+  {"get_NRT_MemInfo_dtor", (PyCFunction)pyc_get_NRT_MemInfo_dtor, METH_VARARGS, "get_NRT_MemInfo_dtor(< capsule(NRT_MemInfo) >) -> < capsule( &NRT_MemInfo->dtor ) >"},
+  {"offsetof_NRT_MemInfo_dtor", (PyCFunction)pyc_offsetof_NRT_MemInfo_dtor, METH_VARARGS, "offsetof_NRT_MemInfo_dtor() -> int"},
+  {"get_NRT_MemInfo_dtor_info", (PyCFunction)pyc_get_NRT_MemInfo_dtor_info, METH_VARARGS, "get_NRT_MemInfo_dtor_info(< capsule(NRT_MemInfo) >) -> < capsule( &NRT_MemInfo->dtor_info ) >"},
+  {"offsetof_NRT_MemInfo_dtor_info", (PyCFunction)pyc_offsetof_NRT_MemInfo_dtor_info, METH_VARARGS, "offsetof_NRT_MemInfo_dtor_info() -> int"},
+  {"get_NRT_MemInfo_data", (PyCFunction)pyc_get_NRT_MemInfo_data, METH_VARARGS, "get_NRT_MemInfo_data(< capsule(NRT_MemInfo) >) -> < capsule( &NRT_MemInfo->data ) >"},
+  {"offsetof_NRT_MemInfo_data", (PyCFunction)pyc_offsetof_NRT_MemInfo_data, METH_VARARGS, "offsetof_NRT_MemInfo_data() -> int"},
+  {"get_NRT_MemInfo_size", (PyCFunction)pyc_get_NRT_MemInfo_size, METH_VARARGS, "get_NRT_MemInfo_size(< capsule(NRT_MemInfo) >) -> < capsule( &NRT_MemInfo->size ) >"},
+  {"offsetof_NRT_MemInfo_size", (PyCFunction)pyc_offsetof_NRT_MemInfo_size, METH_VARARGS, "offsetof_NRT_MemInfo_size() -> int"},
+  {"sizeof_NRT_MemSys", (PyCFunction)pyc_sizeof_NRT_MemSys, METH_VARARGS, "sizeof_NRT_MemSys() -> int"},
+  {"get_NRT_MemSys_atomic_dec", (PyCFunction)pyc_get_NRT_MemSys_atomic_dec, METH_VARARGS, "get_NRT_MemSys_atomic_dec(< capsule(NRT_MemSys) >) -> < capsule( &NRT_MemSys->atomic_dec ) >"},
+  {"offsetof_NRT_MemSys_atomic_dec", (PyCFunction)pyc_offsetof_NRT_MemSys_atomic_dec, METH_VARARGS, "offsetof_NRT_MemSys_atomic_dec() -> int"},
+  {"get_NRT_MemSys_atomic_cas", (PyCFunction)pyc_get_NRT_MemSys_atomic_cas, METH_VARARGS, "get_NRT_MemSys_atomic_cas(< capsule(NRT_MemSys) >) -> < capsule( &NRT_MemSys->atomic_cas ) >"},
+  {"offsetof_NRT_MemSys_atomic_cas", (PyCFunction)pyc_offsetof_NRT_MemSys_atomic_cas, METH_VARARGS, "offsetof_NRT_MemSys_atomic_cas() -> int"},
+  {"get_NRT_MemSys_shutting", (PyCFunction)pyc_get_NRT_MemSys_shutting, METH_VARARGS, "get_NRT_MemSys_shutting(< capsule(NRT_MemSys) >) -> < capsule( &NRT_MemSys->shutting ) >"},
+  {"offsetof_NRT_MemSys_shutting", (PyCFunction)pyc_offsetof_NRT_MemSys_shutting, METH_VARARGS, "offsetof_NRT_MemSys_shutting() -> int"},
+  {"get_NRT_MemSys_stats_mi_free", (PyCFunction)pyc_get_NRT_MemSys_stats_mi_free, METH_VARARGS, "get_NRT_MemSys_stats_mi_free(< capsule(NRT_MemSys) >) -> < capsule( &NRT_MemSys->stats_mi_free ) >"},
+  {"offsetof_NRT_MemSys_stats_mi_free", (PyCFunction)pyc_offsetof_NRT_MemSys_stats_mi_free, METH_VARARGS, "offsetof_NRT_MemSys_stats_mi_free() -> int"},
+  {"get_NRT_MemSys_allocator_malloc", (PyCFunction)pyc_get_NRT_MemSys_allocator_malloc, METH_VARARGS, "get_NRT_MemSys_allocator_malloc(< capsule(NRT_MemSys) >) -> < capsule( &NRT_MemSys->allocator.malloc ) >"},
+  {"offsetof_NRT_MemSys_allocator_malloc", (PyCFunction)pyc_offsetof_NRT_MemSys_allocator_malloc, METH_VARARGS, "offsetof_NRT_MemSys_allocator_malloc() -> int"},
+  {"get_NRT_MemSys_allocator_realloc", (PyCFunction)pyc_get_NRT_MemSys_allocator_realloc, METH_VARARGS, "get_NRT_MemSys_allocator_realloc(< capsule(NRT_MemSys) >) -> < capsule( &NRT_MemSys->allocator.realloc ) >"},
+  {"offsetof_NRT_MemSys_allocator_realloc", (PyCFunction)pyc_offsetof_NRT_MemSys_allocator_realloc, METH_VARARGS, "offsetof_NRT_MemSys_allocator_realloc() -> int"},
+  {"get_NRT_MemSys_allocator_free", (PyCFunction)pyc_get_NRT_MemSys_allocator_free, METH_VARARGS, "get_NRT_MemSys_allocator_free(< capsule(NRT_MemSys) >) -> < capsule( &NRT_MemSys->allocator.free ) >"},
+  {"offsetof_NRT_MemSys_allocator_free", (PyCFunction)pyc_offsetof_NRT_MemSys_allocator_free, METH_VARARGS, "offsetof_NRT_MemSys_allocator_free() -> int"},
   {"value_int32", (PyCFunction)pyc_capsule_to_int32, METH_VARARGS, "(capsule) -> <capsule int32 value>"},
   {"value_int64", (PyCFunction)pyc_capsule_to_int64, METH_VARARGS, "(capsule) -> <capsule int64 value>"},
   {"value_bytes", (PyCFunction)pyc_capsule_to_bytes, METH_VARARGS, "(capsule[, size]) -> <capsule content as bytes>"},
@@ -2584,6 +2818,6 @@ PyInit_xnd_structinfo(void) {
   import_xnd();
   import_gumath();
 
-  return PyModule_Create(&xnd_structinfomodule);
+  return PyModule_Create(&xnd_structinfomodule); 
 }
 #endif

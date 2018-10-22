@@ -1,9 +1,11 @@
+import llvmlite
 from llvmlite import ir
 from llvmlite.ir import PointerType as ptr
 
 i8, i16, i32, i64 = map(ir.IntType, [8, 16, 32, 64])
 int_ = i32
 char = i8
+char_ptr = ptr(char)
 
 
 def index(i):
@@ -27,4 +29,14 @@ def pycapsule_import(c, path, i: int, fntype, name=None):
     return builder.load(
         builder.bitcast(builder.gep(xnd_api, [index(i * 8)], True), ptr(ptr(fntype))),
         name=name,
+    )
+
+
+def print_pointer(builder, ptr_):
+    builder.call(
+        builder.module.get_or_insert_function(
+            llvmlite.ir.FunctionType(llvmlite.ir.VoidType(), [ptr(char)]),
+            name="print_pointer",
+        ),
+        [ptr_],
     )

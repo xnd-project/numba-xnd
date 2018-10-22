@@ -1,50 +1,66 @@
-import xnd
-
 import numba.extending
 import numba.types
+import xnd
 
 from . import libxnd, shared
 
-xnd_object = shared.WrappedCStruct(
-    "XndObject", {"xnd": libxnd.xnd_t.numba_type}, embedded={"xnd"}
-)
+
+class XndObjectType(
+    shared.CStructType,
+    c_name="XndObject",
+    attrs={"xnd": libxnd.XndType(False)},
+    embedded={"xnd"},
+):
+    pass
 
 
-xnd_from_type_xnd = shared.WrappedCFunction(
-    "xnd_from_type_xnd",
-    xnd_object.numba_type,
-    (shared.c_string_type, libxnd.xnd_t.numba_type),
-)
-
-xnd_from_xnd_view = shared.WrappedCFunction(
-    "xnd_from_xnd_view", xnd_object.numba_type, (libxnd.xnd_view_t.numba_type,)
+xnd_from_xnd_view = shared.CFunctionIntrinsic(
+    "xnd_from_xnd_view", XndObjectType(False), (libxnd.XndViewType,)
 )
 
 
 @numba.extending.typeof_impl.register(xnd.xnd)
 def typeof_xnd(val, c):
-    return libxnd.xnd_view_t.WrapperNumbaType(val.type)
+    return libxnd.XndViewWrapperType(True, val.type)
 
 
-@numba.extending.unbox(libxnd.xnd_view_t.WrapperNumbaType)
-def unbox_xnd_wrapper(typ, o, c):
-    x_o = c.builder.bitcast(o, xnd_object.llvm_ptr_type)
-    x = xnd_object.getattr_impl(None, c.builder, None, x_o, "xnd")
-    x_v = libxnd.xnd_view_from_xnd.codegen(c.builder, (o, x))
-    return numba.extending.NativeValue(x_v)
+@numba.extending.unbox(libxnd.XndViewWrapperType)
+def xnd_view_wraper__unbox(typ, o, c):
+    """
+    Create an xnd_view from the xnd on the object
+    """
+    # TODO: Do we need this?
+    c.pyapi.incref(o)
+    # create xnd_view
+    xnd_view = libxnd.XndViewType._alloc_codegen(c.context, c.builder, shared.i64(1))
+
+    # get xnd
+    x = XndObjectType.getattr_impl(c.builder, "xnd", o, shared.index(0))
+
+    # fill xnd view from xnd
+    libxnd.xnd_view_from_xnd.codegen(c.builder, (xnd_view, o, x))
+
+    # TODO: Do we need this?
+    c.context.nrt.incref(c.builder, typ, xnd_view)
+
+    return numba.extending.NativeValue(xnd_view)
 
 
-@numba.extending.box(libxnd.xnd_view_t.WrapperNumbaType)
-def box_xnd_wrapper(typ, x, c):
+@numba.extending.box(libxnd.XndViewWrapperType)
+def xnd_view_wraper__box(typ, xnd_view, c):
     builder = c.builder
-    # This means the view is from `xnd_view_from_xnd` and we have access to
-    # the python object. We can just return the existing python object
-    flags = libxnd.xnd_view_t.getattr_impl(None, builder, None, x, "flags")
+
+    flags = libxnd.XndViewType.getattr_impl(
+        c.builder, "flags", xnd_view, shared.index(0)
+    )
     flags_is_0 = builder.icmp_unsigned("==", flags, flags.type(0))
 
-    o = libxnd.xnd_view_t.getattr_impl(None, builder, None, x, "obj")
+    o = libxnd.XndViewType.getattr_impl(c.builder, "obj", xnd_view, shared.index(0))
     o_is_not_null = builder.icmp_unsigned("!=", o, o.type(None))
 
+    # This means the view is from `xnd_view_from_xnd` and we have access to
+    # the python object. We can just return the existing python object
+    # TOOD: Move this logic to `xnd` to handle this set of flags
     has_original_object = builder.and_(flags_is_0, o_is_not_null)
 
     o_ptr = builder.alloca(o.type)
@@ -52,9 +68,9 @@ def box_xnd_wrapper(typ, x, c):
         with then:
             builder.store(o, o_ptr)
         with otherwise:
-            x_o = xnd_from_xnd_view.codegen(builder, (x,))
-            o = builder.bitcast(x_o, shared.ptr(shared.char))
-            builder.store(o, o_ptr)
+            builder.store(xnd_from_xnd_view.codegen(builder, (xnd_view,)), o_ptr)
     o = builder.load(o_ptr)
-    c.pyapi.incref(o)
-    return o
+
+    # TODO: Do we need this?
+    # c.pyapi.incref(o)
+    return builder.load(o_ptr)

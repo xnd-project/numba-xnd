@@ -1,167 +1,116 @@
 import llvmlite
 import ndtypes
-import xnd
-
 import numba
 import numba.extending
 import numba.types
+import xnd
 
 from . import libndtypes, shared
 
 llvmlite.binding.load_library_permanently(xnd._xnd.__file__)
 
 
-xnd_t = shared.WrappedCStruct(
-    "xnd_t", {"type": libndtypes.ndt_t.numba_type, "ptr": shared.c_string_type}
-)
-create_xnd = xnd_t.create
+class XndType(
+    shared.CStructType,
+    c_name="xnd_t",
+    attrs={"type": libndtypes.NdtType(False), "ptr": shared.c_string_type},
+):
+    pass
 
-xnd_view_t = shared.WrappedCStruct(
-    "xnd_view_t",
-    {
+
+class XndViewType(
+    shared.CStructType,
+    c_name="xnd_view_t",
+    attrs={
         "flags": numba.types.uint32,
         "obj": shared.c_string_type,
-        "view": xnd_t.numba_type,
+        "view": XndType(False),
     },
     embedded={"view"},
-    create_wrapper=True,
-)
-create_xnd_view, wrap_xnd_view, unwrap_xnd_view = (
-    xnd_view_t.create,
-    xnd_view_t.wrap,
-    xnd_view_t.unwrap,
-)
+):
+    pass
+
+
+alloc_xnd_view = XndViewType.alloc
+
+
+class XndViewWrapperType(shared.WrapperType, inner_type=XndViewType):
+    pass
+
+
+wrap_xnd_view, unwrap_xnd_view = XndViewWrapperType.wrap, XndViewWrapperType.unwrap
 
 
 # xnd_key enums for tag property
 XND_KEY_INDEX = 0
 XND_KEY_FIELD_NAME = 1
 XND_KEY_SLICE = 2
-xnd_index_t = shared.WrappedCStruct(
-    "xnd_index_t",
-    {
-        "tag": numba.types.int64,
+
+
+class XndIndexType(
+    shared.CStructType,
+    c_name="xnd_index_t",
+    attrs={
+        "tag": numba.types.int32,
         "Index": numba.types.int64,
         "FieldName": shared.c_string_type,
-        "Slice": libndtypes.ndt_slice_t.numba_type,
+        "Slice": libndtypes.NdtSliceType(False),
     },
     embedded={"Slice"},
-)
-create_xnd_index = xnd_index_t.create
+):
+    pass
 
 
-# Apply zero or more indices to the input *x* and return a typed view. Valid
-# indices are integers or strings for record fields.
+alloc_xnd_index = XndIndexType.alloc
 
-# This function is more general than pure array indexing, hence the name. For
-# example, it is possible to index into nested records that in turn contain
-# arrays.
-xnd_subtree = shared.WrappedCFunction(
-    "xnd_subtree",
-    numba.types.void,
-    (
-        xnd_t.numba_type,
-        xnd_t.numba_type,  # this is the return value, but is passed in at LLVM level
-        xnd_index_t.numba_type,
-        numba.types.intc,
-        libndtypes.ndt_context_t.numba_type,
-    ),
-)
-
-# Apply zero or more keys to the input *x* and return a typed view. Valid
-# keys are integers or slices.
-
-# This function differs from `xnd_subtree` in that it allows
-# mixed indexing and slicing for fixed dimensions.  Records and tuples
-# cannot be sliced.
-
-# Variable dimensions can be sliced, but do not support mixed indexing
-# and slicing.
-xnd_multikey = shared.WrappedCFunction(
-    "xnd_multikey",
-    numba.types.void,
-    (
-        xnd_t.numba_type,  # this is the return value, but is passed in at LLVM level
-        xnd_t.numba_type,
-        xnd_index_t.numba_type,
-        numba.types.intc,
-        libndtypes.ndt_context_t.numba_type,
-    ),
-)
-xnd_view_from_xnd = shared.WrappedCFunction(
-    "xnd_view_from_xnd",
-    xnd_view_t.numba_type,
-    (shared.c_string_type, xnd_t.numba_type),
-    accepts_return=True,
+xnd_view_from_xnd = shared.CFunctionIntrinsic(
+    "xnd_view_from_xnd", numba.types.void, (XndViewType, shared.c_string_type, XndType)
 )
 
 
-xnd_view_subscript = shared.WrappedCFunction(
+xnd_view_subscript = shared.CFunctionIntrinsic(
     "xnd_view_subscript",
-    xnd_view_t.numba_type,
+    numba.types.void,
     (
-        xnd_view_t.numba_type,
-        xnd_index_t.numba_type,
+        XndViewType,
+        XndViewType,
+        XndIndexType,
         numba.types.intc,
-        libndtypes.ndt_context_t.numba_type,
+        libndtypes.NdtContextType,
     ),
-    accepts_return=True,
 )
-xnd_equal = shared.WrappedCFunction(
-    "xnd_equal",
-    numba.types.intc,
-    (xnd_t.numba_type, xnd_t.numba_type, libndtypes.ndt_context_t.numba_type),
+xnd_equal = shared.CFunctionIntrinsic(
+    "xnd_equal", numba.types.intc, (XndType, XndType, libndtypes.NdtContextType)
 )
 
-xnd_strict_equal = shared.WrappedCFunction(
-    "xnd_strict_equal",
-    numba.types.intc,
-    (xnd_t.numba_type, xnd_t.numba_type, libndtypes.ndt_context_t.numba_type),
+xnd_strict_equal = shared.CFunctionIntrinsic(
+    "xnd_strict_equal", numba.types.intc, (XndType, XndType, libndtypes.NdtContextType)
 )
 
 
-# for gumath kernel
-@numba.extending.unbox(xnd_t.NumbaType)
-def unbox_xnd(typ, val, c):
-    return numba.extending.NativeValue(c.builder.bitcast(val, xnd_t.llvm_ptr_type))
+@numba.extending.overload_attribute(XndViewWrapperType, "type")
+def xnd_view_wrapper__type(x_type):
+    n_str = str(x_type.ndt_value)
+    return lambda x: libndtypes.wrap_ndt(unwrap_xnd_view(x).view(0).type(0), n_str)
 
 
-@numba.extending.overload_attribute(xnd_view_t.WrapperNumbaType, "type")
-def xnd_wrapper_type(x_wrapper_t):
-    def get(x_wrapper):
-        x_v = unwrap_xnd_view(x_wrapper)
-        return libndtypes.wrap_ndt(x_v.view.type, x_wrapper)
-
-    return get
+@numba.extending.overload_attribute(XndViewWrapperType, "ndim")
+def xnd_view_wrapper__ndim(x_type):
+    return lambda x: x.type.ndim
 
 
-@numba.extending.overload_attribute(xnd_view_t.WrapperNumbaType, "ndim")
-def xnd_wrapper_ndim(x_wrapped):
-    def get(x_wrapped):
-        return x_wrapped.type.ndim
-
-    return get
-
-
-@numba.extending.overload_attribute(xnd_view_t.WrapperNumbaType, "value")
-def xnd_wrapper_value(x_wrapper):
-    n = x_wrapper.ndt_value
+@numba.extending.overload_attribute(XndViewWrapperType, "value")
+def xnd_view_wraper__value(x_type):
+    n = x_type.ndt_value
 
     if n == ndtypes.ndt("int64"):
-
-        def get(x_wrapper):
-            x = unwrap_xnd_view(x_wrapper).view
-            return shared.ptr_load_type(numba.types.int64, x.ptr)
-
-        return get
-
-    if n == ndtypes.ndt("float64"):
-
-        def get(x_wrapper):
-            x = unwrap_xnd_view(x_wrapper).view
-            return shared.ptr_load_type(numba.types.float64, x.ptr)
-
-        return get
+        primitive_type = numba.types.int64
+    elif n == ndtypes.ndt("float64"):
+        primitive_type = numba.types.float64
+    else:
+        return
+    load_type = shared.create_ptr_load_type(primitive_type)
+    return lambda x: load_type(unwrap_xnd_view(x).view(0).ptr(0))
 
 
 def ndtypes_index(t):
@@ -173,27 +122,32 @@ def ndtypes_index(t):
 
 
 @shared.overload_any("getitem")
-def xnd_wrapper_getitem(x_wrapper, index):
-    if not isinstance(x_wrapper, xnd_view_t.WrapperNumbaType):
+def xnd_view_wraper__getitem(x, index):
+    if not isinstance(x, XndViewWrapperType):
         return
 
     if isinstance(index, numba.types.Integer):
-        resulting_type = str(ndtypes_index(x_wrapper.ndt_value))
+        resulting_type = str(ndtypes_index(x.ndt_value))
 
-        def getitem(x_wrapper, index):
-            x_v = unwrap_xnd_view(x_wrapper)
-            x_index = create_xnd_index()
-            x_index.tag = XND_KEY_INDEX
-            x_index.Index = index
+        def getitem(x, index):
+            x_index = alloc_xnd_index(1)
+            x_index.tag(0, XND_KEY_INDEX)
+            x_index.Index(0, index)
             ctx = libndtypes.ndt_static_context()
-            ret_x_v = xnd_view_subscript(x_v, x_index, shared.i64_to_i32(1), ctx)
-            assert not shared.ptr_is_none(ret_x_v.view.ptr)
-            assert not libndtypes.ndt_err_occurred(ctx)
-            return wrap_xnd_view(ret_x_v, resulting_type)
+            ret_x = alloc_xnd_view(1)
+            xnd_view_subscript(
+                ret_x, unwrap_xnd_view(x), x_index, shared.i64_to_i32(1), ctx
+            )
+            print("done")
+            libndtypes.check_error(ctx, ret_x.view(0).ptr(0))
+            print("checked")
+            print(ret_x.flags(0))
+            print(shared.ptr_is_none(ret_x.obj(0)))
+            return wrap_xnd_view(ret_x, resulting_type)
 
         return getitem
-    elif isinstance(index, numba.types.BaseTuple):
-        resulting_type = x_wrapper.ndt_value
+    if isinstance(index, numba.types.BaseTuple):
+        resulting_type = x.ndt_value
         for i in index:
             if isinstance(i, numba.types.Integer):
                 resulting_type = ndtypes_index(resulting_type)
@@ -202,42 +156,34 @@ def xnd_wrapper_getitem(x_wrapper, index):
         resulting_type = str(resulting_type)
         n_items = len(index)
         if n_items == 0:
-            return lambda x_wrapper, index: x_wrapper
+            return lambda x, index: x
 
-        def getitem(x_wrapper, index):
-            x_v = unwrap_xnd_view(x_wrapper)
-            x_index = create_xnd_index(n_items)
+        def getitem(x, index):
+            x_index = alloc_xnd_index(n_items)
             for i in range(n_items):
-                x_index_cur = x_index[i]
-                x_index_cur.tag = XND_KEY_INDEX
-                x_index_cur.Index = index[i]
+                x_index.tag(i, shared.i64_to_i32(XND_KEY_INDEX))
+                x_index.Index(i, index[i])
             ctx = libndtypes.ndt_static_context()
-            ret_x_v = xnd_view_subscript(x_v, x_index, shared.i64_to_i32(n_items), ctx)
-            assert not shared.ptr_is_none(ret_x_v.view.ptr)
-            assert not libndtypes.ndt_err_occurred(ctx)
-            return wrap_xnd_view(ret_x_v, resulting_type)
+            ret_x = alloc_xnd_view(1)
+            print(x_index.tag(0))
+            print(x_index.tag(1))
+            xnd_view_subscript(
+                ret_x, unwrap_xnd_view(x), x_index, shared.i64_to_i32(n_items), ctx
+            )
+            print(x_index.tag(0))
+            print(x_index.tag(1))
+            libndtypes.check_error(ctx, ret_x.view(0).ptr(0))
+            return wrap_xnd_view(ret_x, resulting_type)
 
         return getitem
 
 
 @shared.overload_any("setitem")
-def xnd_wrapper_setitem(x_wrapper, index, value):
-    if not isinstance(x_wrapper, xnd_view_t.WrapperNumbaType):
+def xnd_wrapper_setitem(x_type, index_type, value_type):
+    if not isinstance(x_type, XndViewWrapperType):
         return
-    if value == numba.types.int64:
-
-        def setitem(x_wrapper, index, value):
-            shared.ptr_store_type(
-                numba.types.int64, unwrap_xnd_view(x_wrapper[index]).view.ptr, value
-            )
-
-        return setitem
-
-    if value == numba.types.float64:
-
-        def setitem(x_wrapper, index, value):
-            shared.ptr_store_type(
-                numba.types.float64, unwrap_xnd_view(x_wrapper[index]).view.ptr, value
-            )
-
-        return setitem
+    if value_type in (numba.types.int64, numba.types.float64):
+        ptr_store_type = shared.create_ptr_store_type(value_type)
+        return lambda x, index, value: ptr_store_type(
+            unwrap_xnd_view(x[index]).view.ptr, value
+        )
